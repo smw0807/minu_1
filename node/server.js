@@ -49,23 +49,62 @@ var app = express();
 //     response.send('Page C');
 // });
 
+//! 2019-03-10
 //응답과 응답 형식
 app.use(express.static('web'));
-var item = [
+var items = [
     {name: 'aaaa', info: 'aaaaaaa'},
     {name: 'bbbb', info: 'bbbbbbbbbbbbbbb'},
     {name: 'cccc', info: 'cccccccccccccccccccccc'}
 ];
 app.all('/data.html', function (request, response) {
-    
+    var output = '';
+    output += '<!DOCTYPE html>';
+    output += '<html>';
+    output += '<head>';
+    output += '<title>Data Html</title>';
+    output += '</head>';
+    output += '<body>'
+    items.forEach(function (item) {
+        output += '<div>';
+        output += ' <h1>' + item.name + '</h1>';
+        output += ' <h2>' + item.info + '</h2>';
+        output += '</div>';
+    });
+    output += '</body>'
+    output += '</html>';
+    response.send(output);        
 })
 app.all('/data.json', function (request, response) {
-
+    response.send(items);
 })
 app.all('/data.xml', function (request, response) {
-
+    var output = '';
+    output += '<?xml version="1.0" encoding="UTF-8" ?>';
+    output += '<products>';
+    items.forEach(function (item) {
+        output += '<product>';
+        output += '<name>' + item.name + '</name>';
+        output += '<info>' + item.info + '</info>';
+        output += '</product>';
+    });
+    output += '</products>';
+    response.type("text/xml");
+    response.send(output);
 })
 
+// 요청과 요청 매개변수
+// 일반 요청 매개변수
+app.all('/parameter/', function (request, response) {
+    var name = request.param('name');
+    var info = request.param('info');
+    response.send('<h1>' + name + ':' + info + '</h1>');
+});
+// 동적 라우트 요청 매개 변수
+app.all('/papapa/:id', function (request, response) {
+    var id = request.param('id');
+    response.send('<h1>' + id + '</h1>');
+});
 
 //웹서버 실행
 http.createServer(app).listen(8085, function () {
