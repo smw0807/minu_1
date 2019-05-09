@@ -1,0 +1,34 @@
+#debug_log = Y
+#link_items = threat_ntm threat_mtm
+link_items = info_flw
+#link_items = threat_ntm threat_mtm info_flw
+#link_items = threat_ntm threat_mtm rule_ntm rule_mtm info_flw info_http
+
+cmn.instCode = A000000001
+cmn.instName = netcore
+cmn.equipCode = A000000001-N-00001
+cmn.equipIp =  10.0.0.2
+cmn.timeout_ms = 300
+
+#############################################################################
+threat_ntm.dir = /DATA/GHOST_1/FILE_G
+###//threat_ntm.batch.size = 100
+##threat_ntm.loop.time = 10
+
+threat_ntm.req.time = 10
+threat_ntm.rest.sizeMb = 100
+#threat_ntm.rest.chunkMode = Y
+threat_ntm.rest.url = https://10.0.0.13:30020/service/ntm/detections
+threat_ntm.rest.id = Z000000001-N-00007
+threat_ntm.rest.pw = 4c74df4dc26335d
+
+##################
+threat_mtm.dir = /DATA/GHOST_1/FILE_G
+threat_mtm.req.time = 10
+#threat_mtm.bundle.time = 10
+#threat_mtm.file.sizeMb = 100
+threat_mtm.rest.sizeMb = 80
+threat_mtm.rest.chunkMode = Y
+threat_mtm.rest.url = https://10.0.0.13:30030/service/mtm/detections
+threat_mtm.rest.id = Z000000001-N-00007
+threat_mtm.rest.pw = 4c74df4dc26335d

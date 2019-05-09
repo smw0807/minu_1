@@ -6,6 +6,18 @@
     "configurations": [
         {
             "type": "java",
+            "name": "CodeLens (Launch) - propertiesTest",
+            "request": "launch",
+            "mainClass": "propertiesTest"
+        },
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - fileTest",
+            "request": "launch",
+            "mainClass": "fileTest"
+        },
+        {
+            "type": "java",
             "name": "CodeLens (Launch) - test",
             "request": "launch",
             "mainClass": "test"
