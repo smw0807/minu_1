@@ -4,7 +4,7 @@ var express = require("express");
 var app = express();
 app.use(express.static('web'));
 
-app.use('/main', require('./web/html/main.html'));
+app.use('/main', require('./web/view/main.html'));
 
 
 http.createServer(app).listen(8085, function () {
