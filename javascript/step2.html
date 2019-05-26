@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>javascript step2</title>
+        <script>
+            var oName = {
+                name : 'minwoo',
+                getName : function () {
+                    return this.name;
+                }
+            }
+            var oName2 = {
+                name : 'minu',
+                getname : function () {
+                    return this.name;
+                }
+            }
+            function Name (_name) {
+                var cName  = {
+                    name: _name,
+                    getName : function () {
+                        return this.name;
+                    }
+                }
+                return cName;
+            }
+            Name('siva');
+            var o = Name('sivaa');
+            o.getName();
+            console.log(o);
+        </script>
+    </head>
+    <body>
+        <h1>index.html</h1>
+        <p>Lorem input dolor sit amet.</p>
+        <p>Cras dapibus velit nec est tempor.</p>
+        <input type="button" class="btn-sm">
+    </body>
+</html>
