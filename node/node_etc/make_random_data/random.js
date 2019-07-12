@@ -1,5 +1,4 @@
 var ut = require("./utils");
-
 var make_data = function (cnt) {
     let rt_list = [];
     for (var i = 0; i < cnt; i++) {
@@ -20,5 +19,6 @@ var make_data = function (cnt) {
 }
 
 module.exports = {
+    "url": "https://192.192.0.4:20000/ins/send_data",
     "make_data": make_data
 }
