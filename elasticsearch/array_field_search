@@ -1,0 +1,92 @@
+[
+    {
+        "SCEN_NM": "test11111",
+        "SCEN_INFOS: [
+            {
+                "POL_NM":"aaaa",
+                "POL_CODE": "123"
+            }
+        ]
+    },
+    {
+        "SCEN_NM": "test22222",
+        "SCEN_INFOS: [
+            {
+                "POL_NM":"aaaa",
+                "POL_CODE": "123"
+            },
+            {
+                "POL_NM":"bbbb",
+                "POL_CODE": "123"
+            }
+        ]
+    },
+    {
+        "SCEN_NM": "test33333",
+        "SCEN_INFOS: [
+            {
+                "POL_NM":"aaaa",
+                "POL_CODE": "123"
+            },
+             {
+                "POL_NM":"bbbb",
+                "POL_CODE": "123"
+            },
+             {
+                "POL_NM":"cccc",
+                "POL_CODE": "123"
+            }
+        ]
+    },    
+    {
+        "SCEN_NM": "test44444",
+        "SCEN_INFOS: [
+            {
+                "POL_NM":"aaaa",
+                "POL_CODE": "123"
+            }
+        ]
+    }
+]
+####################### 위 데이터에서 SCEN_INFOS안에 데이터가 2개인거 뽑는 쿼리
+{
+    "query":{
+        "bool":{
+            "must": [
+                {
+                    "range": {
+                        "_datetime": {
+                            "gte": "2019-08-30T00:00:00.000+0900",
+                            "lte": "2019-08-30T23:59:59.999+0900"
+                        }
+                    }
+                },
+                {
+                    "term":{
+                        "TW_STATE": "0"
+                    }
+                }
+            ],
+            "filter": {
+                "script": {
+                    "script": "doc['SCEN_INFOS.POL_NM'].length == 2"
+                }
+            }
+        }
+    }
+}
+######### RESULT ########
+{
+    "SCEN_NM": "test22222",
+    "SCEN_INFOS: [
+        {
+            "POL_NM":"aaaa",
+            "POL_CODE": "123"
+        },
+        {
+            "POL_NM":"bbbb",
+            "POL_CODE": "123"
+        }
+    ]
+}
+
