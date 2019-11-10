@@ -4,7 +4,7 @@ var express = require("express");
 var main = require("./web/js/main");
 
 //웹서버 생성
-var app = express();
+// var app = express();
 //? ???
 // app.use(function (request, response, next) {
 //     console.log("firest");
@@ -114,26 +114,26 @@ app.use(express.static('web'));
 // app.get('/products', function (request, response) {
 //     response.send(items);
 // });
-app.get('/products/:id', function (request, response) {
-    var id = Number(request.param('id'));
+// app.get('/products/:id', function (request, response) {
+//     var id = Number(request.param('id'));
     
-    if (isNaN(id)) {
-        //오류 : 잘못된 경로
-        response.send({
-            error: '숫자를 입력하세요!'
-        })
-    } else if (items[id]) {
-        //정상
-        response.send(items[id]);
-    } else {
-        response.send({
-            error: '존재하지 않는 데이터 입니다.!'
-        })
-    }
-});
-app.post('/products', function (request, response) {});
-app.put('/products/:id', function (request, response) {});
-app.del('/products/:id', function (request, response) {});
+//     if (isNaN(id)) {
+//         //오류 : 잘못된 경로
+//         response.send({
+//             error: '숫자를 입력하세요!'
+//         })
+//     } else if (items[id]) {
+//         //정상
+//         response.send(items[id]);
+//     } else {
+//         response.send({
+//             error: '존재하지 않는 데이터 입니다.!'
+//         })
+//     }
+// });
+// app.post('/products', function (request, response) {});
+// app.put('/products/:id', function (request, response) {});
+// app.del('/products/:id', function (request, response) {});
 
 //웹서버 실행
 http.createServer(app).listen(8085, function () {
