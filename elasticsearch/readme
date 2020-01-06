@@ -1,1 +1,10 @@
-ElasticSearch Extension 테스트
+Elasticsearch for VSCode Extension 테스트
+
+extension을 설치한 후 파일 확장자를 .es로 생성한다.
+컨트롤 + 쉬프트  + P 를 눌러서  es만치면  ES: Elastic: Set Host 이게 뜨는데
+선택을 하면 이레스틱 host를 입력하라고 뜬다.
+연결할 이레스틱 아이피 및 포트번호를 입력하면 연결이됨
+
+
+사용법 블로그에 작성해둠 
+https://minu0807.tistory.com/37
