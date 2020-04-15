@@ -1,0 +1,18 @@
+{
+	"first_user": {
+		"password": "123123",
+		"name": "first_user"
+	},
+	"second_user": {
+		"password": "123123",
+		"name": "second_user"
+	},
+	"newuser": {
+		"password": "123123",
+		"name": "test123"
+	},
+	"smw0807": {
+		"password": "123123",
+		"name": "smw0807"
+	}
+}

@@ -6,6 +6,7 @@ var app = express();
 var path = require('path');
 var bodyParser = require('body-parser');
 var session = require('express-session');
+var fs = require('fs');
 
 //브라우저에서 Request가 왔을 때 서버에서 어떤 작업을 할 지 Router를 통하여 설정해주어야 한다.
 // app.get('/', function(req, res) {
@@ -19,6 +20,7 @@ var session = require('express-session');
  */
 // app.use(express.static('public'));
 app.use(express.static(path.join(__dirname, 'public')));
+//__dirname : 현재 모듈의 위치를 나타냄
 //path.join(__dirname, "디렉터리명")=>서버의 폴더 경료와 요청 경로가 다르므로 외부인이 서버의 구조를 쉽게 파악할 수 없음
 
 //서버가 읽을 수 있도록 HTML의 위치를 정의해준다.
@@ -41,4 +43,4 @@ app.use(session({
 }));
 
 //라우터 모듈인 main.js를 불러와서 app에 전달해준다.
-var router = require('./router/main')(app);
+var router = require('./router/main')(app, fs);
