@@ -1,9 +1,6 @@
 module.exports = function (app, fs) {
     app.get('/', function (req, res) {
         var sess = req.session;
-        console.log(sess);
-        console.log(sess.name);
-        console.log(sess.username);
         res.render('index', {
             title: "Index Page",
             length: 5,
@@ -48,16 +45,19 @@ module.exports = function (app, fs) {
     });
 
     app.get('/logout', function (req, res) {
-        req.session.destroy(function (err, data) {
-            if (err) {
-                console.log("error!!!");
-                console.log(err);
-            }
-            if (data) {
-                console.log("logout data!!");
-                console.log(data);
-            }
-        });
+        console.log("logout!!");
+        sess = req.session;
+        if (sess.username) {
+            req.session.destroy(function (err) {
+                if (err) {
+                    console.log(err);
+                } else {
+                    res.redirect('/');
+                }
+            });
+        } else {
+            res.redirect('/');
+        }
     });
 
     app.get('/list', function (req, res) {
