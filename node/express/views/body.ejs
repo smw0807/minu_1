@@ -1,13 +1,29 @@
+<script src="js/body.js"></script>
 <div class="col-sm-12">
-    <h1>Loop it!</h1>
+    <p>node login session test</p>
+    <!-- <h1>Loop it!</h1>
     <ul>
         <% for (var i = 0; i < length; i++) { %>
             <li><%= "LOOP " + i %></li>
         <%}%>
-    </ul>
+    </ul> -->
     <% if(username) { %>
-        <H2>Welcome!! <%= username %> (name: <%= name %>)</H2>
+        <div class="col-sm-12">
+            <div style="width: 50%; float: none; margin: 0 auto;">
+                <H2>Welcome!! <%= username %> (name: <%= name %>)</H2>
+                <button class="btn btn-primary top_mg15" id="btn_logout">로그아웃</button>
+            </div>
+        </div>
     <% } else { %>
-        <H2>Please Login.</H2>
+        <div class="col-sm-12">
+            <div style="width: 50%; float: none; margin: 0 auto;">
+                <H2>Please Login.</H2>
+                <!-- <form>  -->
+                    <input type="text" class="form-control top_mg15" id="user_id" name="user_id">
+                    <input type="text" class="form-control top_mg15" id="user_pw" name="user_pw">
+                    <button class="btn btn-primary top_mg15" id="btn_login">로그인</button>
+                <!-- </form> -->
+            </div>
+        </div>
     <% } %>
 </div>
