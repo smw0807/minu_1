@@ -46,6 +46,10 @@ var app5 = new Vue({
         changeMessage: function () {
             console.log("changeMessage");
             this.message = new Date();
+        },
+        showAlertMessage: function () {
+            console.log("showAlertMessage!!");
+            alert("hello vue.js~");
         }
     }
 });
