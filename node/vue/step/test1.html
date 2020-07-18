@@ -43,6 +43,13 @@
             <button v-on:click="showAlertMessage">alert</button>
         </div>
 
+        <div id="app-6">
+            <p>{{message}}</p>
+            <input type="text" v-model="message">
+            <!-- input text 박스안에 문자 입력시 {{message}} 창에 바로바로 출력이됨. -->
+        </div>
+
+        <!-- js-->
         <script src="test1.js"></script>
     </body>
 </html>
