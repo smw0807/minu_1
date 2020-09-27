@@ -1,8 +1,8 @@
-module.exports = function (app, date) {
-    app.get('/', function (req, res) {
+module.exports = function (app) {
+    app.get('/test', function (req, res) {
+        console.log("test...");
         var sess = req.session;
-        console.log("index...");
-        res.render('index', {
+        res.render('main/main', {
             title: "Main page",
             length: 5,
             name: sess.name,

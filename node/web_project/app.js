@@ -12,7 +12,7 @@ app.engine('html', require('ejs').renderFile);
 
 var date = require('./util');
 
-const server = app.listen(3000, function() {
+const server = app.listen(5000, function() {
     console.log ("Server Start... [" + date.dateFormat('yyyy-MM-dd HH:mm:ss E') + ']');
 });
 
@@ -25,3 +25,4 @@ app.use(session({
 }))
 
 var main = require('./route/main')(app);
+var test = require('./route/main/test.js')(app);
