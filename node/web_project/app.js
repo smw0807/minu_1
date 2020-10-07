@@ -1,10 +1,16 @@
 const express = require('express');
+const expressLayouts = require('express-ejs-layouts');
 const app = express();
 const path = require('path');
 const bodyParser = require('body-parser');
 const session = require('express-session');
 
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(expressLayouts);
+
+//express-ejs-layouts setting
+app.set('layout', 'layout');
+app.set("layout extractScripts", true);
 
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
@@ -25,4 +31,4 @@ app.use(session({
 }))
 
 var main = require('./route/main')(app);
-var test = require('./route/main/test.js')(app);
+var test = require('./route/test/test')(app, date);
