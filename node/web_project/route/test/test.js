@@ -10,4 +10,10 @@ module.exports = function (app, dt) {
             today: date
         })
     });
+
+    app.get('/test2', function (req, res) {
+        res.render('test/test2', {
+            title: "test2 page"
+        });
+    });
 };
