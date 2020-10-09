@@ -1,0 +1,19 @@
+<div id="app-7">
+    <ol>
+        <!-- todo-item 컴포넌트의 인스턴스 만들기 -->
+        <!--
+            각 todo-item에 todo 객체를 제공
+            화면에 나오므로, 각 항목의 컨텐츠는 동적으로 바뀔 수 있음.
+            또한 각 구성 요소에 "키"를 제공해야함
+        -->
+        <todo-item
+        v-for="item in groceryList"
+        v-bind:todo="item"
+        v-bind:key="item.id"></todo-item>
+    </ol>
+</div>
+
+
+
+<!-- js -->
+<script src="js/vue/test2.js"></script>

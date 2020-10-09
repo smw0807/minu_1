@@ -1,0 +1,41 @@
+<div id="app">
+    {{message}}
+</div>
+
+<div id="app-2">
+    <span v-bind:title="message">over mouse here</span>
+</div>
+
+<div id="app-3">
+    <p v-if="seen">show? hide?</p>
+</div>
+
+<div id="app-4">
+    <ol>
+        <li v-for="todo in todos" v-if="todo.seen">
+            <p> {{todo.text}} </p>
+        </li>
+    </ol>
+
+    <ol>
+        <li v-for="todo in todos" v-if="todo.seen == false">
+            {{todo.test}}
+        </li>
+    </ol>
+</div>
+
+<div id="app-5">
+    <p>{{message}}</p>
+    <button v-on:click="reverseMessage">reverse</button>
+    <button v-on:click="changeMessage">change</button>
+    <button v-on:click="showAlertMessage">alert</button>
+</div>
+
+<div id="app-6">
+    <p>{{message}}</p>
+    <input type="text" v-model="message">
+    <!-- input text 박스안에 문자 입력시 {{message}} 창에 바로바로 출력이됨. -->
+</div>
+
+<!-- js-->
+<script src="js/vue/test1.js"></script>

@@ -1,5 +1,5 @@
 module.exports = function (app, dt) {
-    app.get('/test', function (req, res) {
+    app.get('/test1', function (req, res) {
         var sess = req.session;
         var date = dt.dateFormat('yyyy-MM-dd');
         res.render('test/test', {

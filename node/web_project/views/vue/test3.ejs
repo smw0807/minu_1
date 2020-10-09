@@ -1,0 +1,13 @@
+<div id="data1"> {{a}}
+    <button v-on:click="a = 'baz'">Change it!!</button>
+</div>
+
+<div id="data2">
+    <p>{{foo}}</p>
+    <!-- obj.foo는 더이상 변하지 않습니다. -->
+    <button v-on:click="foo = 'baz'">Change it!!</button>
+</div>
+
+
+<!-- js -->
+<script src="js/vue/test3.js"></script>
