@@ -44,4 +44,5 @@ app.use(session({
 //라우터 모듈인 main.js를 불러와서 app에 전달해준다.
 var main = require('./route/main')(app);
 var test = require('./route/test/test')(app, date);
+var js = require('./route/javascript/datatables')(app);
 var vuejs = require('./route/vue/vue')(app);
