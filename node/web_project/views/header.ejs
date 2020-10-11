@@ -47,7 +47,7 @@
                                     </ul>
                                 </li>
 
-                                <li class="dropdown">
+                                <li class="dropdown <%= pageType == 'vue' ? 'active' : ''%>">
                                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">VueJS<span class="caret"></span></a>
                                     <ul class="dropdown-menu" role="menu">
                                         <li class="dropdown-header">기초</li>
@@ -62,7 +62,7 @@
                                     </ul>
                                 </li>
 
-                                <li class="dropdown">
+                                <li class="dropdown <%= pageType == 'test' ? 'active' : ''%>">
                                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Test<span class="caret"></span></a>
                                     <ul class="dropdown-menu" role="menu">
                                         <li class="dropdown-header">간단한 테스트</li>

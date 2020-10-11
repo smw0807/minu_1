@@ -1,4 +1,5 @@
 module.exports = function (app) {
+    const pageType = 'vue';
     app.get('/vue-test1', function (req, res) {
         var sess = req.session;
         console.log("vue test1...");
@@ -6,7 +7,8 @@ module.exports = function (app) {
             title: "vue test1 page",
             length: 5,
             name: sess.name,
-            username: sess.username
+            username: sess.username,
+            pageType: pageType
         })
     });
     app.get('/vue-test2', function (req, res) {
@@ -16,7 +18,8 @@ module.exports = function (app) {
             title: "vue test2 page",
             length: 5,
             name: sess.name,
-            username: sess.username
+            username: sess.username,
+            pageType: pageType
         })
     });
     app.get('/vue-test3', function (req, res) {
@@ -26,7 +29,8 @@ module.exports = function (app) {
             title: "vue test3 page",
             length: 5,
             name: sess.name,
-            username: sess.username
+            username: sess.username,
+            pageType: pageType
         })
     });
     app.get('/vue-test4', function (req, res) {
@@ -36,7 +40,8 @@ module.exports = function (app) {
             title: "vue test4 page",
             length: 5,
             name: sess.name,
-            username: sess.username
+            username: sess.username,
+            pageType: pageType
         })
     });
     
