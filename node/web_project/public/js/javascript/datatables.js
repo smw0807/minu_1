@@ -1,4 +1,3 @@
-console.log("check");
 var table;
 var json_data;
 
@@ -16,7 +15,6 @@ function getJson() {
 
 async function drawTable() {
     var result = await getJson();
-    console.log(result);
     table = $('#data_table').DataTable({
        order: [[0, 'asc']],
        data: result,

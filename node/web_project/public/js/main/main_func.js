@@ -1,3 +1,6 @@
+// $('#home').addClass('active');
+// $('#javascript').removeClass('active');
+
 $(function () {
     $('[data-toggle="tooltip"]').tooltip()
 })

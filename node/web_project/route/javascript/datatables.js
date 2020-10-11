@@ -1,6 +1,6 @@
 module.exports = function (app) {
-    const fs = require('fs');
     const folderPath = 'javascript/';
+    const pageType = "js";
     app.get('/js-datatables', function (req, res) {
         var sess = req.session;
         console.log("datatables....");
@@ -8,7 +8,8 @@ module.exports = function (app) {
             title: "JS API DataTables",
             lenght: 5,
             name: sess.name,
-            username: sess.username
+            username: sess.username,
+            pageType: pageType
         });
     });
 }
