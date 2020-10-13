@@ -1,8 +1,8 @@
-module.exports = function (app, dt) {
+module.exports = function (app, util) {
+    const pageType = 'test';
     app.get('/test1', function (req, res) {
-        const pageType = 'test';
         var sess = req.session;
-        var date = dt.dateFormat('yyyy-MM-dd');
+        var date = util.dateFormat('yyyy-MM-dd');
         res.render('test/test', {
             title: "test page",
             length: 5,

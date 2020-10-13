@@ -16,6 +16,53 @@
     </thead>
 </table>
 
+<br>
+
+<div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+   
+    <div class="panel panel-default">
+
+      <div class="panel-heading" role="tab" id="headingOne">
+        <h4 class="panel-title">
+          <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+            1. ejs 소스보기
+          </a>
+        </h4>
+      </div>
+
+      <div id="collapseOne" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+        <div class="panel-body">
+          <img src="img/javascript/datatables/ejs.png">
+        </div>
+      </div>
+
+    </div>
+
+    <div class="panel panel-default">
+
+      <div class="panel-heading" role="tab" id="headingTwo">
+        <h4 class="panel-title">
+          <a class="collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+            2. js 소스보기
+          </a>
+        </h4>
+      </div>
+
+      <div id="collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
+        <div class="panel-body">
+            <div class="col-sm-6">
+                <img src="img/javascript/datatables/js.png">
+            </div>
+            <div class="col-sm-6">
+                <p>getJson : json파일 안에 있는 데이터를 가져오는 함수</p>
+                <p>drawTable : data_table를 datatables로 적용시키고 json데이터를 테이블에 그려줌.</p>
+                <p>json파일에서 추출한 key 값과 columns의 data가 일치하면됨</p>
+            </div>
+        </div>
+      </div>
+
+    </div>
+</div>
 
 <!-- js -->
 <script src="js/javascript/datatables.js"></script>

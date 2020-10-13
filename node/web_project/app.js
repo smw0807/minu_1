@@ -27,10 +27,10 @@ app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
 app.engine('html', require('ejs').renderFile);
 
-var date = require('./util');
+var util = require('./util');
 
 const server = app.listen(5000, function() {
-    console.log ("Server Start... [" + date.dateFormat('yyyy-MM-dd HH:mm:ss E') + ']');
+    console.log ("Server Start... [" + util.dateFormat('yyyy-MM-dd HH:mm:ss E') + ']');
 });
 
 app.use(bodyParser.json());
@@ -43,6 +43,6 @@ app.use(session({
 
 //라우터 모듈인 main.js를 불러와서 app에 전달해준다.
 var main = require('./route/main')(app);
-var test = require('./route/test/test')(app, date);
+var test = require('./route/test/test')(app, util);
 var js = require('./route/javascript/datatables')(app);
 var vuejs = require('./route/vue/vue')(app);

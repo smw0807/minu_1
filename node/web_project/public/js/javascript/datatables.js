@@ -12,7 +12,7 @@ function getJson() {
         });
     });
 }
-
+//table 그리기
 async function drawTable() {
     var result = await getJson();
     table = $('#data_table').DataTable({
