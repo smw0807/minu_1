@@ -50,19 +50,70 @@
 
       <div id="collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
         <div class="panel-body">
-            <div class="col-sm-6">
-                <img src="img/javascript/datatables/js.png">
-            </div>
-            <div class="col-sm-6">
-                <p>getJson : json파일 안에 있는 데이터를 가져오는 함수</p>
-                <p>drawTable : data_table를 datatables로 적용시키고 json데이터를 테이블에 그려줌.</p>
-                <p>json파일에서 추출한 key 값과 columns의 data가 일치하면됨</p>
-            </div>
+            <img src="img/javascript/datatables/js.png">
         </div>
       </div>
 
     </div>
 </div>
 
+<div class="page-header">
+  <h2>DataTables API <small>option createdRow사용해보기</small></h2>
+  <p>tr이 생성될 때 추가적으로 더 작업을 해줄 수 있음</p>
+  <p>데이터를 조작하거나, 데이터를 추가하던가 등 다양한 작업이 가능</p>
+  <p>아래 예제는 name에 a태그를 통해 함수를 호출하고, 해당 row의 index번호로 데이터 전체를 alert에 뿌려주게함</p>
+</div>
+
+<table id="data_table2" class="table table-bordered">
+  <thead>
+      <tr>
+        <th>id</th> 
+        <th>name</th>
+        <th>gender</th>
+        <th>address</th>
+      </tr>
+  </thead>
+</table>
+
+<br>
+
+<div class="panel-group" id="accordion2" role="tablist" aria-multiselectable="true">
+   
+  <div class="panel panel-default">
+
+    <div class="panel-heading" role="tab" id="heading1">
+      <h4 class="panel-title">
+        <a data-toggle="collapse" data-parent="#accordion" href="#collapse1" aria-expanded="true" aria-controls="collapse1">
+          1. ejs 소스보기
+        </a>
+      </h4>
+    </div>
+
+    <div id="collapse1" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading1">
+      <div class="panel-body">
+        <img src="img/javascript/datatables/ejs2.png">
+      </div>
+    </div>
+
+  </div>
+
+  <div class="panel panel-default">
+
+    <div class="panel-heading" role="tab" id="heading2">
+      <h4 class="panel-title">
+        <a class="collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapse2" aria-expanded="false" aria-controls="collapse2">
+          2. js 소스보기
+        </a>
+      </h4>
+    </div>
+
+    <div id="collapse2" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading2">
+      <div class="panel-body">
+          <img src="img/javascript/datatables/js2.png" width="100%">
+      </div>
+    </div>
+
+  </div>
+</div>
 <!-- js -->
 <script src="js/javascript/datatables.js"></script>
