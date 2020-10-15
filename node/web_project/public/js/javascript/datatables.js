@@ -1,5 +1,6 @@
 var table;
 var table2;
+var table3;
 var json_data;
 
 $(document).ready(function () {
@@ -55,4 +56,49 @@ drawTable2();
 function call (idx) {
     var data = table2.row(idx).data();
     alert(JSON.stringify(data));
+};
+
+tabe3 = $('#data_table3').DataTable({
+    scrollY: 300,
+    columns: [
+        {data: 'id'},
+        {data: 'name'},
+        {data: 'gender'},
+        {data: 'address'}
+    ]
+});
+function addRow() {
+    console.log('addRow');
+    var id = $('#id').val();
+    var name = $('#name').val();
+    var gender = $('#gender').val();
+    var address = $('#address').val();
+    if (id == '') {
+        alert('id를 입력해주세요.');
+        $('#id').focus();
+        return;
+    }
+    if (name == '') {
+        alert('name을 입력해주세요.');
+        $('#name').focus();
+        return;
+    }
+    if (gender == '') {
+        alert('gender를 입력해주세요.');
+        $('#gender').focus();
+        return;
+    }
+    if (address == '') {
+        alert('address를 입력해주세요.');
+        $('#address').focus();
+        return;
+    }
+    var param = {
+        id: id,
+        name: name,
+        gender: gender,
+        address: address
+    };
+    table3 = $('#data_table3').DataTable();
+    table3.row.add(param).draw(false);
 };
