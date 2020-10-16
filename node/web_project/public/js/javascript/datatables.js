@@ -58,15 +58,23 @@ function call (idx) {
     alert(JSON.stringify(data));
 };
 
-tabe3 = $('#data_table3').DataTable({
-    scrollY: 300,
-    columns: [
-        {data: 'id'},
-        {data: 'name'},
-        {data: 'gender'},
-        {data: 'address'}
-    ]
-});
+async function drawTable3() {
+    var result = await getJson();
+    tabe3 = $('#data_table3').DataTable({
+        order: [0, 'asc'],
+        data: result,
+        scrollY: 385,
+        columns: [
+            {data: 'id'},
+            {data: 'name'},
+            {data: 'gender'},
+            {data: 'address'}
+        ]
+    });
+}
+drawTable3();
+
+//data 추가
 function addRow() {
     console.log('addRow');
     var id = $('#id').val();
