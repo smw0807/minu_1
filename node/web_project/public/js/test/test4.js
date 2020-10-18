@@ -10,3 +10,9 @@ function callParent () {
     opener.call(msg);
     window.close();
 };
+
+$('#sendMsg').bind('keydown keypress', function (e) {
+    if (e.which === 13) {
+        callParent();
+    }
+});
