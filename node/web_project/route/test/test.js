@@ -19,4 +19,18 @@ module.exports = function (app, util) {
             pageType: pageType
         });
     });
+
+    app.get('/test3', function (req, res) {
+        res.render('test/test3', {
+            title: "test3 page",
+            pageType: pageType
+        });
+    });
+
+    app.get('/test4', function (req, res) {
+        res.render('test/test4', {
+            title: "test4 page",
+            pageType: pageType
+        });
+    });
 };
