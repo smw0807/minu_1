@@ -44,5 +44,16 @@ module.exports = function (app) {
             pageType: pageType
         })
     });
-    
+    app.get('/vue-test5', function (req, res) {
+        var sess = req.session;
+        console.log("vue test5...");
+        res.render('vue/test5', {
+            title: "vue test5 page",
+            length: 5,
+            name: sess.name,
+            username: sess.username,
+            pageType: pageType,
+
+        })
+    });
 };

@@ -1,0 +1,23 @@
+<div class="page-header">
+    <h1>템플릿 문법<small>v-once</small></h1>
+    <P>소스상에서 title의 값을 sayHello라는 함수를 통해 값을 변경하는데, v-once를 써서하지 않음.</P>
+</div>
+
+<div class="col-sm-12" id="app">
+    <h1 v-once>{{ title }}</h1>
+    <p>{{ sayHello() }}</p>
+</div>
+
+
+<div class="page-header">
+    <h1>템플릿 문법<small>v-html</small></h1>
+    <P>data의 값은 string형식이기 때문에 data값으로 html태그를 넘겨주고 싶으면 사용하는듯.</P>
+</div>
+
+<div class="col-sm-12" id="app2">
+    <p>{{ htmlTag }}</p>
+    <p v-html="htmlTag"></p>
+</div>
+
+<!-- js -->
+<script src="js/vue/test5.js"></script>
