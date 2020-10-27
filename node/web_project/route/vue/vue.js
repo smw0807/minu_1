@@ -62,4 +62,15 @@ module.exports = function (app) {
 
         })
     });
+    app.get('/vue-test7', function (req, res) {
+        var sess = req.session;
+        res.render('vue/test7', {
+            title: "Vue computed와 watch",
+            length: 5,
+            name: sess.name,
+            username: sess.username,
+            pageType: pageType,
+
+        })
+    });
 };
