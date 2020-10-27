@@ -1,5 +1,23 @@
-
-
+<div class="page-header">
+    <h1>템플릿 문법<small>디렉티브</small></h1>
+</div>
+<div class="col-sm-12" id="app1">
+    <p><a v-bind:href="url">naver주소 v-bind:href 테스트</a></p>
+    <p><a v-on:click="doSomething">v-on:click Test</a></p>
+</div>
+<br><br>
+<div class="page-header">
+    <h2>디렉티브<small>약어</small></h2>
+    <p>가장 자주 사용되는 v-bind와 v-on의 경우 약어가 제공됨</p>
+    <p>v-bind는 <code>:href="url"</code> 또는 <code>:[key]="url"</code></p>
+    <p>v-on은 <code>@click="doSomething"</code> 또는 <code>@[event]="doSomething"</code></p>
+</div>
+<div class="col-sm-12" id="app2">
+    <p><a :href="url">v-bind 약어 테스트</a></p>
+    <p><a @click="doSomething">v-on 약어 Test</a></p> 
+    <!-- doSomething 누르고 url 누르면 바뀐 url로 넘어감! -->
+</div>
 
 <!-- js -->
-<script src="js/vue/test5.js"></script>
+<script src="js/vue/test6.js"></script>
+
