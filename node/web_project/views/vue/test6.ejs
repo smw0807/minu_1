@@ -18,6 +18,37 @@
     <!-- doSomething 누르고 url 누르면 바뀐 url로 넘어감! -->
 </div>
 
+<br><br>
+<div class="page-header">
+    <h2>디렉티브<small>연습</small></h2>
+    <p><code>v-if</code>와 <code>v-bind</code>를 써서 간단한 테스트</p>
+    <p>v-if를 이용해 텍스트창에 값이 있을 때와 없을 때를 구분해 보여주는 div 2개를 만듬</p>
+    <p>텍스트 창에 값을 넣고 버튼을 누르면 v-bind를 통해 메소드를 실행</p>
+</div>
+<div class="col-sm-12" id="app3">
+    <div class="form-inline">
+        <div class="form-group">
+          <label for="id">ID</label>
+          <input type="text" class="form-control" id="id" placeholder="Your ID">
+        </div>
+        <div class="form-group">
+          <label for="pass">PW</label>
+          <input type="password" class="form-control" id="pass" placeholder="Your PassWord">
+        </div>
+        <button @click="sendText" class="btn btn-primary">Send</button>
+        <button @click="reset" class="btn btn-default">reset</button>
+    </div>
+    <div class="form-inline">
+        <pre class="form-control" style="width:500px; height:200px; margin-top:10px;"  readonly>
+            <div v-if="id == ''">ID, PW를 입력해주세요</div>
+            <div v-if="id != ''">
+                입력하신 ID는 {{ id }} 입니다. <br>
+                입력하신 PW는 {{ pass }} 입니다.
+            </div>
+        </pre>
+    </div>
+</div>
+
 <!-- js -->
 <script src="js/vue/test6.js"></script>
 
