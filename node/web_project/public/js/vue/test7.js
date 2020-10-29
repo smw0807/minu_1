@@ -5,6 +5,11 @@ var app1 = new Vue({
     data: {
         message: "안녕하세요"
     },
+    methods: {
+        reverseMsg: function () {
+            return this.message.split('').reverse().join('');
+        }
+    },
     computed: {
         reversedMessage: function () {
             return this.message.split('').reverse().join('');
