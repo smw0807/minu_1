@@ -1,8 +1,55 @@
-<div id="app1">
+<div class="col-sm-12">
+    <a href="https://github.com/smw0807/minu_1/blob/master/node/web_project/views/vue/test7.ejs" target="_blank">이 페이지 ejs 소스 보기</a> 
+    <a href="https://github.com/smw0807/minu_1/blob/master/node/web_project/public/js/vue/test7.js" target="_blank">이 페이지 js 소스 보기</a>
+</div>
+
+<div id="app1" class="col-sm-12">
     <p>원본 메세지 : "{{ message }}"</p>
     <p>역순 메세지(computed 사용) : "{{ reversedMessage }}"</p>
     <p>역순 메세지(method 사용) : "{{ reverseMsg() }}"</p>
 </div>
 
+<h2>computed 속성과 watch 속성?</h2>
+<div id="app2" class="col-sm-12">
+    <p>watch..</p>
+    <div class="col-sm-12">
+        <p>{{fullName}}</p>
+    </div>
+</div>
+
+<div id="app3" class="col-sm-12">
+    <p>computed..</p>
+    <div class="col-sm-12">
+        <p>{{fullName}}</p>
+    </div>
+</div>
+
+<div id="app4" class="col-sm-12">
+    <p>computed..getter and setter</p>
+    <div class="col-sm-12">
+        <p>{{fullName}}</p>
+    </div>
+</div>
+
+<div id="app5" class="col-sm-12">
+    <div class="page-header">
+        <h3>watch 속성</h3>
+        <p><code>v-model</code>사용해서 처리?</p>
+    </div>
+    <div>
+        <p>yes/no 질문을 물어보세요 :
+            <input v-model="question">
+        </p>
+        <p>{{ answer }}</p>
+    </div>
+</div>
+
+
 <!-- js -->
+<!-- 이미 Ajax 라이브러리의 풍부한 생태계와 범용 유틸리티 메소드 컬렉션이 있기 때문에, -->
+<!-- Vue 코어는 다시 만들지 않아 작게 유지됩니다. -->
+<!-- 이것은 이미 익숙한 것을 선택할 수 있는 자유를 줍니다. -->
+<script src="https://unpkg.com/axios@0.12.0/dist/axios.min.js"></script>
+<script src="https://unpkg.com/lodash@4.13.1/lodash.min.js"></script>
 <script src="js/vue/test7.js"></script>
+
