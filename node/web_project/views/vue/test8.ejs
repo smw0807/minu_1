@@ -1,4 +1,20 @@
-
+<div class="col-sm-12">
+    <div class="page-header">
+        <h3>HTML 클래스 바인딩하기</h3>
+    </div>
+    <p class="bg-info">객체 구문</p>
+    <div id="app1">
+        <div class="col-sm-12">
+            <button type="button" class="btn btn-primary btn-lg active">button1</button>
+            <button type="button" class="btn btn-primary btn-lg" v-bind:class="{ active : isActive }">button2</button>
+            <button type="button" class="btn btn-lg" :class="{ active : isActive2, 'btn-info' : isBtn }">button3</button>
+        </div>
+        <div class="col-sm-12">
+            <button type="button" v-on:click="goActive" class="btn btn-danger">button2 active 상태로 바꾸기</button>
+            <button type="button" @click="backActive" class="btn btn-danger">button2 active 상태 없애기</button>
+        </div>
+    </div>
+</div>
 
 
 
