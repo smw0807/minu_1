@@ -73,4 +73,15 @@ module.exports = function (app) {
 
         })
     });
+    app.get('/vue-test8', function (req, res) {
+        var sess = req.session;
+        res.render('vue/test7', {
+            title: "Vue 클래스와 스타일 바인딩",
+            length: 5,
+            name: sess.name,
+            username: sess.username,
+            pageType: pageType,
+
+        })
+    });
 };
