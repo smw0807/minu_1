@@ -8,10 +8,29 @@
             <button type="button" class="btn btn-primary btn-lg active">button1</button>
             <button type="button" class="btn btn-primary btn-lg" v-bind:class="{ active : isActive }">button2</button>
             <button type="button" class="btn btn-lg" :class="{ active : isActive2, 'btn-info' : isBtn }">button3</button>
+            <!-- 왜 active는 '' 를 안씌워도 되고 btn-info는 안씌우면 에러가 나는 걸까? -->
+            <!-- 하이픈(-) 때문에 그런거였음-->
         </div>
         <div class="col-sm-12">
             <button type="button" v-on:click="goActive" class="btn btn-danger">button2 active 상태로 바꾸기</button>
             <button type="button" @click="backActive" class="btn btn-danger">button2 active 상태 없애기</button>
+            <button type="button" @click="btn3" class="btn btn-primary">button3 class on/off</button>
+        </div>
+        <div class="col-sm-12 mrgT30">
+            <div class="panel" :class="[panelStyle]">
+                <div class="panel-heading">heading</div>
+                <div class="panel-body">
+                    배열 []를 이용해서 여러개를 넣을 수도 있고 단일로 넣을 경우엔 그냥 <code>v-bind:class="dataName"</code>으로 쓸 수 있음
+                  <p :class="test">확인용</p>
+                </div>
+                <div class="panel-footer">
+                    <p>색 바꾸기</p>
+                    <button type="button" class="btn btn-sm btn-primary" @click="btnColor('primary')">primary</button>
+                    <button type="button" class="btn btn-sm btn-info" @click="btnColor('info')">info</button>
+                    <button type="button" class="btn btn-sm btn-danger" @click="btnColor('danger')">danger</button>
+                    <button type="button" class="btn btn-sm btn-default" @click="btnColor('default')">default</button>
+                </div>
+              </div>
         </div>
     </div>
 </div>
