@@ -2,7 +2,7 @@
     <div class="page-header">
         <h3>HTML 클래스 바인딩하기</h3>
     </div>
-    <p class="bg-info">객체 구문</p>
+    <h4 class="text-success">객체 구문과 객체 배열</h4>
     <div id="app1">
         <div class="col-sm-12">
             <button type="button" class="btn btn-primary btn-lg active">button1</button>
@@ -32,6 +32,18 @@
                 </div>
               </div>
         </div>
+    </div>
+    <h4 class="text-success">컴포넌트와 함계 사용하는 방법</h4>
+    <my-component class="baz boo">c</my-component>
+
+    <div class="page-header">
+        <h3>인라인 스타일 바인딩</h3>
+    </div>
+    <h4 class="text-success">객체 구문과 객체 배열</h4>
+    <div id="app2">
+        <div :style="{color: activeColor, fontSize: fontSize + 'px'}">객체 구문</div>
+        <div v-bind:style="styleObject">객체 구문 오브젝트로 사용하기</div>
+        <div v-bind:style="[styleObject, {color : activeColor}]">객체 배열로 사용하기</div>
     </div>
 </div>
 

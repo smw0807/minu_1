@@ -24,3 +24,19 @@ var app1 = new Vue({
         }
     }
 });
+
+Vue.component('my-component', {
+    template: '<p class="foo bar">Hi</p>'
+});
+
+var app2 = new Vue({
+    el: '#app2',
+    data: {
+        activeColor: 'red',
+        fontSize: 30,
+        styleObject: {
+            'background-color': 'rgba(0,255,0,0.5)',
+            fontSize: '20px'
+        }
+    }
+});
