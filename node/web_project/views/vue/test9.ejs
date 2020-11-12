@@ -2,6 +2,55 @@
     <div class="page-header">
         <h3>조건부 렌더링</h3>
     </div>
+    <h4 class="text-success">v-if</h4>
+    <div id="app1">
+        <div class="col-sm-12">
+            <h3 v-if="awesome">v-if Test!!! <small>This true</small></h3>
+            <h3 v-else>v-if Test!!! <small>This false</small></h3>
+            <button v-on:click="awesomeBtn">change : {{!awesome}}</button>
+        </div>
+        <div class="col-sm-12">
+            <template v-if="tpl_1">
+                <div class="page-header">
+                    <h4>Template를 이용한 조건부 그룹만들기</h4>
+                    <p>true!!!</p>
+                </div>
+            </template>
+            <template v-else>
+                <div class="page-header">
+                    <h4>Template를 이용한 조건부 그룹만들기</h4>
+                    <p>false!!!</p>
+                </div>
+            </template>
+            <button v-on:click="templateBtn">tpl change : {{!tpl_1}}</button>
+        </div>
+        <div class="col-sm-12">
+            <div class="page-header">
+                <h3><code>v-else-if</code>를 사용해보자.</h3>
+            </div>
+            <div class="form-inline">
+                <div class="form-group">
+                    <label class="sr-only" for="textValue">anything</label>
+                    <input v-model="check" type="text" class="form-control" id="textValue" placeholder="1, 2, 3 중에 입력" maxlength="1">
+                </div>
+                <div v-if="check == ''">
+                    <p>값을 입력해보세요...</p>
+                </div>
+                <div v-else-if="check == 1">
+                    <p>1을 입력</p>
+                </div>
+                <div v-else-if="check == 2">
+                    <p>2을 입력</p>
+                </div>
+                <div v-else-if="check == 3">
+                    <p>3을 입력</p>
+                </div>
+                <div v-else>
+                    <p>{{check}}는 안돼요.</p>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 
