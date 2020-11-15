@@ -95,4 +95,15 @@ module.exports = function (app) {
 
         })
     });
+    app.get('/vue-test10', function (req, res) {
+        var sess = req.session;
+        res.render('vue/test10', {
+            title: "Vue 리스트 렌더링",
+            length: 5,
+            name: sess.name,
+            username: sess.username,
+            pageType: pageType,
+
+        })
+    });
 };
