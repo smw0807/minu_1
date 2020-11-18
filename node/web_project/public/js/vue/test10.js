@@ -1,3 +1,5 @@
+var arr = ["apple","oragne","grapes","strawberry","watermelon"]
+
 var app1 = new Vue({
     el: '#app1',
     data: {
@@ -19,4 +21,16 @@ var app2 = new Vue({
            NowStatus: 'sad'
        }
    } 
+});
+
+var app3 = new Vue({
+    el: '#app3',
+    data: {
+        items: arr
+    },
+    created: function() {
+        this.items = arr.filter(function (val, idx, arr) {
+            return val.length > 5;
+        });
+    },
 });
