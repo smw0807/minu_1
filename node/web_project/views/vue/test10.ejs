@@ -62,6 +62,32 @@
                 <li v-for="item in items">{{ item }}</li>
             </ul>
         </div>
+        <div id="app4">
+            <p>주의 사항</p>
+            1. 인덱스로 배열에 있는 항목을 직접 설정 불가능 <br>
+            <code>app4.items[1] = 'bb';</code> 이게 안됨 <br>
+            <code>Vue.set(app4.items, 1, 'bb');</code> 이걸 사용<br>
+            <code>app4.items.splice(1, 1, 'bbb');</code> 또는 이걸 사용 <br>
+            <code>app4.$set(app4.items, 1, 'bbbb');</code> 또는 이걸 사용
+            <p>2. 배열 길이를 수정 불가능</p>
+            <code>app4.items.length = 3;</code> 이게 안됨<br>
+            <code>app4.items.splice(3);</code> 이걸 사용
+            <ul>
+                <li v-for="item in items">{{ item }}</li>
+            </ul>
+            <p>근데 vue 인스턴스안에서 <code>created</code>에서 <code>this.items.length</code>나 <code>>this.itmes[index] = newValue</code> 먹힘</p>
+        </div>
+    </div>
+</div>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title">객체 변경 감지에 관한 주의사항</h3>
+    </div>
+    <div class="panel-body">
+        <div id="app5">
+            d
+        </div>
     </div>
 </div>
 <!-- js -->

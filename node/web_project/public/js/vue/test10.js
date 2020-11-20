@@ -34,3 +34,24 @@ var app3 = new Vue({
         });
     },
 });
+
+var app4 = new Vue({
+    el:'#app4',
+    data: {
+        items: [
+            'a', 'b', 'c', 'd'
+        ]
+    },
+    created: function () {
+        // if (this.items.length > 5) {
+        //     this.items.length = 2;
+        // }
+        // this.items[2] = 'ccccc';
+    }
+});
+// app4.items[1] = 'bb';
+// Vue.set(app4.items, 1, 'bb');
+app4.$set(app4.items, 1, 'bbbb');
+// app4.items.splice(1, 1, 'bbb');
+// app4.items.length = 3;
+// app4.items.splice(3);
