@@ -128,5 +128,22 @@
         </div>
     </div>
 </div>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title">Range 와 template</h3>
+    </div>
+    <div class="panel-body">
+        <div id="app7">
+            <span v-for="n in 10">{{ n }} </span>
+            <ul>
+                <template v-for="item in items">
+                    <li>{{ item }}</li>
+                    <li class="divider" role="presentation"></li>
+                </template>
+            </ul>
+        </div>
+    </div>
+</div>
 <!-- js -->
 <script src="js/vue/test10.js"></script>

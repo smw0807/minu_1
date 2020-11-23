@@ -97,3 +97,10 @@ var app6 = new Vue({
         }
     }
 });
+
+var app7 = new Vue({
+    el:'#app7',
+    data: {
+        items: arr
+    }
+});
