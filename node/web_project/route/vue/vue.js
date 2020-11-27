@@ -106,4 +106,15 @@ module.exports = function (app) {
 
         })
     });
+    app.get('/vue-test11', function (req, res) {
+        var sess = req.session;
+        res.render('vue/test11', {
+            title: "Vue 이벤트 핸들링",
+            length: 5,
+            name: sess.name,
+            username: sess.username,
+            pageType: pageType,
+
+        })
+    });
 };
