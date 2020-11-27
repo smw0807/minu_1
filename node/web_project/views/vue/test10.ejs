@@ -145,5 +145,33 @@
         </div>
     </div>
 </div>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title">v-for 와 v-if</h3>
+    </div>
+    <div class="panel-body">
+        <div id="app8">
+            <li v-for="todo in todos" v-if="todo.isComplete">{{ todo.todo }}</li>
+        </div>
+    </div>
+</div>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title">v-for와 컴포넌트</h3>
+    </div>
+    <div class="panel-body">
+        <div id="app9">
+            <my-component
+                v-for="(val, idx) for items"
+                v-bind:item="val"
+                v-bind:index="idx"
+                v-bind:key="val.id"
+            ></my-component>
+        </div>
+    </div>
+</div>
+
 <!-- js -->
 <script src="js/vue/test10.js"></script>

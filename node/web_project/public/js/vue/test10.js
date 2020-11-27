@@ -104,3 +104,16 @@ var app7 = new Vue({
         items: arr
     }
 });
+
+var app8 = new Vue({
+    el: '#app8',
+    data: {
+        todos: [
+            { todo : '1111', isComplete: false },
+            { todo : '222', isComplete: true },
+            { todo : '333', isComplete: false },
+            { todo : '444', isComplete: true },
+            { todo : '555', isComplete: false }
+        ]
+    } 
+});
