@@ -20,10 +20,21 @@
         <h3 class="panel-title">메소드 이벤트 핸들러</h3>
     </div>
     <div class="panel-body">
-        <div id="app1">
-           <button v-on:click="count += 1">Add 1</button>
-           <p>버튼을 누를 때마다 +1</p>
-           <p>누른 횟수 : {{ count }}</p>
+        <div id="app2">
+            <button class="btn btn-primary" v-on:click="great">Great</button>
+        </div>
+    </div>
+</div>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title">인라인 메소드 핸들러</h3>
+    </div>
+    <div class="panel-body">
+        <div id="app3">
+            <button class="btn btn-info" v-on:click="say('hi')">Say hi</button>
+            <button class="btn btn-info" v-on:click="say('what')">Say what</button>
+            <button class="btn btn-danger" v-on:click="warn('Form cannot be submitted yet.', $event)">Submit</button>
         </div>
     </div>
 </div>
