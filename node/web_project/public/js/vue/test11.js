@@ -1,3 +1,10 @@
+Vue.config.keyCodes = {
+    v: 86,
+    f1: 112,
+    mediaPlayPause: 179,
+    "media-play-pause": 179,
+    up: [38, 87]
+}
 var app1 = new Vue({
     el: '#app1',
     data: {
@@ -38,6 +45,31 @@ var app3 = new Vue({
                 event.preventDefault();
                 alert(msg);
             }
+        }
+    }
+});
+
+var app4 = new Vue({
+    el: '#app4',
+    methods: {
+        doThis: function () {
+            console.log("doThis!!");
+        },
+        doThat: function() {
+            console.log("doThat!!");
+        }
+    }
+});
+
+var app5 = new Vue({
+    el: '#app5',
+    data: {
+        what : ''
+    },
+    methods: {
+        check: function (e) {
+            console.log("enter !");
+            console.log(e);
         }
     }
 });
