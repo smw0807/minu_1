@@ -117,4 +117,14 @@ module.exports = function (app) {
 
         })
     });
+    app.get('/vue-test12', function (req, res) {
+        var sess = req.session;
+        res.render('vue/test12', {
+            title: "Vue 폼 입력 바인딩",
+            length: 5,
+            name: sess.name,
+            username: sess.username,
+            pageType: pageType,
+        })
+    });
 };
