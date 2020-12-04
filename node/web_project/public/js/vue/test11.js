@@ -73,3 +73,23 @@ var app5 = new Vue({
         }
     }
 });
+
+var app6 = new Vue({
+    el: '#app6',
+    data: {
+        test1: '111'
+    },
+    methods: {
+        clear: function (e) {
+            console.log("clear");
+            console.log(e.target);
+            $('#' + e.target.id).val('');            
+        },
+        onClick: function () {
+            console.log("onClick");
+        },
+        onCtrlClick: function () {
+            console.log("onCtrlClick");
+        }
+    }
+});

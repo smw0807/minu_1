@@ -91,5 +91,30 @@
         </div>
     </div>
 </div>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title">시스템 수식어 키 목록</h3>
+    </div>
+    <div class="panel-body">
+        <div id="app6">
+            <code>.ctrl</code> <code>.alt</code> <code>.shift</code> <code>.meta</code>
+            <div>
+                <code>@keyup.alt.67</code> = > alt + c
+                <input id="clearTest" @keyup.alt.67="clear" placeholder="clearTest">
+                <input id="clearTest2" v-on:keyup.alt.67="clear" placeholder="clearTest2">
+            </div>
+            <div>
+                <code>.exact</code>
+                <!-- Alt 또는 Shift와 함께 눌린 경우에도 실행됩니다. -->
+                <button @click.ctrl="onClick">Ctrl 누른 상태에서 클릭해야함!!</button>
+                <!-- Ctrl 키만 눌려있을 때만 실행됩니다. -->
+                <button @click.ctrl.exact="onCtrlClick">Ctrl 키만 실행?</button>
+                <!-- 아래 코드는 시스템 키가 눌리지 않은 상태인 경우에만 작동합니다. -->
+                <button @click.exact="onClick">시스템 키 안눌렸을 때만</button>
+            </div>
+        </div>
+    </div>
+</div>
 <!-- js -->
 <script src="js/vue/test11.js"></script>
