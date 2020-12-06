@@ -8,6 +8,46 @@
     </div>
     <div class="panel-body">
         <div id="app1">
+            <div class="mrgB20">
+                문자열
+                <input v-model="message" placeholder="여기를 수정해보세요">
+                <span>메세지: {{message}}</span>
+            </div>
+            <div class="mrgB20">
+                여러줄을 가진 문장
+                <p style="white-space: pre-line;">{{message2}}</p>
+                <textarea class="form-control" v-model="message2" placeholder="여러줄을 입력해보세요"></textarea>
+            </div>
+            <div class="mrgB20">
+                체크박스
+                <input type="checkbox" id="checkbox" v-model="checked">
+                <label for="checkbox">{{checked}}</label>
+            </div>
+            <div class="mrgB20">
+                여러개의 체크박스
+                <input type="checkbox" id="jack" value="Jack" v-model="checkedNames">
+                <label for="jack">Jack</label>
+                <input type="checkbox" id="john" value="John" v-model="checkedNames">
+                <label for="john">John</label>
+                <input type="checkbox" id="mike" value="Mike" v-model="checkedNames">
+                <label for="mike">Mike</label>
+                <br>
+                <span>체크한 이름 : {{checkedNames}} </span>
+            </div>
+            <div class="mrgB20">
+                라디오
+                <br>
+                <input type="radio" id="one" value="One" v-model="picked">
+                <label for="one">One</label>
+                <br>
+                <input type="radio" id="two" value="Two" v-model="picked">
+                <label for="two">Two</label>
+                <br>
+                <span>선택: {{ picked }}</span>
+            </div>
+            <div class="mrgB20">
+                <button class="btn btn-primary" v-on:click="submit">Save</button>
+            </div>
         </div>
     </div>
 </div>
