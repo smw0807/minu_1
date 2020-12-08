@@ -48,10 +48,47 @@
             <div class="mrgB20">
                 <button class="btn btn-primary" v-on:click="submit">Save</button>
             </div>
+            <div class="mrgB20">
+                셀렉트박스<br>
+                <select v-model="selected">
+                    <option disabled value="">Please select one</option>
+                    <option value="1">A</option>
+                    <option>B</option>
+                    <option>C</option>
+                </select>
+                <span>Select : {{ selected }}</span>
+            </div>
+            <div class="mrgB20">
+                다중 셀렉트<br>
+                <select v-model="selected2" multiple>
+                    <option>A</option>
+                    <option>B</option>
+                    <option>C</option>
+                    <option>D</option>
+                </select>
+                <span>Selects : {{ selected2 }}</span>
+            </div>
+            <div class="mrgB20">
+                <code>v-for</code>를 이용한 동적 옵션 렌더링<br>
+                <select v-model="forSelected">
+                    <option v-for="option in options" v-bind:value="option.value">{{option.text}}</option>
+                </select>
+                <span>Select : {{ forSelected }}</span>
+            </div>
         </div>
     </div>
 </div>
 
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title">값 바인딩 하기</h3>
+    </div>
+    <div class="panel-body">
+        <div id="app1">
+
+        </div>
+    </div>
+</div>
 
 <!-- js -->
 <script src="js/vue/test12.js"></script>

@@ -5,7 +5,17 @@ var app1 = new Vue({
         message2: '',
         checked: false,
         checkedNames: [],
-        picked: ''
+        picked: '',
+        selected: '1',
+        selected2: [],
+        forSelected: 'value3',
+        options: [
+            { value: 'value1', text: 'text1' },
+            { value: 'value2', text: 'text2' },
+            { value: 'value3', text: 'text3' },
+            { value: 'value4', text: 'text4' },
+            { value: 'value5', text: 'text5' }
+        ]
     },
     created: function(){
       
