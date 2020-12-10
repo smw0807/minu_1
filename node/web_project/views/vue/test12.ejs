@@ -84,8 +84,29 @@
         <h3 class="panel-title">값 바인딩 하기</h3>
     </div>
     <div class="panel-body">
-        <div id="app1">
-
+        <div id="app2">
+            <div class="mrgB20">
+                <div>
+                    체크박스
+                    <input type="checkbox" v-model="toggle" true-value="ss" false-value="no" checked="checked">
+                    true-value? false-value? : {{ toggle }}
+                </div>
+                <div>
+                    라디오 
+                    <input type="radio" v-model="radio" value="one" > one
+                    <input type="radio" v-model="radio" value="two" > two
+                    {{ radio }}
+                </div>
+                <div>
+                    셀렉트옵션
+                    <select v-model="selected">
+                        <option v-bind:value="{ number: 123 }">123</option>
+                        <option v-bind:value="{ string: 123 }">123</option>
+                        <option v-bind:value="5555">555</option>
+                        <option v-bind:value="'666'">666</option>
+                    </select>
+                </div>
+            </div>
         </div>
     </div>
 </div>
