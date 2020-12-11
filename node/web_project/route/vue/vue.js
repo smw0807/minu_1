@@ -127,4 +127,14 @@ module.exports = function (app) {
             pageType: pageType,
         })
     });
+    app.get('/vue-test13', function (req, res) {
+        var sess = req.session;
+        res.render('vue/test13', {
+            title: "Vue 컴포넌트",
+            length: 5,
+            name: sess.name,
+            username: sess.username,
+            pageType: pageType,
+        })
+    });
 };
