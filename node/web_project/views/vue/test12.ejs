@@ -111,5 +111,38 @@
     </div>
 </div>
 
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title">수식어</h3>
+    </div>
+    <div class="panel-body">
+        <div id="app3">
+            <div class="mrgB20">
+                <code>.lazy</code>
+                <div>
+                    <input v-model.lazy="msg" id="lazyinput" placeholder="lazy 수식어가 들어간거">
+                    <input v-model="msg" id="input" placeholder="lazy 수식어가 안들어간거">
+                </div>
+            </div>
+            <div class="mrgB20">
+                <code>.number</code>
+                <div>
+                    <input v-model.number="age1" type="number" placeholder="age1">
+                    <input v-model="age2" type="number" placeholder="age2">
+                    <button v-on:click="show">Console 확인</button>
+                </div>
+            </div>
+            <div class="mrgB20">
+                <code>.trim</code>
+                <div>
+                    <input v-model.trim="trimMsg">
+                    <button v-on:click="trim">trim!!</button>
+                    {{trimMsg}}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- js -->
 <script src="js/vue/test12.js"></script>

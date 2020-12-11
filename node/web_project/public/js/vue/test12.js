@@ -73,3 +73,31 @@ var app2 = new Vue({
         }
     }
 });
+
+var app3 = new Vue({
+    el:'#app3',
+    data: {
+        msg: '',
+        age1: '',
+        age2: '',
+        trimMsg:'asdasd asdasd asdasd'
+    },
+    watch: {
+        msg: function (e) {
+            console.log(e);
+        }
+    },
+    methods: {
+        show: function () {
+            console.log("show data type!!");
+            console.log(this.age1);
+            console.log(typeof this.age1);
+            console.log(this.age2);
+            console.log(typeof this.age2);
+        },
+        trim: function (e) {
+            console.log("msg trim...");
+            console.log(this.trimMsg);
+        }
+    }
+});
