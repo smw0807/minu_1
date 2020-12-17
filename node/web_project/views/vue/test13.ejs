@@ -20,6 +20,39 @@
                    <child-component></child-component>
                </div>
            </div>
+           <div class="mrgB20">
+               # DOM 템플릿 구문 분석 경고
+               <div>
+                   기본
+                   <table class="table">
+                        <tr><td>tdtdtdtdtdtd1</td><td>tdtdtdtdtdtd2</td></tr>
+                   </table>
+                   잘못된
+                   <table class="table">
+                        <tr-component></tr-component>
+                   </table>
+                   <code>is 특수 속성을 사용하면?</code>
+                   <table class="table">
+                        <tr is="tr-component"></tr>
+                   </table>
+                   번외(data 테스트)
+                   <table class="table">
+                        <tr is="tr-com"></tr>
+                    </table>
+               </div>
+           </div>
+           <div class="mrgB20">
+               # data는 반드시 함수여야한다.
+               <div>
+                   <my-com></my-com>
+               </div>
+               공식홈 예제
+               <div>
+                   <simple-counter></simple-counter>
+                   <simple-counter></simple-counter>
+                   <simple-counter></simple-counter>
+               </div>
+           </div>
         </div>
     </div>
 </div>
