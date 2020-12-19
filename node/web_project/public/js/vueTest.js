@@ -1,3 +1,3 @@
-Vue.component('componentTest', {
+Vue.component('component-test', {
     template: '<li>Test!!!</li>'
 });

@@ -71,9 +71,29 @@ Vue.component('case', {
     template: '<span>{{ myMessage }}</span>'
 })
 
-var app2 = new Vue({
+Vue.component('child2', {
+    props: ['parentMsg'],
+    template: '<span>{{parentMsg}}</span>'
+})
+
+
+var todoItem = {
+    template: '<span>ss</span>'
+}
+
+//vue인스턴스가 부모, component가 자식
+var app2 = new Vue({ 
     el:'#app2',
     data: {
-        message: '안녕?'
+        message: '안녕?',
+        parentMsg: 'parentMessage11',
+        todo: {
+            text: 'Learn Vue',
+            isComplate: false
+        },
+        components: {
+            'todo-item': todoItem
+        }
     }
 })
+

@@ -74,11 +74,23 @@
                 <div>
                     <case my-message="CASE1!!!!"></case>
                     <case my-Message="CASE2!!!!"></case>
+                    <component-test></component-test>
                     <!-- <case myMessage="CASE3!!!!"></case> -->
                 </div>
             </div>
             <div class="mrgB20">
                 # 동적 Props
+                <div>
+                    <input type="text" v-model="parentMsg">
+                    <br>
+                    <child2 parent-msg="parentMsg"></child2>
+                    <br>
+                    <child2 v-bind:parent-msg="parentMsg"></child2>
+                    <br>
+                    <todo-item v-bind="todo"></todo-item>
+                    <br>
+                    <!-- <input v-bind:text="todo.text" v-bind:is-complate="todo.isComplate"> -->
+                </div>
             </div>
         </div>
     </div>
