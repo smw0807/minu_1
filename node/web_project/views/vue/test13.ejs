@@ -87,9 +87,29 @@
                     <br>
                     <child2 v-bind:parent-msg="parentMsg"></child2>
                     <br>
+                    <!-- 이건 어떻게하는건지 잘 모르겠음... -->
                     <todo-item v-bind="todo"></todo-item>
                     <br>
                     <!-- <input v-bind:text="todo.text" v-bind:is-complate="todo.isComplate"> -->
+                </div>
+            </div>
+            <div class="mrgB20">
+                # 리터럴 vs 동적
+                <div>
+                    <comp some-prop="1"></comp>
+                    <comp v-bind:some-prop="1"></comp>
+                </div>
+            </div>
+            <div class="mrgB20">
+                # 단방향 데이터
+                <div>
+                    <compo1 initial-counter="100" size="AA AAAA"></compo1>
+                </div>
+            </div>
+            <div class="mrgB20">
+                # Prop 검증
+                <div>
+                  <example prop-c="ss"></example>  
                 </div>
             </div>
         </div>

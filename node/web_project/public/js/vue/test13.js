@@ -76,10 +76,65 @@ Vue.component('child2', {
     template: '<span>{{parentMsg}}</span>'
 })
 
+Vue.component('todo-item', {
+    props:['todo'],
+    template: '<span>{{ todo }}</span>',
+   
+})
 
-var todoItem = {
-    template: '<span>ss</span>'
-}
+Vue.component('comp', {
+    props:['someProp'],
+    template: '<span>{{ someProp }}</span>',
+    created: function () {
+        console.log('child');
+        console.log(this.someProp);
+        console.log(typeof this.someProp);
+    }
+});
+
+Vue.component('compo1', {
+    props:['initialCounter','size'],
+    template: '<span>{{initialCounter}} // {{size}} // {{ counter }} // {{ normalizedSize }}</span>',
+    data: function () {
+        return {
+            counter: this.initialCounter
+        }
+    },
+    computed: {
+        normalizedSize: function () {
+            return this.size.trim().toLowerCase()
+        }
+    }
+});
+
+//Prop 검증
+Vue.component('example', {
+    props:{
+        //기본 타입 확인 (`null`은 어떤 타입이든 가능하다는 뜻)
+        propA: Number,
+        propB: [String, Number], //여러개의 타입
+        propC: {
+            type: String, //문자열
+            required: true //꼭 필요
+        },
+        propD: {
+            type: Number, //숫자
+            default: 100 //기본 값
+        },
+        propE: { //객체/배열의 기본값에 팩토리 함수에서 반환되어야 한다?
+            type: Object,
+            default: function () {
+                return { message : 'hello' }
+            }
+        },
+        propF: { //사용자 정의 유효성 기능
+            validator: function (value) {
+                return value > 10
+            }
+        }
+    },
+    template: '<span>{{ propC }}</span>'
+});
 
 //vue인스턴스가 부모, component가 자식
 var app2 = new Vue({ 
@@ -89,10 +144,7 @@ var app2 = new Vue({
         parentMsg: 'parentMessage11',
         todo: {
             text: 'Learn Vue',
-            isComplate: false
-        },
-        components: {
-            'todo-item': todoItem
+            isComplete: false
         }
     }
 })
