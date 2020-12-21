@@ -149,3 +149,11 @@ var app2 = new Vue({
     }
 })
 
+Vue.component('bs-date-input', {
+    template: '<input type="text">'
+})
+
+var app3 = new Vue({
+    el: '#app3',
+
+})
