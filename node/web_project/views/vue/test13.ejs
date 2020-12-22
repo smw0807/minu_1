@@ -126,6 +126,26 @@
                 <!-- <bs-date-input col-sm-12="false"></bs-date-input> -->
                 <bs-date-input class="form-control"></bs-date-input>
             </div>
+            <div class="mrgB20">
+                # <code>v-on</code>을 이용한 사용자 지정 이벤트
+                <div>
+                    <p>{{ total }}</p>
+                    <button-counter></button-counter>
+                    <button-counter v-on:increment="incrementTotal"></button-counter>
+                    <button-counter v-on:click.native="incrementTotal"></button-counter>
+                    <!-- 여기에 v-on을 넣고 자식 컴포넌트에서 $emit을 이용해 트리거 할 수 있다? -->
+                </div>
+            </div>
+            <div class="mrgB20">
+                # 사용자 정의 이벤트를 사용하여 폼 입력 컴포넌트 만들기
+                <div>
+                    <!-- <input v-model="something"> -->
+                    <!-- <input v-bind:value="something" v-on:input="something = $event.target.value"> -->
+                    <!-- <custom-input :value="something" @input="value => { something = value }"></custom-input> -->
+                    <currency-input v-model="price"></currency-input> 
+                    {{ getTotal }}
+                </div>
+            </div>
         </div>
     </div>
 </div>

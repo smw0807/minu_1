@@ -153,7 +153,116 @@ Vue.component('bs-date-input', {
     template: '<input type="text">'
 })
 
+Vue.component('button-counter', {
+    template: '<button v-on:click="incrementCounter">{{ counter }}</button>',
+    // template: '<button v-on:increment="incrementTotal" v-on:click="incrementCounter">{{ counter }}</button>',
+    // ㄴ> incrementTotal이게 부모에 있는거라 에러발생
+    data: function () {
+        return {
+            counter: 0
+        }
+    },
+    methods: {
+        incrementCounter: function () {
+            console.log('incrementCounter');
+            this.counter += 1;
+            this.$emit('increment');
+            // this.$emit('click'); //이건 됨 
+            //incrementCounter를 실행하면서 increment를 트리거하여 
+            //부모 methods의 incrementTotal를 실행시킴
+            // this.$on('incrementTotal'); //안됨 이건
+        }
+    }
+}) //난 아직까진 이렇게 컴포넌트를 만들어서 저런식으로 소스를 짜고 쓴다는게 이해가 안된다.
+
+Vue.component('currency-input', {
+    template: '\
+        <span>\
+        $\
+        <input ref="input" \
+        v-bind:value="value"\
+        v-on:input="updateValue($event.target.value)">\
+        </span>\
+    ',
+    props: ['value'],
+    methods: {
+        updateValue: function (value) {
+            console.log("??");
+            var formattedValue = value.trim().slice(0, value.indexOf('.') === -1 
+            ? value.length : value.indexOf('.') + 3);
+            if (formattedValue !== value) {
+                this.$refs.input.value = formattedValue;
+            }
+            //입력 이벤트를 통해 숫자 값을 내보낸다.
+            this.$emit('input', Number(formattedValue));
+            console.log()
+        }
+    }
+})
+
+Vue.component('currency-inputs', {
+    template: '\
+      <div>\
+        <label v-if="label">{{ label }}</label>\
+        $\
+        <input\
+          ref="input"\
+          v-bind:value="value"\
+          v-on:input="updateValue($event.target.value)"\
+          v-on:focus="selectAll"\
+          v-on:blur="formatValue"\
+        >\
+      </div>\
+    ',
+    props: {
+      value: {
+        type: Number,
+        default: 0
+      },
+      label: {
+        type: String,
+        default: ''
+      }
+    },
+    mounted: function () {
+      this.formatValue()
+    },
+    methods: {
+      updateValue: function (value) {
+        var result = currencyValidator.parse(value, this.value)
+        if (result.warning) {
+          this.$refs.input.value = result.value
+        }
+        this.$emit('input', result.value)
+      },
+      formatValue: function () {
+        this.$refs.input.value = currencyValidator.format(this.value)
+      },
+      selectAll: function (event) {
+        // Workaround for Safari bug
+        // http://stackoverflow.com/questions/1269722/selecting-text-on-focus-using-jquery-not-working-in-safari-and-chrome
+        setTimeout(function () {
+            event.target.select()
+        }, 0)
+      }
+    }
+  })
+
 var app3 = new Vue({
     el: '#app3',
-
+    data: {
+        total: 0,
+        price: 0,
+    },
+    methods: {
+        incrementTotal: function () {
+            console.log("incrementTotal");
+            this.total += 1;
+        }
+    },
+    computed: {
+        getTotal: function () {
+            return (this.price).toFixed(3);
+        }
+    }
 })
