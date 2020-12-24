@@ -248,6 +248,19 @@ Vue.component('currency-inputs', {
     }
   })
 
+Vue.component('my-checkbox', {
+    model: {
+        prop: 'checked',
+        event: 'change'
+    },
+    props: {
+        //다른 목적을 위해 value prop을 사용할 수 있다.
+        checked: Boolean,
+        value: String
+    }
+})
+//<my-checkbox v-model="foo" value="some value"></my-checkbox>
+
 var app3 = new Vue({
     el: '#app3',
     data: {
@@ -264,5 +277,21 @@ var app3 = new Vue({
         getTotal: function () {
             return (this.price).toFixed(3);
         }
+    }
+})
+
+Vue.component('child-component2', {
+    template: '<div v-show="someChildProperty">Child!!</div>',
+    data: function () {
+        return {
+            someChildProperty: true
+        }
+    }
+})
+
+var app4 = new Vue({
+    el: '#app4',
+    data: {
+        someChildProperty: true
     }
 })
