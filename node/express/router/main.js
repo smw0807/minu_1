@@ -1,6 +1,8 @@
 module.exports = function (app, fs) {
     app.get('/', function (req, res) {
         var sess = req.session;
+        console.log('/');
+        console.log(sess);
         res.render('index', {
             title: "Index Page",
             length: 5,
