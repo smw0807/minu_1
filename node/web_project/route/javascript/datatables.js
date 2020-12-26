@@ -6,7 +6,7 @@ module.exports = function (app) {
         res.render(folderPath + 'datatables', {
             title: "JS API DataTables",
             lenght: 5,
-            name: sess.name,
+            userid: sess.userid,
             username: sess.username,
             pageType: pageType
         });

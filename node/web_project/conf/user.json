@@ -1,0 +1,7 @@
+{
+    "admin":{
+        "user_id":"admin",
+        "user_nm":"어드민",
+        "pass": "1234"
+    }
+}

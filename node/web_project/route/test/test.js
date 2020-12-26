@@ -6,7 +6,7 @@ module.exports = function (app, util) {
         res.render('test/test', {
             title: "test page",
             length: 5,
-            name: sess.name,
+            userid: sess.userid,
             username: sess.username,
             today: date,
             pageType: pageType
@@ -16,6 +16,8 @@ module.exports = function (app, util) {
     app.get('/test2', function (req, res) {
         res.render('test/test2', {
             title: "test2 page",
+            userid: sess.userid,
+            username: sess.username,
             pageType: pageType
         });
     });
@@ -23,6 +25,8 @@ module.exports = function (app, util) {
     app.get('/test3', function (req, res) {
         res.render('test/test3', {
             title: "test3 page",
+            userid: sess.userid,
+            username: sess.username,
             pageType: pageType
         });
     });
@@ -30,6 +34,8 @@ module.exports = function (app, util) {
     app.get('/test4', function (req, res) {
         res.render('test/test4', {
             title: "test4 page",
+            userid: sess.userid,
+            username: sess.username,
             pageType: pageType
         });
     });

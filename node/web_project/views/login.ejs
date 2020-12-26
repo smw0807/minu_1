@@ -1,1 +1,27 @@
-로그인 하셈
+<!-- Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <!-- <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button> -->
+          <h4 class="modal-title" id="myModalLabel">로그인 해주세요</h4>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label for="user_id">아이디</label>
+                <input type="text" class="form-control" v-model="user_id" id="user_id" placeholder="아이디를 입력하세요.">
+            </div>
+            <div class="form-group">
+                <label for="user_pw">패스워드</label>
+                <input type="password" class="form-control" v-model="user_pw" id="user_pw" placeholder="패스워드를 입력하세요.">
+            </div>
+        </div>
+        <div class="modal-footer">
+          <!-- <button type="button" class="btn btn-default" data-dismiss="modal">Close</button> -->
+          <button v-on:click="login" type="button" class="btn btn-primary">Login</button>
+          <button v-on:click="join" type="button" class="btn btn-primary">Join</button>
+        </div>
+      </div>
+    </div>
+</div>
+<script src="js/login.js"></script>
