@@ -1,15 +1,15 @@
-var options = {
-    backdrop: false
-}
-$('#myModal').modal(options)
-
-var login = new Vue({
-    el:'#myModal',
+var header = new Vue({
+    el: '#header',
     data: {
         user_id: '',
         user_pw: ''
     },
     methods: {
+        showLoginForm: function () {
+            $('#myModal').modal({
+                backdrop: true
+            });
+        },
         login: function () {
             console.log("login!!!!!!!!");
             var user_id = this.user_id;
@@ -33,6 +33,7 @@ var login = new Vue({
                     this.user_pw = '';
                     alert(rs.message);
                 } else {
+                    $('#myModal').modal('hide');
                     location.href = '/';
                 }
            }).fail(function (err) {
