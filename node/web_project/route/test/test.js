@@ -14,6 +14,7 @@ module.exports = function (app, util) {
     });
 
     app.get('/test2', function (req, res) {
+        var sess = req.session;
         res.render('test/test2', {
             title: "test2 page",
             userid: sess.userid,
@@ -23,6 +24,7 @@ module.exports = function (app, util) {
     });
 
     app.get('/test3', function (req, res) {
+        var sess = req.session;
         res.render('test/test3', {
             title: "test3 page",
             userid: sess.userid,
@@ -32,6 +34,7 @@ module.exports = function (app, util) {
     });
 
     app.get('/test4', function (req, res) {
+        var sess = req.session;
         res.render('test/test4', {
             title: "test4 page",
             userid: sess.userid,
