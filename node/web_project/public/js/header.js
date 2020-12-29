@@ -2,7 +2,8 @@ var header = new Vue({
     el: '#header',
     data: {
         user_id: '',
-        user_pw: ''
+        user_pw: '',
+        user_nm: ''
     },
     methods: {
         showLoginForm: function () {
@@ -42,8 +43,12 @@ var header = new Vue({
            })
         },
         join: function () {
-            alert('아직 미완성');
-            return;
+            var test = true;
+            if (test) {
+                alert('아직 미완성');
+                return;
+            }
+            
         }
     }
 })
