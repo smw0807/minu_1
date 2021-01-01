@@ -1,7 +1,12 @@
 {
-    "admin":{
-        "user_id":"admin",
-        "user_nm":"어드민",
-        "pass": "1234"
-    }
+	"admin": {
+		"user_id": "admin",
+		"user_nm": "관리자",
+		"pass": "f1651c4ec15f10fc43c722b0a0eca309dc630766eb21966f53932cebfbe890f6"
+	},
+	"smw0807": {
+		"user_id": "smw0807",
+		"user_nm": "송민우",
+		"pass": "a0662665b5542539fb31f6d1610547375e7f9e2d14ddf02c4a4a9069bfbfa49f"
+	}
 }

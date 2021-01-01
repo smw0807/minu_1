@@ -1,4 +1,5 @@
 const { get } = require("request");
+const user = require("./util/user.js");
 
 module.exports = function (app, conf, fs, util) {
     const pageType = 'main';
@@ -24,7 +25,7 @@ module.exports = function (app, conf, fs, util) {
                 console.log(date);
                 var users = JSON.parse(data);
                 var userid = req.params.userid;
-                var userpw = req.params.userpw;
+                var userpw = user.sha256(userid, req.params.userpw);
                 console.log('로그인 ID : ' + userid);
                 if (!users[userid]) { //아이디 없을 때
                     console.log('결과 : Fail');
@@ -67,6 +68,46 @@ module.exports = function (app, conf, fs, util) {
             });
         } else {
             res.redirect('/');
+        }
+    });
+
+    app.post('/joinUser', async function (req,res) {
+        console.log("====== 회원 가입 ======= S");
+        var body = req.body; //data 정보 가져오기
+        console.log("입력된 정보 : " + JSON.stringify(body));
+        var result = {};
+        //아이디 중복되는게 있는지 확인
+        var idCheck = await user.idCheck(body.user_id);
+        if (!idCheck) {
+            console.log("아이디 중복")
+            result["success"] = 0;
+            result["message"] = '이미 등록된 아이디 입니다.';
+            res.json(result);
+            console.log("====== 회원 가입 ======= E");
+            return;
+        }
+        
+        //패스워드 sha256 처리
+        var pw = await user.sha256(body.user_id, body.user_pw);
+        body['pass'] = pw;
+        delete body['user_pw'];
+        
+        //등록
+        var add = await user.addUser(body);
+        if (add) {
+            console.log("등록성공")
+            result["success"] = 1;
+            result["message"] = '등록에 성공했습니다.';
+            res.json(result);
+            console.log("====== 회원 가입 ======= E");
+            return;
+        } else {
+            console.log("등록실패")
+            result["success"] = 0;
+            result["message"] = '사용자 정보 등록 중 문제가 발생했습니다.';
+            res.json(result);
+            console.log("====== 회원 가입 ======= E");
+            return;
         }
     });
 };
