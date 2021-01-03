@@ -1,0 +1,6 @@
+number: &num 123
+object:
+  test: sdfsdf
+  txt: tttttt
+  obj:
+    num: *num 456
