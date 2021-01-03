@@ -1,0 +1,6 @@
+object:
+ str1: test123
+ str2: test234
+ obj:
+  num: 12345
+  str: 12345
