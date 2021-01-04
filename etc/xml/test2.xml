@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<list>
+    <user>
+        <name>kim</name>
+        <country>korea</country>
+    </user>
+    <user>
+        <name>lee</name>
+        <country>paris</country>
+    </user>
+    <user>
+        <name>park</name>
+        <country>indonesia</country>
+    </user>
+    <user>
+        <name>choi</name>
+        <country>mexico</country>
+    </user>
+</list>

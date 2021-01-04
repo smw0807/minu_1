@@ -1,0 +1,26 @@
+https://www.npmjs.com/package/xml2json
+
+npm install xml2json
+
+#Usage
+var parser = require('xml2json');
+ 
+var xml = "<foo attr=\"value\">bar</foo>";
+console.log("input -> %s", xml)
+ 
+// xml to json
+var json = parser.toJson(xml);
+console.log("to json -> %s", json);
+ 
+// json to xml
+var xml = parser.toXml(json);
+console.log("back to xml -> %s", xml)
+
+
+fs = require('fs');
+var parser = require('xml2json');
+
+fs.readFile( './data.xml', function(err, data) {
+    var json = parser.toJson(data);
+    console.log("to json ->", json);
+ });

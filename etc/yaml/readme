@@ -1,0 +1,27 @@
+https://www.npmjs.com/package/js-yaml
+
+npm install js-yaml
+
+#Usage
+usage: js-yaml [-h] [-v] [-c] [-t] file
+
+Positional arguments:
+  file           File with YAML document(s)
+
+Optional arguments:
+  -h, --help     Show this help message and exit.
+  -v, --version  Show program's version number and exit.
+  -c, --compact  Display errors in compact mode
+  -t, --trace    Show stack trace on error
+##############################################
+#API
+const yaml = require('js-yaml');
+const fs   = require('fs');
+
+// Get document, or throw exception on error
+try {
+  const doc = yaml.load(fs.readFileSync('/home/ixti/example.yml', 'utf8'));
+  console.log(doc);
+} catch (e) {
+  console.log(e);
+}
