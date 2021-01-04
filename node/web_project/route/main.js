@@ -1,7 +1,9 @@
 const { get } = require("request");
+const fs = require('fs');
+const yaml = require('js-yaml');
 const user = require("./util/user.js");
 
-module.exports = function (app, conf, fs, util) {
+module.exports = function (app, util) {
     const pageType = 'main';
     app.get('/', function (req, res) {
         var sess = req.session;
@@ -19,6 +21,8 @@ module.exports = function (app, conf, fs, util) {
         sess = req.session;
         var result = {};
         var date = util.dateFormat('yyyy-MM-dd HH:mm:ss');
+        var readConf = fs.readFileSync(__dirname + '/../conf/conf.yaml', 'utf-8');
+        var conf = yaml.safeLoad(readConf);
         if (conf.db.is_db == 'N') {
             fs.readFile(__dirname + '/../conf/user.json', 'utf-8', function (err, data) {
                 console.log('======== 로그인 시도 ========S');

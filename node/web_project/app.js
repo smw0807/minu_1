@@ -4,8 +4,6 @@ const app = express();
 const path = require('path');
 const bodyParser = require('body-parser');
 const session = require('express-session');
-const fs = require('fs');
-const conf = require('./conf/conf.json');
 /**
  * 정적파일(Static files) 사용하기
  * HTML에서 사용되는 js, css, image 파일등을 정적파일이라함
@@ -43,7 +41,8 @@ app.use(session({
 }))
 
 //라우터 모듈인 main.js를 불러와서 app에 전달해준다.
-var main = require('./route/main')(app, conf, fs, util);
+// var main = require('./route/main')(app, conf, fs, util);
+var main = require('./route/main')(app, util);
 var test = require('./route/test/test')(app, util);
 var js = require('./route/javascript/datatables')(app);
 var vuejs = require('./route/vue/vue')(app);

@@ -8,5 +8,15 @@
 		"user_id": "smw0807",
 		"user_nm": "송민우",
 		"pass": "a0662665b5542539fb31f6d1610547375e7f9e2d14ddf02c4a4a9069bfbfa49f"
+	},
+	"smw001": {
+		"user_id": "smw001",
+		"user_nm": "민우001",
+		"pass": "4b31846606b1ad4d7746379e81a39fdd333703a826715009f0ad5aea306282e9"
+	},
+	"smw002": {
+		"user_id": "smw002",
+		"user_nm": "민우002",
+		"pass": "2249fbcb366c80477d66965dedbab0950374a5a1c5391dc76777a93ba0a098c0"
 	}
 }
