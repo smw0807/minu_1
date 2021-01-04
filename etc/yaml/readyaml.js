@@ -16,3 +16,7 @@ console.log("-------------------------------------3");
 let an3 = fs.readFileSync('./anchorTest3.yaml', 'utf-8');
 let anData3 = yaml.safeLoad(an3);
 console.log(anData3);
+console.log("-------------------------------------4");
+let an4 = fs.readFileSync('./anchorTest4.yaml', 'utf-8');
+let anData4 = yaml.safeLoad(an4);
+console.log(anData4);
