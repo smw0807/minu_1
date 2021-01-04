@@ -3,4 +3,4 @@ object:
   test: sdfsdf
   txt: tttttt
   obj:
-    num: *num 456
+    num: *num

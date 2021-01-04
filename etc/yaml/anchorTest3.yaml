@@ -1,0 +1,9 @@
+# &num2 1234 그냥 선언해서 쓸 수 있나 테스트 해봤는데 안됨 
+
+num: &num1 1234
+str1: &str1 안녕하세요?
+str2: &str2 ㅇㅇ
+setting:
+ setNumber: *num1
+ setTitle: *str1
+ setContent: *str2
