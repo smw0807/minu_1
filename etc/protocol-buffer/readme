@@ -1,3 +1,87 @@
 https://www.npmjs.com/package/protocol-buffers
 
 npm install protocol-buffers
+############################################################
+1. readFile.js
+스마파 파일을 읽고 인코딩, 디코딩 값을 얻는걸 해볼 수 있음
+
+2. compileSchemaFile.js
+스키마 파일을 컴파일해서 인터페이스 코드가 작성된 js 파일을 만들어 줌
+
+3. use.js
+스키마 파일을 이용해 데이터를 넣고 읽는 파일
+사용시 db라는 디렉터리와 함께 각종 파일과 로그가 생김
+이건 위 주소에서 써본건데 정확히 이해를 못하겠음
+
+4. useInterfaceCode.js
+compileSchemaFile.js 에서 만든 인터페이스 코드(message.js)를 이용해서 
+인코딩된 파일과 디코딩된 파일 만들기
+
+5. message.js
+compileSchemaFile.js 에서 만들어진 인터페이스 코드
+
+6. decodingBuffer.js
+인터페이스 코드를 이용해 프로토콜 버퍼 파일을 읽고 디코딩해서 결과를 보여줌
+###############################################################
+Use the above proto file to encode/decode messages by doing
+
+var protobuf = require('protocol-buffers')
+ 
+// pass a proto file as a buffer/string or pass a parsed protobuf-schema object
+var messages = protobuf(fs.readFileSync('test.proto'))
+ 
+var buf = messages.Test.encode({
+  num: 42,
+  payload: 'hello world'
+})
+ 
+console.log(buf) // should print a buffer
+
+###############################################################
+To decode a message use Test.decode
+
+var obj = messages.Test.decode(buf)
+console.log(obj) // should print an object similar to above
+Enums are accessed in the same way as messages
+
+var buf = messages.AnotherOne.encode({
+  list: [
+    messages.FOO.BAR
+  ]
+})
+
+###############################################################
+Nested emums are accessed as properties on the corresponding message
+
+var buf = message.SomeMessage.encode({
+  list: [
+    messages.SomeMessage.NESTED_ENUM.VALUE
+  ]
+})
+
+######################## 컴파일 ##########################
+Compile to a file
+Since v4 you can now compile your schemas to a JavaScript file you can require from Node. This means you do not have runtime parse the schemas, which is useful if using in the browser or on embedded devices. It also makes the dependency footprint a lot smaller.
+
+# first install the cli tool 
+npm install -g protocol-buffers
+ 
+# compile the schema 
+protocol-buffers test.proto -o messages.js
+ 
+# then install the runtime dependency in the project 
+npm install --save protocol-buffers-encodings
+That's it! Then in your application you can simply do
+
+var messages = require('./messages')
+ 
+var buf = messages.Test.encode({
+  num: 42
+})
+The compilation functionality is also available as a JavaScript API for programmatic use:
+
+var protobuf = require('protocol-buffers')
+ 
+// protobuf.toJS() takes the same arguments as protobuf()
+var js = protobuf.toJS(fs.readFileSync('test.proto'))
+fs.writeFileSync('messages.js', js)
