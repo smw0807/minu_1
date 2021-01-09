@@ -5,28 +5,18 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "java",
-            "name": "CodeLens (Launch) - test1",
-            "request": "launch",
-            "mainClass": "test1"
+            "name": "Attach to Chrome",
+            "port": 9222,
+            "request": "attach",
+            "type": "pwa-chrome",
+            "webRoot": "${workspaceFolder}"
         },
         {
-            "type": "java",
-            "name": "CodeLens (Launch) - propertiesTest",
+            "name": "Launch Chrome",
             "request": "launch",
-            "mainClass": "propertiesTest"
-        },
-        {
-            "type": "java",
-            "name": "CodeLens (Launch) - fileTest",
-            "request": "launch",
-            "mainClass": "fileTest"
-        },
-        {
-            "type": "java",
-            "name": "CodeLens (Launch) - test",
-            "request": "launch",
-            "mainClass": "test"
+            "type": "pwa-chrome",
+            "url": "http://localhost:8080",
+            "webRoot": "${workspaceFolder}"
         }
     ]
 }
