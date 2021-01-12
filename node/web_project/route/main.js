@@ -60,7 +60,7 @@ module.exports = function (app, util) {
     });
 
     app.get('/logout', function (req, res) {
-        console.log('login!!');
+        console.log('logout!!');
         sess = req.session;
         if (sess.username) {
             req.session.destroy(function (err) {
