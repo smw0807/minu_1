@@ -37,24 +37,28 @@ async function getFieldsInfo(data) {
     console.log("Info....................................");
     console.log("index : " + index);
     console.log("properties : " + prop);
-    let run = addFields(index, prop);
+    let run = await addFields(index, prop);
 };
 
-let addFields = async function (idx, info) {
-    await client.indices.putMapping({
-        index: idx,
-        type: 'doc',
-        body: {
-            properties: info
-        }
-    }, function(err, resp, status) {
-        if (err) {
-            console.log("err!!!");
-            console.log(err);
-            console.log("End---------------------");
-        } else {
-            console.log(resp);
-            console.log("End---------------------");
-        }
+let addFields = function (idx, info) {
+    return new Promise(function (resolve, reject) {
+        client.indices.putMapping({
+            index: idx,
+            type: 'doc',
+            body: {
+                properties: info
+            }
+        }, function(err, resp, status) {
+            if (err) {
+                console.log("err!!!");
+                console.log(err);
+                console.log("End---------------------");
+                reject(err)
+            } else {
+                console.log(resp);
+                console.log("End---------------------");
+                resolve(resp);
+            }
+        });
     });
 };
