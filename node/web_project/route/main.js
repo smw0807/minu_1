@@ -2,6 +2,34 @@ const { get } = require("request");
 const fs = require('fs');
 const yaml = require('js-yaml');
 const user = require("./util/user.js");
+/**
+ * db 모드 json 모드
+ */
+let conf = function () {
+   let result = {};
+   try {
+       let readConf = fs.readFileSync(__dirname + '/../conf/conf.yaml', 'utf-8');
+       let loadYaml = yaml.safeLoad(readConf);
+       result["is_db"] = loadYaml.db.is_db;
+       result["db_type"] = loadYaml.db.db_type;
+   } catch (err) {
+       console.log("======== Read Mode File Error!! ======");
+       console.log(err);
+   }
+   return result;
+}
+const is_db = conf().is_db;
+const db_type = conf().db_type;
+/**
+ * `${~~}` 형식으로 모드에 맞춰 url 요청 주소를 다르게 주려고했는데 마땅한 아이디어가 떠오르지가 않네
+ */
+let gAction = {
+    login: '/login/:userid/:userpw', //로그인
+    logout: '/logout' //로그아웃
+};
+let sAction = {
+    joinUser: '/joinUser' //회원가입
+}
 
 module.exports = function (app, util) {
     const pageType = 'main';
@@ -16,14 +44,12 @@ module.exports = function (app, util) {
         })
     });
 
-    app.get('/login/:userid/:userpw', function (req, res) {
+    app.get(gAction.login, function (req, res) {
         var sess;
         sess = req.session;
         var result = {};
         var date = util.dateFormat('yyyy-MM-dd HH:mm:ss');
-        var readConf = fs.readFileSync(__dirname + '/../conf/conf.yaml', 'utf-8');
-        var conf = yaml.safeLoad(readConf);
-        if (conf.db.is_db == 'N') {
+        if (is_db == 'N') {
             fs.readFile(__dirname + '/../conf/user.json', 'utf-8', function (err, data) {
                 console.log('======== 로그인 시도 ========S');
                 console.log(date);
@@ -59,7 +85,7 @@ module.exports = function (app, util) {
         }
     });
 
-    app.get('/logout', function (req, res) {
+    app.get(gAction.logout, function (req, res) {
         console.log('logout!!');
         sess = req.session;
         if (sess.username) {
@@ -75,7 +101,7 @@ module.exports = function (app, util) {
         }
     });
 
-    app.post('/joinUser', async function (req,res) {
+    app.post(sAction.joinUser, async function (req,res) {
         console.log("====== 회원 가입 ======= S");
         var body = req.body; //data 정보 가져오기
         console.log("입력된 정보 : " + JSON.stringify(body));
