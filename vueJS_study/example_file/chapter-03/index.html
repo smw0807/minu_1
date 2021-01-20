@@ -35,13 +35,14 @@
           <p class="price">
             {{product.price | formatPrice}}
           </p>
-          <button class="btn btn-primary btn-lg"
+          <button class="btn btn-primary btn-lg" v-on:click="addToCart" v-bind:disabled="!canAddToCart">장바구니 담기</button>
+          <!-- <button class="btn btn-primary btn-lg"
             v-on:click="addToCart"
             v-if="canAddToCart">장바구니 담기
           </button>
           <button disabled="true" class="btn btn-primary btn-lg"
             v-else>장바구니 담기
-          </button>
+          </button> -->
         </div>
       </div>
       <div v-else>
