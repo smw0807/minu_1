@@ -205,7 +205,7 @@
         alert('제출 완료');
       },
       checkRating(n, myProduct) {
-        return myProduct.rating - n >= 0;
+        return myProduct.rating  >= n;
       },
       canAddToCart(aProduct) {
         return aProduct.availableInventory > this.cartCount(aProduct.id);
