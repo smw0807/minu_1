@@ -61,7 +61,7 @@ var app1 = new Vue({
 // Props....
 Vue.component('child', {
     //props 정의
-    props: ['message', 'name'],
+    props: ['message', 'name'], //받아야할 속성
     //data와 마찬가지로 prop은 템플릿 내부에서 사용할 수 있으며, vm.message로 사용할 수 있다.
     template: '<span> {{ message }} 내 이름은 {{ name }}야!</span>'
 })
