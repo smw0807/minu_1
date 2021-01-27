@@ -11,11 +11,14 @@
     <my-component></my-component>
   </div>
   <script>
-  const counter = {counter: 0};
+  // const counter = {counter: 0}; //! 3개가 모두 이거 1개를 같이 봄
   const MyComponent= {
     template:'<div><button v-on:click="counter +=1">{{counter}}</button></div>',
     data() {
-      return counter;
+      // return counter;
+      return {
+        counter: 0 //컴포넌트 각각에 들어가있어서 서로 다름
+      }
     }
   };
   new Vue({

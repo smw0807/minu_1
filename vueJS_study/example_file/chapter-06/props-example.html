@@ -8,6 +8,7 @@
   <div id="app">
     <my-component :num="myNumber" :str="passedString"
                   :even="myNumber" :obj="passedObject"></my-component>
+    <my-component></my-component>
   </div>
   <script>
   const MyComponent={
@@ -16,7 +17,9 @@
     props:{
       num: {
         type: Number,
-        required: true
+        // required: true, //꼭 필요
+        default: 10
+        
       },
       str: {
         type: String,
