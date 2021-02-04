@@ -2,8 +2,7 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import Form from '@/components/Form' //Form 컴포넌트를 불러온다.
 import Main from '@/components/Main' //Main 컴포넌트를 불러온다.
-import HelloWorld from '@/components/HelloWorld'
-
+import Product from '@/components/Product' // 매개변수를 사용해보자.
 Vue.use(Router)
 
 export default new Router({
@@ -24,6 +23,12 @@ export default new Router({
     {
       path: '*', //위에 선언된 이외의 경로가 들어오면 / 로 리다이렉트 처리를 시키는 듯함
       redirect: "/"
+    },
+    {
+      path: '/product/:id', //id라는 동적 경로 세그먼트를 표시
+      name: 'Id',
+      component: Product,
+      props: true
     }
   ]
 })
