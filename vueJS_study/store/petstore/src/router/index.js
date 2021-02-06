@@ -3,6 +3,7 @@ import Router from 'vue-router'
 import Form from '@/components/Form' //Form 컴포넌트를 불러온다.
 import Main from '@/components/Main' //Main 컴포넌트를 불러온다.
 import Product from '@/components/Product' // 매개변수를 사용해보자.
+import EditProduct from '@/components/EditProduct' //자식 경로를 써보자.
 Vue.use(Router)
 
 export default new Router({
@@ -28,7 +29,15 @@ export default new Router({
       path: '/product/:id', //id라는 동적 경로 세그먼트를 표시
       name: 'Id',
       component: Product,
-      props: true
+      props: true,
+      children: [ // id 경로에서만 보이는 새로운 자식 경로를 정의한다.
+        {
+          path: 'edit',
+          name: 'Edit',
+          component: EditProduct,
+          props: true
+        }
+      ]
     }
   ]
 })

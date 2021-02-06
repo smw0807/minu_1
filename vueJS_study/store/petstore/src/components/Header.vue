@@ -18,6 +18,15 @@
           tag="button" class="btn btn-default btn-lg" :to="{name: 'Form'}">
         <span class="glyphicon glyphicon-shopping-cart">{{cartItemCount}}</span> 체크아웃
       </router-link>
+      <!--
+        <router-link --- 체크아웃 페이지로 이동시킬 rounter-link 요소
+          active-class="active" --- 활성화된 클래스 속성은 active 클래를 추가할 것이다.
+          tag="button"  --- router-link를 <h1>태그로 변환한다.
+          class="btn btn-default btn-lg" 
+          :to="{name: 'Form'}"> --- Form 경로로 이동한다.
+          <span class="glyphicon glyphicon-shopping-cart">{{cartItemCount}}</span> 체크아웃
+        </router-link>
+        -->
     </div>
   </div>
 </header>
@@ -33,9 +42,9 @@ export default {
   },
   props: ['cartItemCount'],
   methods: {
-    showCheckout() {
-      this.$router.push({name: 'Form'}); //Vue.js 앱을 Form 경로로 이동하게 해줌
-    }
+    // showCheckout() {
+    //   this.$router.push({name: 'Form'}); //Vue.js 앱을 Form 경로로 이동하게 해줌
+    // }
   }
 }
 </script>
