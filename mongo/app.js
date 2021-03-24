@@ -20,7 +20,7 @@ mongoose.connect(url, { useCreateIndex: true })
   .then(() => {
     console.log('Successfully connected to mongodb')
     app.use('/api/test', require('./routes/api/test'));
-    // let data = require('./data/test');
+    const data = require('./data/test');
   })
   .catch(e => console.error(e));
   

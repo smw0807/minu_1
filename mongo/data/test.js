@@ -1,4 +1,12 @@
 const data = require('../model/testDataSet');
+var datef = require('dateformat');
+var rd = require("../randomUt");
+
+const sleep = function (ms) {
+  return new Promise(resolve => {
+    setTimeout(resolve, ms);
+  })
+};
 
 var struct = {
 	"sendDateTime": "2019-05-01T09:10:16.424+0900",
@@ -18,23 +26,59 @@ var struct = {
 	"detectionCount": 1
 }
 
-const sleep = function (ms) {
-  return new Promise(resolve => {
-    setTimeout(resolve, ms);
-  })
-};
-
 let run = async () => {
   console.log('mongoDB run!!!');
+  //------ 랜덤 데이터 지정 --------- S
+  var col_list = new Array();
+	col_list.push("institutionCode,institutionName,equipCode,equipIp");
+
+  let keyval_list = new Array();
+	keyval_list.push("A000002723,충남대학교,A000002723-N-00001,10.0.10.28");
+	// keyval_list.push("A000003754,농협대학교,A000003754-N-00001,10.0.10.28");
+	keyval_list.push("Z000000001,교육부사이버안전센터,Z000002019-N-00004,10.0.10.18");
+	// keyval_list.push("A000004974,신경대학교,A000004974-N-00001,10.0.10.18");
+	// keyval_list.push("Z000000001,교육부사이버안전센터,A000000001-N-00001,10.0.10.18");
+	// keyval_list.push("R100003088,울진초등학교,A000003754-N-00001,10.0.10.18");
+	// keyval_list.push("R100005370,안동초등학교,A000003754-N-00001,10.0.10.18");
+
+
+  let proto_list = new Array();
+	proto_list.push(6);
+	proto_list.push(8);
+	// proto_list.push(18);
+	// proto_list.push(22);
+
+  var detecName_list = new Array();
+	detecName_list.push(Buffer.from("Hack-CnC-29-01-Linux(bash_history).1712021828ECSC#").toString('base64'));
+	// detecName_list.push(Buffer.from("Mail-Hack-29-01-Linux(bash_history).1712021828ECSC#").toString('base64'));
+	detecName_list.push(Buffer.from("Malwr-Ransom-29-01-Linux(bash_history).1712021828ECSC#").toString('base64'));
+
+  var payload_list = new Array();
+	payload_list.push(Buffer.from(Buffer.from("테스트1").toString('hex')).toString('base64'));
+	payload_list.push(Buffer.from(Buffer.from("테스트2").toString('hex')).toString('base64'));
+
+  //------ 랜덤 데이터 지정 --------- E
+
   let cnt = 0;
   console.time('runTotal');
-  while(cnt < 30000) {
+  while(cnt < 1000000) {
     console.time('run');
     let bulk = [];
     for (var i = 0; i < 5000; i++) {
       let dt = new data();
       dt.$set(struct);
-      dt.detectionCount = i;
+      rd.listColArray(col_list,keyval_list, struct); 
+      dt.sendDateTime = datef(new Date(), "yyyy-mm-dd'T'hh:MM:ss.l+0900");
+		  dt.detectionDateTime = datef(new Date(), "yyyy-mm-dd'T'hh:MM:ss.l+0900");
+      dt.packetSize = rd.intRange(1, 5);
+      dt.attackIp = rd.ipRange('192.168.11.1', '192.168.11.5');
+      dt.victimIp = rd.ipRange('192.168.1.1', '192.168.1.5');
+      dt.attackPort = rd.intRange(1010, 1019);
+      dt.victimPort = rd.intRange(2020, 2029);
+      dt.protocol = rd.list(proto_list);
+      dt.payload = rd.list(payload_list);
+      dt.detectionRuleName = rd.list(detecName_list);
+      dt.detectionCount = rd.intRange(1, 5);
       bulk.push(dt);
     }
     data.bulkInsert(bulk, function (err, rs) {
