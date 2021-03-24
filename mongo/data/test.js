@@ -27,12 +27,14 @@ const sleep = function (ms) {
 let run = async () => {
   console.log('mongoDB run!!!');
   let cnt = 0;
+  console.time('runTotal');
   while(cnt < 30000) {
     console.time('run');
     let bulk = [];
     for (var i = 0; i < 5000; i++) {
       let dt = new data();
       dt.$set(struct);
+      dt.detectionCount = i;
       bulk.push(dt);
     }
     data.bulkInsert(bulk, function (err, rs) {
@@ -45,5 +47,6 @@ let run = async () => {
     });
     await sleep(5000);
   }
+  console.timeEnd('runTotal');
 }
 run();
