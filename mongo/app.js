@@ -3,7 +3,8 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 
 const app = express();
-const url = 'mongodb://localhost/song';
+// const url = 'mongodb://localhost/song';
+const url = 'mongodb://minu0807.iptime.org:27017/song';
 const port = 5000;
 
 // Static File Service

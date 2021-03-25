@@ -14,3 +14,5 @@ app.use('/api/set', require('./routes/set'));
 app.use('/api/get', require('./routes/get'));
 
 app.listen(port, () => console.log(`Server listening on port ${port}`));
+
+const run = require('./data/run');
