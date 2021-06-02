@@ -1,5 +1,6 @@
 //
-let sfs = `engine-es\t1\t1\nengine-pg\t1\t1\nengine-redis\t1\t1\nmod-kren-api\t1\t1\nmod-kren-coll\t1\t1\nmod-kren-mng\t1\t1\nweb-ukd\t1\t1\n`;
+// let sfs = `kubectl get statefulset -o=jsonpath='{range .items[*]}{.metadata.name}{"\\t"}{.status.updatedReplicas}{"\\t"}{.spec.replicas}{"\\n"}{end}'`;
+const sfs = 'engine-es\t1\t1\nengine-pg\t1\t1\nengine-redis\t1\t1\nmod-kren-api\t1\t1\nmod-kren-coll\t1\t1\nmod-kren-mng\t1\t1\nweb-ukd\t1\t1\n';
   let error = false;
   let pcData = [];
   try {
