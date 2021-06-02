@@ -26,6 +26,7 @@ var longToIp = function(ip) {
 
 var listColArray = function(col, list, msg) {
   let col_code = col[0].split(",");  
+  console.log('test : ', col_code);
   let r = intRange(0, list.length - 1);
   
   
@@ -36,17 +37,17 @@ var listColArray = function(col, list, msg) {
     console.info("@@@@@@@@@@@@@@@@@@@");
   }
 
-  //console.info(r);
-try{
-  let value = list[r].split(",");
-  for(var i=0;i<value.length;i++){
-    msg[col_code[i]] = value[i];  
+  // console.info(r);
+  try{
+    let value = list[r].split(",");
+    for(var i=0;i<value.length;i++){
+      msg[col_code[i]] = value[i];  
+    }
+  }catch(e) {
+    console.info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@22###############3");
+    console.info(r);
+    process.exit();
   }
-}catch(e) {
-  console.info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@22###############3");
-  console.info(r);
-  process.exit();
-}
   
 }
 
