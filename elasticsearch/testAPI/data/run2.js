@@ -23,20 +23,27 @@ const run = async () => {
   var col_list = new Array();
 	col_list.push("name,age");
 
-  let keyval_list = new Array();
-	keyval_list.push("송민우,30");
-	keyval_list.push("송민우1,31");
-  keyval_list.push("송민우2,32");
-  keyval_list.push("송민우3,33");
-  keyval_list.push("송민우4,34");
-  keyval_list.push("송민우5,35");
-  keyval_list.push("민우,30");
-  keyval_list.push("민우1,31");
-  keyval_list.push("민우2,32");
-  keyval_list.push("민우3,33");
-  keyval_list.push("민우4,34");
-  keyval_list.push("민우5,35");
+  let name = new Array();
+  name.push("송민우");
+	name.push("송민우1");
+  name.push("송민우2");
+  name.push("송민우3");
+  name.push("송민우4");
+  name.push("송민우5");
+  name.push("민우");
+  name.push("민우1");
+  name.push("민우2");
+  name.push("민우3");
+  name.push("민우4");
+  name.push("민우5");
 
+  let age = new Array();
+  age.push('27');
+  age.push('28');
+  age.push('29');
+  age.push('30');
+  age.push('31');
+  age.push('32');
 
   let is_use = new Array();
 	is_use.push(true);
@@ -54,7 +61,8 @@ const run = async () => {
       let index = '{"index":{"_index":"idx_test1"}}';
       bulk.push(index);
       let msg = JSON.parse(JSON.stringify(struct));
-      rd.listColArray(keyval_list, struct); 
+      msg.name = rd.list(name);
+      msg.age = rd.list(age);
       msg.test_mk_dt = datef(new Date(), "yyyy-mm-dd hh:MM:ss");
       msg.test_ip = rd.ipRange('192.168.11.1', '192.168.11.5');
       msg.test_port = rd.intRange(8080, 9000);

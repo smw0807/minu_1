@@ -26,7 +26,10 @@ var longToIp = function(ip) {
 
 var listColArray = function(col, list, msg) {
   let col_code = col[0].split(",");  
-  console.log('test : ', col_code);
+  console.log('test1 : ', col_code);
+  console.log('test2 : ', col);
+  console.log('test3 : ', list);
+  console.log('test4 : ', msg);
   let r = intRange(0, list.length - 1);
   
   
