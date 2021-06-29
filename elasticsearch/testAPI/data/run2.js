@@ -54,10 +54,10 @@ const run = async () => {
   //------ 랜덤 데이터 지정 --------- E
   let cnt = 0;
   console.time('runTotal');
-  while(cnt < 1000000) {
+  while(cnt < 15000) {
     console.time('run');
     let bulk = [];
-    for (var i = 0; i < 5000; i++) {
+    for (var i = 0; i < 100; i++) {
       let index = '{"index":{"_index":"idx_test1"}}';
       bulk.push(index);
       let msg = JSON.parse(JSON.stringify(struct));
@@ -79,7 +79,7 @@ const run = async () => {
       console.log('cnt: ' + cnt);
       console.timeEnd('run');
     })
-    await sleep(2000);
+    await sleep(3000);
   }
   console.timeEnd('runTotal');
 };
