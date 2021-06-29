@@ -20,5 +20,10 @@
     "url": "https://github.com/smw0807/minu_1/issues"
   },
   "homepage": "https://github.com/smw0807/minu_1#readme",
-  "dependencies": {}
+  "dependencies": {
+    "elasticsearch": "^16.7.2",
+    "express": "^4.17.1",
+    "express-ejs-layouts": "^2.5.1",
+    "mongoose": "^5.13.0"
+  }
 }
