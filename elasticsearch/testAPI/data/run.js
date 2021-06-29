@@ -60,7 +60,7 @@ const run = async () => {
   //------ 랜덤 데이터 지정 --------- E
   let cnt = 0;
   console.time('runTotal');
-  while(cnt < 1000000) {
+  while(cnt < 10000) {
     console.time('run');
     let bulk = [];
     for (var i = 0; i < 5000; i++) {
