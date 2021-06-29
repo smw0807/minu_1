@@ -1,0 +1,24 @@
+{
+  "name": "minu_1",
+  "version": "1.0.0",
+  "description": "node test and study project",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/smw0807/minu_1.git"
+  },
+  "author": "smw0807",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/smw0807/minu_1/issues"
+  },
+  "homepage": "https://github.com/smw0807/minu_1#readme",
+  "dependencies": {}
+}
