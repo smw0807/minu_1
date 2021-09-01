@@ -417,16 +417,39 @@ function flatmap(data) {
 
 let data = flatmap(tmp);
 
+//트리구조 만들기
 let level = '0';
-let arr = [];
-let a = data.reduce( (acc, cur, idx, el) => {
+let a = data.reduce( (acc, cur) => {
   if (level === cur.grp_level) { 
     level = cur.grp_level;
-    acc.push(cur);
+    if (cur.pcode === 'MAIN') {
+      acc.push(cur);
+    } else {
+      const pcode = cur.pcode;
+      for (var i in acc) {
+        if (acc[i].code === pcode) {
+          if (acc[i].children === undefined) {
+            acc[i].children = [];
+          }
+          acc[i].children.push(cur);
+        }
+      }
+    }
   } else {
-    
+    level = cur.grp_level;
+    const pcode = cur.pcode;
+    for (var i in acc) {
+      console.log(acc[i]);
+      if (acc[i].code === pcode) {
+        if (acc[i].children === undefined) {
+          acc[i].children = [];
+        }
+        acc[i].children.push(cur);
+      }
+    }
   }
-  
   return acc;
 }, []);
-// console.log(JSON.stringify(a));
+for (var i in a) {
+  console.log(JSON.stringify(a[i]));
+}
