@@ -20,5 +20,10 @@ app.post('/api/test', (req, res) => {
   console.log('/api/test....');
   res.send('API Success!!');
 })
+//test nuxt에서 serverMiddleware 값이 있어도 탈 수 있는지 확인용
+app.post('/express/test', (req, res) => {
+  console.log('/express/test....');
+  res.send('API Success!!');
+})
 
 app.use('/api/v1/code', require('./routes/code'));
