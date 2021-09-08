@@ -1,4 +1,4 @@
-function flatmap (data) {
+exports.flatmap = function (data) {
   let rt = data.hits.hits.flatMap( (doc) => {
     let d = {};
     d._index = doc._index;
@@ -14,7 +14,7 @@ function flatmap (data) {
   return rt;
 }
 
-function singleFlatMap (data) {
+exports.singleFlatMap = function (data) {
   let rt = data.hits.hits.flatMap( (doc) => {
     let d= {};
     d._index = doc._index;
@@ -29,7 +29,3 @@ function singleFlatMap (data) {
   return rt;
 }
 
-export default {
-  flatmap,
-  singleFlatMap
-}

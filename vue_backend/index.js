@@ -5,6 +5,8 @@ const path = require('path');
 var util = require('./utils/utils');
 const app = express();
 
+require('dotenv').config();
+
 const server = app.listen(8080, function() {
   console.log ("Server Start... [" + util.dateFormat('yyyy-MM-dd HH:mm:ss E') + ']');
 });
@@ -19,4 +21,4 @@ app.post('/api/test', (req, res) => {
   res.send('API Success!!');
 })
 
-// app.use('/api/v1/code', require('./routes/code'));
+app.use('/api/v1/code', require('./routes/code'));

@@ -1,9 +1,8 @@
 const express = require('express');
-const aRoot = require('app-root-path');
 
 const router = express.Router();
-const es_client = require(aRoot + '/elastic');
-// const { flatmap } = require(aRoot + '/utils/elastic').default;
+const es_client = require('../elastic.js');
+const es_utils = require('../utils/elastic.js');
 
 const index_name = 'ni_setting';
 
@@ -47,13 +46,14 @@ router.post('/tree_list', async (req, res) => {
     // console.dir(rs, {depth: 5});
     rt.error = false;
     rt.msg = 'ok';
-    rt.result = flatmap(rs);
+    rt.result = es_utils.flatmap(rs);
   } catch (err) {
     console.log('tree_list err : ', err);
     rt.error = true;
     rt.msg = 'err';
     rt.result = err.message;
   }
+  console.info('API Result : ', !rt.error);
   res.send(rt);
 });
 
