@@ -7,10 +7,9 @@ const app = express();
 
 require('dotenv').config();
 
-const server = app.listen(8080, function() {
+const server = app.listen(process.env.prot, function() {
   console.log ("Server Start... [" + util.dateFormat('yyyy-MM-dd HH:mm:ss E') + ']');
 });
-
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 app.use(bodyParser.json());
