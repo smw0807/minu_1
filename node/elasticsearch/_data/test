@@ -1,0 +1,2 @@
+{"index": {"_index": "idx_test1", "_type": "_doc"}}
+{"test_mk_dt": "2021-06-04 08:47:07","name": "민우1","age": "31","test_ip": "192.168.11.4","test_port": 8804,"is_use": false}
