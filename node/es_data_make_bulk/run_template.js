@@ -6,14 +6,17 @@ async function asyncForEach (array, callback) {
     await callback(array[index], index, array);
   }
 };
+  
 
 async function run() {
   try {
-    const list = fs.readdirSync('./_bulk/');
+    const list = fs.readdirSync('./_template/');
+    console.log(list);
     asyncForEach(list, async (name) => {
-      console.log(name);
-      let data = fs.readFileSync('./_bulk/' + name, 'utf8');
-      let bulk = await es_client.bulk({
+      let data = fs.readFileSync('./_template/' + name, 'utf8');
+      const save_name = name.split('.')[0];
+      let bulk = await es_client.indices.putTemplate({
+        name: save_name,
         body: data
       })
       console.log(bulk);
