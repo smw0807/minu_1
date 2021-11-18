@@ -19,7 +19,7 @@ async function run() {
         name: save_name,
         body: data
       })
-      console.log(bulk);
+      console.log(name, bulk);
     })
   } catch (err) {
     console.error(err);
