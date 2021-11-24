@@ -1,0 +1,7 @@
+{
+  "properties": {
+    "add_test":{
+      "type":"keyword"
+    }
+  }
+}
