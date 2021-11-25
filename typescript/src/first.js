@@ -1,4 +1,4 @@
-// myFirstTypescript.ts
+// first.ts
 var str = "happy CODEing";
 var Coffee = /** @class */ (function () {
     function Coffee(name, temperature) {

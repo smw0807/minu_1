@@ -1,4 +1,4 @@
-// myFirstTypescript.ts
+// first.ts
 const str: string = "happy CODEing";
 
 class Coffee {
