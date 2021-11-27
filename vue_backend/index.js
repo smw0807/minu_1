@@ -36,3 +36,4 @@ app.post('/api2/test', (req, res) => {
 })
 
 app.use('/api/v1/code', require('./routes/code'));
+app.use('/api/v1/els', require('./routes/els_info'));
