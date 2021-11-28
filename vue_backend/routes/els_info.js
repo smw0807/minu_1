@@ -4,9 +4,31 @@ const router = express.Router();
 const es_client = require('../elastic.js');
 
 const idx_arr = [
-  'idx_data',
-  'idx_file'
+  'idx',
+  'ni'
+  // 'idx_test1',
+  // 'idx_file',
+  // 'ni_setting'
 ]
+
+/**
+ * 엘라스틱서치 핑 테스트
+ */
+router.post('/es_ping', async (req, res) => {
+  // console.log('/ElasticSearch Connection Check!');
+  let rt = {};
+  try {
+    const rs =  await es_client.ping({requestTimeout : 1000});
+    rt.error = false;
+    rt.result = rs;
+  } catch (err) {
+    console.error('es_test err : ', err);
+    rt.error = true;
+    rt.result = err;
+    // throw new Error(err); //프로세스 멈춰 버림
+  }
+  res.send(rt);
+})
 
 /**
  * 엘라스틱서치 노드 디스크 용량
@@ -50,15 +72,14 @@ router.post('/els_idx_infos', async (req,res) => {
     let idx_infos = [];
     for (let item of idx_arr) {
       const rs = await es_client.indices.stats({
-        index : item + '-*',
+        index : item + '*',
       })
+      console.log(rs);
       let info = {
         index_type : item,
         doc_count : rs._all.total.docs.count,
         size : rs._all.total.store.size_in_bytes,
-        indices: [
-  
-        ]
+        indices: []
       }
       const arr = Object.keys(rs.indices);
       for (let v of arr) {
