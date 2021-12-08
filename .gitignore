@@ -1,3 +1,3 @@
 node_modules
-node/es_data_make_bulk/_bulk/*
-node/es_data_make_bulk/_template/*
+node/es_functions/_bulk/*
+node/es_functions/_template/*

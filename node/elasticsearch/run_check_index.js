@@ -52,6 +52,18 @@ async function run(idx_name, sdt, edt, format) {
       if (edt.indexOf('-') !== -1) {
         edt = edt.replace(/-/g, '');
       }
+      if (format === 'YYYYMM' && sdt.length > 6) {
+        sdt = sdt.substr(0, 6);
+      }
+      if (format === 'YYYYMM' && edt.length > 6) {
+        edt = edt.substr(0, 6);
+      }
+      if (format === 'YYYY' && sdt.length > 4) {
+        sdt = sdt.substr(0, 4);
+      }
+      if (format === 'YYYY' && edt.length > 4) {
+        edt = edt.substr(0, 4);
+      }
       let start = moment(sdt);
       let end = moment(edt);
       let now = start.clone();
@@ -89,7 +101,7 @@ async function test_function() {
     // const chk = await run('ni_raw_flw-20211120');
     // const chk = await run('ni_raw_flw-', '2021-11-20', '2021-11-25', 'YYYYMMDD');
     // const chk = await run('ni_stat_month-', '2020', '2021', 'YYYY');
-    const chk = await run('ni_stat_day-', '2021-11-20', '2021-11-20', 'YYYYMM');
+    const chk = await run('ni_stat_day-', '2021-11-20', '2021-12-02', 'YYYYMM');
     console.log(chk);
     if (!chk) {
       //elasticsearch event...
