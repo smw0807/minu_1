@@ -7,17 +7,28 @@ async function asyncForEach (array, callback) {
   }
 };
 
+// async function run() {
+//   try {
+//     const list = fs.readdirSync('./_bulk/');
+//     asyncForEach(list, async (name) => {
+//       console.log(name);
+//       let data = fs.readFileSync('./_bulk/' + name, 'utf8');
+//       let bulk = await es_client.bulk({
+//         body: data
+//       })
+//       console.log(bulk);
+//     })
+//   } catch (err) {
+//     console.error(err);
+//   }
+// }
 async function run() {
   try {
-    const list = fs.readdirSync('./_bulk/');
-    asyncForEach(list, async (name) => {
-      console.log(name);
-      let data = fs.readFileSync('./_bulk/' + name, 'utf8');
-      let bulk = await es_client.bulk({
-        body: data
-      })
-      console.log(bulk);
+    const data = fs.readFileSync('./_bulk/backupOrg', 'utf8');
+    let bulk = await es_client.bulk({
+      body: data
     })
+    console.log(bulk);
   } catch (err) {
     console.error(err);
   }
