@@ -1,3 +1,4 @@
+//https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/api-reference.html#_indices_gettemplate
 const es_client = require('./client');
 
 
