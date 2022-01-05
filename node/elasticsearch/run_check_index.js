@@ -28,9 +28,22 @@ function type (type) {
 async function run(idx_name, sdt, edt, format) {
   let rt = false;
   try {
-    console.log(idx_name, sdt, edt, format);
+    // console.log(idx_name, sdt, edt, format);
     if (sdt === undefined && edt === undefined) { //인덱스 1개 검색
-      const rs = await es_client.indices.exists({index: idx_name});
+      const rs = await es_client.indices.exists({
+        index: idx_name,
+        allowNoIndices: true,
+        ignoreUnavailable: true,
+        expandWildcards: 'all'
+      });
+      /**
+       * closed된 인덱스도 가져오는 문제가 있음
+       * open된 인덱스만 체크하고 싶은데 제공해주는 옵션중에 ignoreUnavailable 가 
+       * 내가 원하는 옵션인 것 같았지만,
+       * 안됨.
+       * 확인이 필요함
+       * https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/api-reference.html#_indices_exists
+       */
       if (rs) {
         return idx_name;
       }
@@ -70,7 +83,10 @@ async function run(idx_name, sdt, edt, format) {
       let result = [];
       while(now.isSameOrBefore(end)) {
         const index_name =  idx_name + now.format(format);
-        const rs = await es_client.indices.exists({index: index_name});
+        const rs = await es_client.indices.exists({
+          index: index_name,
+          ignore_unavailable: true,
+        });
         if (rs) {
           result.push(index_name);
         }
@@ -96,12 +112,12 @@ async function run(idx_name, sdt, edt, format) {
 
 async function test_function() {
   try {
-    // const chk = await run('ni_raw_threat-20211125');
+    const chk = await run('ni_raw_threat-20211208');
     // const chk = await run('ni_raw_flw-');
     // const chk = await run('ni_raw_flw-20211120');
     // const chk = await run('ni_raw_flw-', '2021-11-20', '2021-11-25', 'YYYYMMDD');
     // const chk = await run('ni_stat_month-', '2020', '2021', 'YYYY');
-    const chk = await run('ni_stat_day-', '2021-11-20', '2021-12-02', 'YYYYMM');
+    // const chk = await run('ni_stat_day-', '2021-11-20', '2021-12-02', 'YYYYMM');
     console.log(chk);
     if (!chk) {
       //elasticsearch event...
