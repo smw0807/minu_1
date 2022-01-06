@@ -16,6 +16,29 @@ function type (type) {
   }
   return rt;
 }
+//인덱스가 open인지 close인지 확인
+async function isCloseIndex(idx) {
+  try {
+    const rs = await es_client.cat.indices({
+      index: idx,
+      format: "JSON"
+    })
+    return rs[0].status === 'open' ? idx : false;
+  } catch (err) {
+    console.error('isCloseIndex', err);
+    return false;
+  }
+}
+//인덱스가 있는지 없는지 확인
+async function isExistsIndex(idx) {
+  try {
+    const rs = await es_client.indices.exists({index: idx});
+    return rs;
+  } catch (err) {
+    console.error('isExistsIndex', err);
+    return false;
+  }
+}
 /**
  * 년월일, 년월, 년 식의 인덱스 여러개를 조회하기 전 인덱스 유무를 체크해서
  * 존재하는 인덱스들로 반환시키기
@@ -30,22 +53,9 @@ async function run(idx_name, sdt, edt, format) {
   try {
     // console.log(idx_name, sdt, edt, format);
     if (sdt === undefined && edt === undefined) { //인덱스 1개 검색
-      const rs = await es_client.indices.exists({
-        index: idx_name,
-        allowNoIndices: true,
-        ignoreUnavailable: true,
-        expandWildcards: 'all'
-      });
-      /**
-       * closed된 인덱스도 가져오는 문제가 있음
-       * open된 인덱스만 체크하고 싶은데 제공해주는 옵션중에 ignoreUnavailable 가 
-       * 내가 원하는 옵션인 것 같았지만,
-       * 안됨.
-       * 확인이 필요함
-       * https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/api-reference.html#_indices_exists
-       */
+      const rs = await isExistsIndex(idx_name);
       if (rs) {
-        return idx_name;
+        return await isCloseIndex(idx_name);
       }
     } else if (sdt === edt) { //시작날짜, 종료날짜 값이 같은 경우
       if (sdt.indexOf('-') !== -1) {
@@ -54,9 +64,9 @@ async function run(idx_name, sdt, edt, format) {
       if (format !== undefined) { //같은데 날짜 포맷이 있을 경우
         sdt = sdt.substr(0, format.length);
       }
-      const rs = await es_client.indices.exists({index: idx_name + sdt});
+      const rs = await isExistsIndex(idx_name + sdt);
       if (rs) {
-        return idx_name + sdt;
+        return await isCloseIndex(idx_name + sdt);
       }
     } else if (sdt !== edt && sdt !== undefined && edt !== undefined && format !== undefined) { //범위일 때
       if (sdt.indexOf('-') !== -1) {
@@ -83,12 +93,10 @@ async function run(idx_name, sdt, edt, format) {
       let result = [];
       while(now.isSameOrBefore(end)) {
         const index_name =  idx_name + now.format(format);
-        const rs = await es_client.indices.exists({
-          index: index_name,
-          ignore_unavailable: true,
-        });
+        const rs = await isExistsIndex(index_name);
         if (rs) {
-          result.push(index_name);
+          const isClose = await isCloseIndex(index_name);
+          if (isClose) result.push(index_name);
         }
         now.add(1, type(format));
       }
@@ -112,13 +120,13 @@ async function run(idx_name, sdt, edt, format) {
 
 async function test_function() {
   try {
-    const chk = await run('ni_raw_threat-20211208');
+    // const chk = await run('ni_raw_threat-20211209');
     // const chk = await run('ni_raw_flw-');
     // const chk = await run('ni_raw_flw-20211120');
-    // const chk = await run('ni_raw_flw-', '2021-11-20', '2021-11-25', 'YYYYMMDD');
+    const chk = await run('ni_raw_flw-', '2022-01-01', '2022-01-25', 'YYYYMMDD');
     // const chk = await run('ni_stat_month-', '2020', '2021', 'YYYY');
     // const chk = await run('ni_stat_day-', '2021-11-20', '2021-12-02', 'YYYYMM');
-    console.log(chk);
+    console.log('result : ', chk);
     if (!chk) {
       //elasticsearch event...
       console.log('not exists index');
