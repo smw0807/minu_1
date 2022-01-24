@@ -1,3 +1,4 @@
 node_modules
 node/es_functions/_bulk/*
 node/es_functions/_template/*
+node/nct_test
