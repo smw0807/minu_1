@@ -14,6 +14,7 @@ const type = {
   11: "기타",
 }
 
+//bulk 데이터 elastic에 넣기
 async function run_bulk(bulk) {
   try {
     const rs = await es_client.bulk({
@@ -26,33 +27,38 @@ async function run_bulk(bulk) {
   }
 }
 
+//bulk 데이터 생성 함수
+function makeBulkData(cnt) {
+  let result = [];
+  for (var i = 0; i < cnt; i++) {
+    result.push({"index": {"_index": "ni_manage", "_type": "_doc"}})
+    let code = ut.intRange(1, 11);
+    var data = {
+      type: "assets",
+      "assets": {
+        "ip": {
+          "gte": "192.168.1.1",
+          "lte": ut.ipRange("192.168.1.1", "192.168.1.255")
+        },
+        "type_code":  code.toString(),
+        "type_nm": type[code],
+        "desc": '송민우 테스트',
+        "mk_dt": `2021-${ut.intRange(10, 12)}-${ut.intRange(10, 28)} ${ut.intRange(10, 12)}:${ut.intRange(10, 59)}:${ut.intRange(10, 59)}`,
+        "is_use": true
+      }
+    };
+    result.push(data);
+  }
+  return result;
+}
+
 async function run (cnt) {
   try {
-    let bulk = [];
-    for (var i = 0; i < cnt; i++) {
-      bulk.push({"index": {"_index": "ni_manage", "_type": "_doc"}})
-      let code = ut.intRange(1, 11);
-      var data = {
-        type: "assets",
-        "assets": {
-          "ip": {
-            "gte": "192.168.1.1",
-            "lte": ut.ipRange("192.168.1.1", "192.168.1.255")
-          },
-          "type_code":  code.toString(),
-          "type_nm": type[code],
-          "desc": '송민우 테스트',
-          "mk_dt": `2021-${ut.intRange(10, 12)}-${ut.intRange(10, 28)} ${ut.intRange(10, 12)}:${ut.intRange(10, 59)}:${ut.intRange(10, 59)}`,
-          "is_use": true
-        }
-      };
-      bulk.push(data);
-    }
-    // console.log(bulk);
+    const bulkData = makeBulkData(cnt);
+    if (bulkData.length === 0) return
     await run_bulk(bulk);
   } catch (err) {
     console.error(err);
   }
 }
-
 run(500);
