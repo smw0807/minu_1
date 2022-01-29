@@ -75,6 +75,12 @@ async function run(idx_name, sdt, edt, format) {
       if (edt.indexOf('-') !== -1) {
         edt = edt.replace(/-/g, '');
       }
+      if (format === 'YYYYMMDD' && sdt.length > 8) {
+        sdt = sdt.substr(0, 8);
+      }
+      if (format === 'YYYYMMDD' && edt.length > 8) {
+        edt = edt.substr(0, 8);
+      }
       if (format === 'YYYYMM' && sdt.length > 6) {
         sdt = sdt.substr(0, 6);
       }
@@ -117,13 +123,15 @@ async function run(idx_name, sdt, edt, format) {
   return rt;
 }
 
+module.exports = run;
 
 async function test_function() {
   try {
     // const chk = await run('ni_raw_threat-20211209');
     // const chk = await run('ni_raw_flw-');
     // const chk = await run('ni_raw_flw-20211120');
-    const chk = await run('ni_raw_flw-', '2022-01-01', '2022-01-25', 'YYYYMMDD');
+    // const chk = await run('ni_raw_flw-', '2022-01-01', '2022-01-25', 'YYYYMMDD');
+    const chk = await run('idx_file3', '2022', '2022', 'YYY');
     // const chk = await run('ni_stat_month-', '2020', '2021', 'YYYY');
     // const chk = await run('ni_stat_day-', '2021-11-20', '2021-12-02', 'YYYYMM');
     console.log('result : ', chk);
