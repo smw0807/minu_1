@@ -1,11 +1,10 @@
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
-const ACCESS_KEY = 'accesssssssssskeyyyyyyyyyy@@123';
-const REFRESH_KEY = 'refreshhhhhhkeeeyyyyyyyy@@123';
+const ACCESS_KEY = process.env.access_key;
+const REFRESH_KEY = process.env.refresh_key;
 
 function certifyAccessToken(token) {
-  //console.info("certifyAccessToken : ", token);
   return new Promise((resolve, reject) => {
     jwt.verify(token, ACCESS_KEY, (err, decoded) => {
       if (err) {
@@ -65,28 +64,34 @@ function encryptPassword(password) {
   return bcrypt.hashSync(password, 5);
 }
 
+//accessToken 만들기
 function generateAccessToken(information, time) {
-  const { uid, user_auth_code, user_auth_nm, user_nm } = information;
+  const { uid, user_nm } = information;
+  // const { uid, user_auth_code, user_auth_nm, user_nm } = information;
   if (!uid) {
     throw 'uid 정보가 누락되었습니다.';
-  } else if (!user_auth_code) {
-    throw `${uid}: user_auth_code 정보가 누락되었습니다.`;
-  } else if (!user_auth_nm) {
-    throw `${uid}: user_auth_nm 정보가 누락되었습니다.`;
   }
-  return jwt.sign({ uid, user_auth_code, user_auth_nm, user_nm }, ACCESS_KEY, { expiresIn: time });
+  //  else if (!user_auth_code) {
+  //   throw `${uid}: user_auth_code 정보가 누락되었습니다.`;
+  // } else if (!user_auth_nm) {
+  //   throw `${uid}: user_auth_nm 정보가 누락되었습니다.`;
+  // }
+  return jwt.sign({ uid, user_nm }, ACCESS_KEY, { expiresIn: time });
 }
 
+//refreshToken 만들기
 function generateRefreshToken(information, time) {
-  const { uid, user_auth_code, user_auth_nm, user_nm } = information;
+  // const { uid, user_auth_code, user_auth_nm, user_nm } = information;
+  const { uid, user_nm } = information;
   if (!uid) {
     throw 'uid 정보가 누락되었습니다.';
-  } else if (!user_auth_code) {
-    throw `${uid}: user_auth_code 정보가 누락되었습니다.`;
-  } else if (!user_auth_nm) {
-    throw `${uid}: user_auth_nm 정보가 누락되었습니다.`;
-  }
-  return jwt.sign({ uid, user_auth_code, user_auth_nm, user_nm }, REFRESH_KEY, { expiresIn: time });
+  } 
+  // else if (!user_auth_code) {
+  //   throw `${uid}: user_auth_code 정보가 누락되었습니다.`;
+  // } else if (!user_auth_nm) {
+  //   throw `${uid}: user_auth_nm 정보가 누락되었습니다.`;
+  // }
+  return jwt.sign({ uid,  user_nm }, REFRESH_KEY, { expiresIn: time });
 }
 
 function getUid(token) {

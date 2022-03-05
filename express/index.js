@@ -9,8 +9,8 @@ require('dotenv').config();
 
 const server = app.listen(process.env.port, function() {
   console.log ("Server Start... [" + util.dateFormat('yyyy-MM-dd HH:mm:ss E') + ']');
-  console.log('server info : ',process.env.ip, process.env.port);
 });
+
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 app.use(bodyParser.json());
@@ -41,3 +41,4 @@ app.post('/api2/test', (req, res) => {
 
 app.use('/api/v1/code', require('./routes/code'));
 app.use('/api/v1/els', require('./routes/els_info'));
+app.use('/api/auth', require('./routes/auth'));
