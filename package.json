@@ -38,6 +38,7 @@
     "mocha": "^9.2.0",
     "moment": "^2.29.1",
     "mongoose": "^5.13.0",
+    "mysql": "^2.18.1",
     "node-schedule": "^2.0.0",
     "request": "^2.88.2",
     "statman-stopwatch": "^2.13.0"

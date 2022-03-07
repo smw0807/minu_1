@@ -35,5 +35,5 @@ if (STORAGE === 'es') {
   app.use('/api/es/info', require('./routes/es/els_info'));
 }
 if (STORAGE === 'mysql') {
-  
+  global.mysql = require('./mysql');
 }
