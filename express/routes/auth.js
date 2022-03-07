@@ -3,7 +3,7 @@ const express = require('express');
 const router = express.Router();
 const es_client = require('../elastic');
 const es_utils = require('../utils/utils');
-// const token = require('../utils/authenticate');
+
 const { 
   generateAccessToken, 
   generateRefreshToken,
@@ -62,6 +62,7 @@ router.post('/login', async(req,res) => {
 
 //refreshToken 유효성 체크 후 토큰 새로 발급하기
 router.post('/refreshToken', async(req,res) => {
+  console.log('refreshToken....');
   let rt = {
     ok: false,
     msg: '',

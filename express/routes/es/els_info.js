@@ -1,7 +1,6 @@
 const express = require('express');
 
 const router = express.Router();
-const es_client = require('../elastic.js');
 
 const idx_arr = [
   'idx',
@@ -14,7 +13,7 @@ const idx_arr = [
 /**
  * 엘라스틱서치 핑 테스트
  */
-router.post('/es_ping', async (req, res) => {
+router.post('/ping', async (req, res) => {
   // console.log('/ElasticSearch Connection Check!');
   let rt = {};
   try {
