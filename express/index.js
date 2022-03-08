@@ -36,4 +36,5 @@ if (STORAGE === 'es') {
 }
 if (STORAGE === 'mysql') {
   global.mysql = require('./mysql');
+  app.use('/api/mysql/make', require('./routes/mysql/makeTable'));
 }
