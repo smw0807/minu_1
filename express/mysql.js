@@ -13,7 +13,7 @@ const {
   MYSQL_DB,
 } = process.env;
 
-const pool = mysql.createPool({
+module.exports = mysql.createPool({
   host: MYSQL_HOST,
   user: MYSQL_USER,
   password: MYSQL_PW,
@@ -21,5 +21,3 @@ const pool = mysql.createPool({
   connectTimeout: 5000,
   connectionLimit: 30 //default 10
 })
-
-module.exports = pool
