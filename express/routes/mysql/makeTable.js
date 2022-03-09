@@ -21,19 +21,20 @@ router.post('/user_table', async (req, res) => {
     mysql.getConnection((err, connection) => {
       if (err) {
         console.error('connection Error : ', err);
+      } else {
+        connection.query(sql, (err, rs, fields) => {
+          if (err) {
+            console.error('query Error : ', err);
+            rt.msg = 'query Error';
+            rt.result = err
+          } else {
+            console.log('result : ', rs);
+            rt.msg = 'success!!';
+            rt.result = rs;
+          }
+        })
+        connection.release();
       }
-      connection.query(sql, (err, rs, fields) => {
-        if (err) {
-          console.error('query Error : ', err);
-          rt.msg = 'query Error';
-          rt.result = err
-        } else {
-          console.log('result : ', rs);
-          rt.msg = 'success!!';
-          rt.result = rs;
-        }
-      })
-      connection.release();
     });
   } catch (err) {
     console.error("makeTable/user_table Error!!");
