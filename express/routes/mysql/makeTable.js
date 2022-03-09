@@ -21,16 +21,22 @@ router.post('/user_table', async (req, res) => {
     mysql.getConnection((err, connection) => {
       if (err) {
         console.error('connection Error : ', err);
+        rt.msg = 'connection Error';
+        rt.result = err;
+        res.send(rt);
       } else {
         connection.query(sql, (err, rs, fields) => {
           if (err) {
             console.error('query Error : ', err);
             rt.msg = 'query Error';
-            rt.result = err
+            rt.result = err;
+            res.send(rt);
           } else {
             console.log('result : ', rs);
+            rt.ok = true;
             rt.msg = 'success!!';
             rt.result = rs;
+            res.send(rt);
           }
         })
         connection.release();
@@ -39,8 +45,10 @@ router.post('/user_table', async (req, res) => {
   } catch (err) {
     console.error("makeTable/user_table Error!!");
     console.error(err);
+    rt.msg = 'user_table Error';
+    rt.result = err.message;
+    res.send(rt);
   }
-  res.send(rt);
 })
 
 module.exports = router;
