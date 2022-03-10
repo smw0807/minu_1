@@ -4,7 +4,8 @@
  * https://darrengwon.tistory.com/688
  * https://velog.io/@gwon713/Nodejs-MySQL-DB-connection-pool
  */
-const mysql = require('mysql');
+// const mysql = require('mysql');
+const mysql = require('mysql2/promise');
 
 const {
   MYSQL_HOST,
