@@ -12,14 +12,15 @@ router.post('/user_table', async (req, res) => {
   }
   let conn = null;
   try {
+    //is_use 1 = true, 0 = false
     const sql = `CREATE TABLE tb_user (
-      user_id varchar(255),
-      user_nm varchar(255),
-      user_pw varchar(255),
+      user_id varchar(255) NOT NULL PRIMARY KEY,
+      user_nm varchar(255) NOT NULL,
+      user_pw varchar(255) NOT NULL,
       user_addr varchar(255),
-      user_mk_dt datetime,
-      user_upd_dt datetime,
-      is_use tinyint(1)
+      user_mk_dt datetime DEFAULT NOW(),
+      user_upd_dt datetime DEFAULT NOW(),
+      is_use tinyint(1) DEFAULT 1
       )`;
 
     conn = await mysql.getConnection();
