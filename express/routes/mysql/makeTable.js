@@ -10,6 +10,7 @@ router.post('/user_table', async (req, res) => {
     msg: '',
     result: null
   }
+  let conn = null;
   try {
     const sql = `CREATE TABLE tb_user (
       user_id varchar(255),
@@ -21,7 +22,7 @@ router.post('/user_table', async (req, res) => {
       is_use tinyint(1)
       )`;
 
-    const conn = await mysql.getConnection();
+    conn = await mysql.getConnection();
     //myslq2/promise에서 결과를 배열로 반환하기 때문에 배열로 받아야한다.
     const [ result ] = await conn.query(sql);
 
@@ -35,7 +36,7 @@ router.post('/user_table', async (req, res) => {
     console.error(err);
     rt.msg = 'user_table Error';
     rt.result = err.message;
-    
+
     conn.release();
   }
   res.send(rt);
