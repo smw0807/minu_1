@@ -1,6 +1,7 @@
 const express = require('express');
 const aRoot = require('app-root-path');
 const router = express.Router();
+const es_client = require('../../elastic');
 const es_utils = require('../../utils/elastic.js');
 
 const index_name = 'ni_setting';

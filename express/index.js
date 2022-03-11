@@ -30,7 +30,6 @@ app.post('/api/test', (req, res) => {
 
 app.use('/api/auth', require('./routes/auth'));
 if (STORAGE === 'es') {
-  global.es_client = require('./elastic');
   app.use('/api/es/code', require('./routes/es/code'));
   app.use('/api/es/info', require('./routes/es/els_info'));
 }

@@ -2,6 +2,8 @@ const express = require('express');
 
 const router = express.Router();
 
+const es_client = require('../../elastic');
+
 const idx_arr = [
   'idx',
   'ni'
