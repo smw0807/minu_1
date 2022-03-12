@@ -26,18 +26,20 @@ router.post('/insert', async (req, res) => {
       1
       )`;
     conn = await mysql.getConnection();
-    const [ rows, fields ] = await conn.query(sql);
-    console.log(rows);
-    console.log(fields);
+    //트랜젝션 시작
+    await conn.beginTransaction();
+    const [ rows ] = await conn.query(sql);
     rt.ok = true;
     rt.msg = 'ok';
     rt.result = rows;
+    await conn.commit(); //commit
     conn.release();
   } catch (err) {
     console.error('userTable/user_insert Error!!');
     console.error(err);
     rt.msg = 'user_insert Error';
     rt.result = err.message;
+    await conn.rollback(); //rollback
     conn.release();
   }
   res.send(rt);
