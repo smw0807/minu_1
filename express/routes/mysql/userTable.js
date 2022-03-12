@@ -16,11 +16,14 @@ router.post('/insert', async (req, res) => {
     if (params.user_id === undefined || params.user_id === '') throw '아이디 없음';
     if (params.user_nm === undefined || params.user_nm === '') throw '이름 없음';
     if (params.user_pw === undefined || params.user_pw === '') throw '패스워드 없음';
-    const sql = `INSERT INTO tb_user (user_id, user_nm, user_pw, user_addr) VALUES (
-      ${params.user_id},
-      ${params.user_nm},
-      ${encryptPassword(params.user_pw)},
-      ${params.user_addr}
+    const sql = `INSERT INTO tb_user (user_id, user_nm, user_pw, user_addr, user_mk_dt, user_upd_dt, is_use) VALUES (
+      "${params.user_id}",
+      "${params.user_nm}",
+      "${encryptPassword(params.user_pw)}",
+      "${params.user_addr}",
+      NOW(),
+      NOW(),
+      1
       )`;
     conn = await mysql.getConnection();
     const [ rows, fields ] = await conn.query(sql);
