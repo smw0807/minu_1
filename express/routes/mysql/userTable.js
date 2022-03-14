@@ -35,8 +35,7 @@ router.post('/insert', async (req, res) => {
     await conn.commit(); //commit
     conn.release();
   } catch (err) {
-    console.error('userTable/user_insert Error!!');
-    console.error(err);
+    console.error('userTable/insert Error!!', err);
     rt.msg = 'user_insert Error';
     rt.result = err.message;
     await conn.rollback(); //rollback
@@ -90,9 +89,43 @@ router.post('/update', async (req, res) => {
       conn.release();
     }
   } catch (err) {
-    console.error('userTable/user_updae Error!!');
-    console.error(err);
+    console.error('userTable/updae Error!!', err);
     rt.msg = 'user_update Error';
+    rt.result = err.message;
+    if (conn !== null) {
+      await conn.rollback();
+      conn.release();
+    }
+  }
+  res.send(rt);
+})
+
+router.post('/delete', async (req, res) => {
+  let rt = {
+    ok: false,
+    msg: '',
+    result: null
+  }
+  const params = req.body;
+  let conn = null;
+  try {
+    if (params.user_id === undefined || params.user_id === null || params.user_id === '') {
+      throw { message : 'parameter user_id is null....'};
+    }
+    const sql = `DELETE FROM ${table} WHERE user_id="${params.user_id}"`;
+    conn = await mysql.getConnection();
+    await mysql.beginTransaction();
+    const [ result, fields ] = await conn.query(sql);
+    console.log(result);
+    console.log(fields);
+    await conn.commit();
+    conn.release();
+    rt.ok = true;
+    rt.msg = 'ok';
+    rt.result = result;
+  } catch (err) {
+    console.error('userTable/delete Error!!', err);
+    rt.msg = 'userTable/delete Error';
     rt.result = err.message;
     if (conn !== null) {
       await conn.rollback();
