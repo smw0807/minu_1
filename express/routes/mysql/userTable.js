@@ -114,10 +114,8 @@ router.post('/delete', async (req, res) => {
     }
     const sql = `DELETE FROM ${table} WHERE user_id="${params.user_id}"`;
     conn = await mysql.getConnection();
-    await mysql.beginTransaction();
-    const [ result, fields ] = await conn.query(sql);
-    console.log(result);
-    console.log(fields);
+    await conn.beginTransaction();
+    const [ result ] = await conn.query(sql);
     await conn.commit();
     conn.release();
     rt.ok = true;
