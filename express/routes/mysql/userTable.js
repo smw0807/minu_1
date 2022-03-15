@@ -13,9 +13,9 @@ router.post('/insert', async (req, res) => {
   const params = req.body;
   let conn = null;
   try {
-    if (params.user_id === undefined || params.user_id === '') throw '아이디 없음';
-    if (params.user_nm === undefined || params.user_nm === '') throw '이름 없음';
-    if (params.user_pw === undefined || params.user_pw === '') throw '패스워드 없음';
+    if (params.user_id === undefined || params.user_id === '') throw { message : '아이디 없음'};
+    if (params.user_nm === undefined || params.user_nm === '') throw { message : '이름 없음'};
+    if (params.user_pw === undefined || params.user_pw === '') throw { message : '패스워드 없음'};
     const sql = `INSERT INTO ${table} (user_id, user_nm, user_pw, user_addr, user_mk_dt, user_upd_dt, is_use) VALUES (
       "${params.user_id}",
       "${params.user_nm}",
@@ -38,8 +38,10 @@ router.post('/insert', async (req, res) => {
     console.error('userTable/insert Error!!', err);
     rt.msg = 'user_insert Error';
     rt.result = err.message;
-    await conn.rollback(); //rollback
-    conn.release();
+    if (conn !== null) {
+      await conn.rollback(); //rollback
+      conn.release();
+    }
   }
   res.send(rt);
 })
