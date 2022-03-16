@@ -4,6 +4,37 @@ const mysql = require('../../mysql');
 const { encryptPassword } = require('../../utils/authenticate');
 
 const table = 'tb_user';
+
+router.post('/row', async (req, res) => {
+  let rt = {
+    ok: false,
+    msg : '',
+    result : null
+  }
+  const params = req.body;
+  let conn = null;
+  try {
+    if (isNull(params.user_id)) throw { message : 'Parameter user_id is null...'};
+    const sql = `SELECT * FROM ${table} WHERE user_id="${params.user_id}"`;
+    conn = await mysql.getConnection();
+    await conn.beginTransaction();
+    const [ row  ] = await conn.query(sql);
+    rt.msg = 'ok';
+    rt.result = row[0];
+    await conn.commit();
+    conn.release();
+  } catch (err) {
+    console.error('userTable/row Error!!', err);
+    rt.msg = 'userTable row Error';
+    rt.result = err.message;
+    if (conn !== null) {
+      await conn.rollback();
+      conn.release();
+    }
+  }
+  res.send(rt);
+})
+
 router.post('/insert', async (req, res) => {
   let rt = {
     ok : false,
@@ -134,5 +165,13 @@ router.post('/delete', async (req, res) => {
   }
   res.send(rt);
 })
+
+function isNull (v) {
+  let result = false;
+  if (v === undefined || v === null || v === '') {
+    result = true;
+  }
+  return result;
+}
 
 module.exports = router;
