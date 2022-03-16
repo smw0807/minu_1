@@ -44,9 +44,9 @@ router.post('/insert', async (req, res) => {
   const params = req.body;
   let conn = null;
   try {
-    if (params.user_id === undefined || params.user_id === '') throw { message : '아이디 없음'};
-    if (params.user_nm === undefined || params.user_nm === '') throw { message : '이름 없음'};
-    if (params.user_pw === undefined || params.user_pw === '') throw { message : '패스워드 없음'};
+    if (isNull(params.user_id)) throw { message : '아이디 없음'};
+    if (isNull(params.user_nm)) throw { message : '이름 없음'};
+    if (isNull(params.user_pw)) throw { message : '패스워드 없음'};
     const sql = `INSERT INTO ${table} (user_id, user_nm, user_pw, user_addr, user_mk_dt, user_upd_dt, is_use) VALUES (
       "${params.user_id}",
       "${params.user_nm}",
@@ -142,9 +142,7 @@ router.post('/delete', async (req, res) => {
   const params = req.body;
   let conn = null;
   try {
-    if (params.user_id === undefined || params.user_id === null || params.user_id === '') {
-      throw { message : 'parameter user_id is null....'};
-    }
+    if (isNull(params.user_id)) throw { message : 'parameter user_id is null....'};
     const sql = `DELETE FROM ${table} WHERE user_id="${params.user_id}"`;
     conn = await mysql.getConnection();
     await conn.beginTransaction();
