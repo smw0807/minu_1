@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const mysql = require('../../mysql');
 const { encryptPassword } = require('../../utils/authenticate');
+const run = require('./runQuery');
 
 const table = 'tb_user';
 
@@ -12,25 +12,16 @@ router.post('/row', async (req, res) => {
     result : null
   }
   const params = req.body;
-  let conn = null;
   try {
     if (isNull(params.user_id)) throw { message : 'Parameter user_id is null...'};
     const sql = `SELECT * FROM ${table} WHERE user_id="${params.user_id}"`;
-    conn = await mysql.getConnection();
-    await conn.beginTransaction();
-    const [ row  ] = await conn.query(sql);
+    const rs = await run(sql);
     rt.msg = 'ok';
-    rt.result = row[0];
-    await conn.commit();
-    conn.release();
+    rt.result = rs[0];
   } catch (err) {
     console.error('userTable/row Error!!', err);
     rt.msg = 'userTable row Error';
     rt.result = err.message;
-    if (conn !== null) {
-      await conn.rollback();
-      conn.release();
-    }
   }
   res.send(rt);
 })
@@ -42,7 +33,6 @@ router.post('/insert', async (req, res) => {
     result : null
   }
   const params = req.body;
-  let conn = null;
   try {
     if (isNull(params.user_id)) throw { message : '아이디 없음'};
     if (isNull(params.user_nm)) throw { message : '이름 없음'};
@@ -56,23 +46,13 @@ router.post('/insert', async (req, res) => {
       NOW(),
       1
       )`;
-    conn = await mysql.getConnection();
-    //트랜젝션 시작
-    await conn.beginTransaction();
-    const [ rows ] = await conn.query(sql);
     rt.ok = true;
     rt.msg = 'ok';
-    rt.result = rows;
-    await conn.commit(); //commit
-    conn.release();
+    rt.result = await run(sql);
   } catch (err) {
     console.error('userTable/insert Error!!', err);
     rt.msg = 'user_insert Error';
     rt.result = err.message;
-    if (conn !== null) {
-      await conn.rollback(); //rollback
-      conn.release();
-    }
   }
   res.send(rt);
 })
@@ -90,8 +70,8 @@ router.post('/update', async (req, res) => {
     result: null
   }
   const params = req.body;
-  let conn = null;
   try {
+    if (isNull(params.user_id)) throw { message : '수정할 대상 정보가 없습니다.'}
     let sql = `UPDATE ${table} SET `;
     //---------------
     //배열을 toString() 처리하면 콤마 처리가 편리해서 이렇게 만들어 봤음
@@ -106,29 +86,18 @@ router.post('/update', async (req, res) => {
       tmp.push(`user_addr="${params.user_addr}"`);
     }
     //--------------
-    // console.log(tmp.toString());
     if (tmp.length == 0) {
       throw { message : '입력된 값이 없음'};
     } else {
       sql += `${tmp.toString()} WHERE user_id="${params.user_id}"`;
-      // console.log(sql);
-      conn = await mysql.getConnection();
-      await conn.beginTransaction();
-      const [ result ] = await conn.query(sql);
       rt.ok = true;
       rt.msg = 'ok';
-      rt.result = result;
-      await conn.commit();
-      conn.release();
+      rt.result = await run(sql);
     }
   } catch (err) {
     console.error('userTable/updae Error!!', err);
     rt.msg = 'user_update Error';
     rt.result = err.message;
-    if (conn !== null) {
-      await conn.rollback();
-      conn.release();
-    }
   }
   res.send(rt);
 })
@@ -140,26 +109,19 @@ router.post('/delete', async (req, res) => {
     result: null
   }
   const params = req.body;
-  let conn = null;
   try {
+    /**
+     * 삭제할 user_id가 있는지 체크하는 쿼리 필요
+     */
     if (isNull(params.user_id)) throw { message : 'parameter user_id is null....'};
     const sql = `DELETE FROM ${table} WHERE user_id="${params.user_id}"`;
-    conn = await mysql.getConnection();
-    await conn.beginTransaction();
-    const [ result ] = await conn.query(sql);
-    await conn.commit();
-    conn.release();
     rt.ok = true;
     rt.msg = 'ok';
-    rt.result = result;
+    rt.result = await run(sql);
   } catch (err) {
     console.error('userTable/delete Error!!', err);
     rt.msg = 'userTable/delete Error';
     rt.result = err.message;
-    if (conn !== null) {
-      await conn.rollback();
-      conn.release();
-    }
   }
   res.send(rt);
 })
