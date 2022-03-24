@@ -1,4 +1,12 @@
 const path = require('path');
+const webpack = require('webpack');
+
+const handler = (percentage, message, ...args) => {
+  // e.g. Output each progress message directly to the console:
+  console.info(percentage, message, ...args);
+};
+
+
 
 module.exports = {
   mode: 'none',
@@ -17,6 +25,9 @@ module.exports = {
         test: /\.css$/,
         use: ['css-loader']
       }
-    ]
-  }
+    ],
+  },
+  plugins: [
+    new webpack.ProgressPlugin(handler)
+  ]
 }
