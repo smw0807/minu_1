@@ -10,10 +10,22 @@ const station = {
   ]
 }
 
-function readingOutsideRange(station, min, max) {
+class NumberRange {
+  constructor(min, max) {
+    this._data = {
+      min: min,
+      max: max
+    }
+  }
+
+  get min() { return this._data.min; }
+  get max() { return this._data.max; }
+}
+
+function readingOutsideRange(station, min, max, range) {
   return station.readings.filter( r => r.temp < min || r.temp > max);
 }
 
-const run = readingOutsideRange(station, 45, 50);
+const run = readingOutsideRange(station, 45, 50, null);
 console.log(run);
 
