@@ -22,10 +22,14 @@ class NumberRange {
   get max() { return this._data.max; }
 }
 
-function readingOutsideRange(station, min, max, range) {
-  return station.readings.filter( r => r.temp < min || r.temp > max);
+function readingOutsideRange(station, range) {
+  return station.readings.filter( r => r.temp < range.min || r.temp > range.max);
 }
 
-const run = readingOutsideRange(station, 45, 50, null);
+const range = {
+  min: 45,
+  max: 50
+}
+const run = readingOutsideRange(station, range);
 console.log(run);
 
