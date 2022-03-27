@@ -26,10 +26,7 @@ function readingOutsideRange(station, range) {
   return station.readings.filter( r => r.temp < range.min || r.temp > range.max);
 }
 
-const range = {
-  min: 45,
-  max: 50
-}
+const range = new NumberRange(45, 50);
 const run = readingOutsideRange(station, range);
 console.log(run);
 
