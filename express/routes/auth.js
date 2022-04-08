@@ -28,14 +28,15 @@ router.post('/login', async(req,res) => {
       user_nm: ''
     }
     if (freepass) {
+      console.log('this is freepass id : ', uid);
       info.uid = uid;
       info.user_nm = '테스트';
       const token = makeToken(info);
       rt.ok = true;
       rt.msg = 'test user';
       rt.result = {
-        accessToken: token.accessToken(info),
-        refreshToken: token.refreshToken(info)
+        accessToken: token.accessToken,
+        refreshToken: token.refreshToken
       }
     } else {
       //====== user check logic ======S
@@ -46,8 +47,8 @@ router.post('/login', async(req,res) => {
       rt.ok = true;
       rt.msg = 'login success';
       rt.result = {
-        accessToken: token.accessToken(info),
-        refreshToken: token.refreshToken(info)
+        accessToken: token.accessToken,
+        refreshToken: token.refreshToken
       }
     }
   } catch (err) {
@@ -55,6 +56,31 @@ router.post('/login', async(req,res) => {
     console.error(err);
     rt.ok = false;
     rt.msg = 'error';
+    rt.result = err.message;
+  }
+  res.send(rt);
+})
+
+//accessToken 유효한지 체크하기
+router.post('/accessTokenCheck', async (req, res) => {
+  console.log('accessTokenCheck!');
+  let rt = {
+    ok: false,
+    msg: '',
+    result: null
+  }
+  try {
+    const rs = await certifyAccessToken(req.headers['access-token']);
+    rt.ok = true;
+    rt.msg = 'ok';
+    rt.result = true;
+  } catch (err) {
+    console.error('accessTokenCheck Error : ', err);
+    if(err.message.indexOf('jwt expired') !== -1) {
+      rt.msg = '토큰 만료';
+    } else {
+      rt.msg = 'accessTokenCheck fail...';
+    }
     rt.result = err.message;
   }
   res.send(rt);
