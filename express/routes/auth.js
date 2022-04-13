@@ -33,7 +33,7 @@ router.post('/login', async(req,res) => {
       info.user_nm = '테스트';
       const token = makeToken(info);
       rt.ok = true;
-      rt.msg = 'test user';
+      rt.msg = '테스트 유저로 로그인했습니다.';
       rt.result = {
         accessToken: token.accessToken,
         refreshToken: token.refreshToken
@@ -41,15 +41,15 @@ router.post('/login', async(req,res) => {
     } else {
       //====== user check logic ======S
       //====== user check logic ======E
-      info.uid = uid;
-      info.user_nm = '';
-      const token = makeToken(info);
-      rt.ok = true;
-      rt.msg = 'login success';
-      rt.result = {
-        accessToken: token.accessToken,
-        refreshToken: token.refreshToken
-      }
+      // info.uid = uid;
+      // info.user_nm = '';
+      // const token = makeToken(info);
+      // rt.ok = true;
+      // rt.msg = '로그인 성공';
+      // rt.result = {
+      //   accessToken: token.accessToken,
+      //   refreshToken: token.refreshToken
+      // }
     }
   } catch (err) {
     console.error('===== login Error =====');
