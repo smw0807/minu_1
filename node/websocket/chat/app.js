@@ -9,10 +9,9 @@ const dotenv = require('dotenv');
 dotenv.config();
 const webSocket = require('./socket');
 const indexRouter = require('./routes');
-
 const app = express();
 app.set('port', process.env.port || 8081);
-app.set('vie engine', 'html');
+app.set('view engine', 'html');
 nunjucks.configure('views', {
   express: app,
   watch: true
@@ -22,11 +21,11 @@ app.use(morgan('dev'));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false}));
-app.use(cookieParser(process.env.cookie_secret));
+app.use(cookieParser(process.env.cookie_secret || 'chat'));
 app.use(session({
   resave: false,
   saveUninitialized: false,
-  secret: process.env.cookie_secret,
+  secret: process.env.cookie_secret || 'chat',
   cookie: {
     httpOnly: true,
     secure: false
