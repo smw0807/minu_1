@@ -1,7 +1,13 @@
 const SocketIO = require('socket.io');
 
 module.exports = (server) => {
-  const io = SocketIO(server, {path: '/socket.io'});
+  const io = SocketIO(server, {
+    path: '/socket.io',
+    cors: {
+      origin: '*',
+      methods: ["GET", "POST"]
+    }
+  });
   io.on('connection',  (socket) => { //웹 소켓 연결 시
     const req = socket.request;
     console.log('socket request info : ', req);
@@ -20,12 +26,12 @@ module.exports = (server) => {
     });
     socket.on('express', (data) => {
       console.log('express 웹에서 받은 메세지 : ', data);
-    })
+    });
     socket.on('nuxt', (data) => {
       console.log('nuxt 웹에서 받은 메세지 : ', data);
-    })
+    });
     socket.interval = setInterval(() => { //3초마다 클라이언트로 메시지 전송
       socket.emit('news', 'Hello Socket.IO!!');
     }, 3000);
-  })
+  });
 }

@@ -10,7 +10,7 @@ dotenv.config();
 const webSocket = require('./socket');
 const indexRouter = require('./routes');
 const app = express();
-app.set('port', process.env.port || 8081);
+app.set('port', 8005);
 app.set('view engine', 'html');
 nunjucks.configure('views', {
   express: app,
