@@ -9,7 +9,8 @@
 <body>
   <script src="/socket.io/socket.io.js"></script>
   <script>
-    const socket = io.connect('http://localhost:8005', {
+    //주소뒤에 run1은 웹소켓 네임스페이스
+    const socket = io.connect('http://localhost:8005/run1', {
       path: '/socket.io',
       transports: ['websocket']
     });
