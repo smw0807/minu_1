@@ -29,7 +29,6 @@ function certifyRefreshToken(token) {
 }
 
 function authCheck(reqAuth = []) {
-  console.log('authCheck');
   return async function(req, res, next) {
     const token = req.headers['x-access-token'];
     try {
