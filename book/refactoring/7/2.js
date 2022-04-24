@@ -10,7 +10,8 @@ class CustomerData {
     this._data = data;
   }
   //읽기
-  getRawData() {
+  // RawData() { // RawData();
+  get RawData() { // RawData;
     return cloneDeep(this._data);
   }
   usage(customerID, year, month) {
@@ -24,6 +25,8 @@ class CustomerData {
 }
 
 const customer = new CustomerData(dataSet);
+const allData_1 = customer.RawData;
+console.dir(allData_1, { depth: 5});
 // console.log(customer);
 const getData = customer.usage('2022', '2019', '5');
 console.log(getData);
@@ -31,3 +34,6 @@ customer.setUsage('2022', '2019', '5', 10);
 const test = customer.usage('2022', '2019', '5');
 console.log(getData); //18
 console.log(test); //10
+console.log('-=========');
+const allData_2 = customer.RawData;
+console.dir(allData_2, { depth: 5});
