@@ -1,8 +1,8 @@
 const EventEmitter = require('events');
 
 const myEvent = new EventEmitter();
-myEvent.addListener('event1', () => {
-  console.log('event1!!');
+myEvent.addListener('event1', (a) => {
+  console.log('event1!!', a);
 })
 myEvent.on('event2', () => {
   console.log('event2');
@@ -14,7 +14,7 @@ myEvent.once('event3', () => {
   console.log('event3');
 }) //한 번만 실행됨
 
-myEvent.emit('event1');
+myEvent.emit('event1', 'aa');
 myEvent.emit('event1');
 myEvent.emit('event2'); //add event2까지 2개가 실행됨
 myEvent.emit('event2'); //add event2까지 2개가 실행됨
