@@ -33,22 +33,25 @@ function authCheck(reqAuth = []) {
     const token = req.headers['x-access-token'];
     try {
       //로그인 체크
-      let { user_auth_code } = await certifyAccessToken(token);
+      let rs = await certifyAccessToken(token);
+      console.log('토큰 이상 없음.', rs);
+      return next();
+      // let { user_auth_code } = await certifyAccessToken(token);
       //사용자 권한 체크
-      if (reqAuth.length > 0) {
-        //화이트리스트
-        if (reqAuth.includes(user_auth_code)) {
-          return next();
-        } else {
-          console.info(`user_auth_code:${user_auth_code} doesn't have permission to this request.`);
-          res.status(403).json({ msg: '권한이 없습니다.' });
-        }
-      } else {
-        return next();
-      }
+      // if (reqAuth.length > 0) {
+      //   //화이트리스트
+      //   if (reqAuth.includes(user_auth_code)) {
+      //     return next();
+      //   } else {
+      //     console.info(`user_auth_code:${user_auth_code} doesn't have permission to this request.`);
+      //     res.status(403).json({ msg: '권한이 없습니다.' });
+      //   }
+      // } else {
+      //   return next();
+      // }
     } catch (err) {
       console.info('authCheck.err : ', err);
-      res.status(401).json({ msg: '로그인이 필요합니다.' });
+      res.status(401).json({ msg: 'accessToken 이상' });
     }
   };
 }

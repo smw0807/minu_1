@@ -2,10 +2,11 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
 
-var util = require('./utils/utils');
+const util = require('./utils/utils');
 const app = express();
 
 require('dotenv').config();
+const { verifyToken } = require('./middleware/auth');
 
 const { server_port, STORAGE } = process.env;
 
@@ -18,15 +19,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 app.use(bodyParser.json());
 
+app.use(verifyToken); //토큰 체크 미들웨어
+
 //test
-app.post('/api/test', (req, res) => {
-  console.log('/api/test....');
-  let rt = {
-    ok: true,
-    msg: 'API Success!!'
-  };
-  res.send(rt);
-})
+app.use('/api/test/', require('./routes/test'));
 
 app.use('/api/auth', require('./routes/auth'));
 if (STORAGE === 'es') {
@@ -34,7 +30,6 @@ if (STORAGE === 'es') {
   app.use('/api/es/info', require('./routes/es/els_info'));
 }
 if (STORAGE === 'mysql') {
-  // global.mysql = require('./mysql');
   app.use('/api/mysql/make', require('./routes/mysql/makeTable'));
   app.use('/api/mysql/user', require('./routes/mysql/userTable'));
 }

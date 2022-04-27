@@ -33,7 +33,7 @@ router.post('/login', async(req,res) => {
       info.user_nm = '테스트';
       const token = makeToken(info);
       rt.ok = true;
-      rt.msg = 'test user';
+      rt.msg = '테스트 유저로 로그인했습니다.';
       rt.result = {
         accessToken: token.accessToken,
         refreshToken: token.refreshToken
@@ -41,15 +41,15 @@ router.post('/login', async(req,res) => {
     } else {
       //====== user check logic ======S
       //====== user check logic ======E
-      info.uid = uid;
-      info.user_nm = '';
-      const token = makeToken(info);
-      rt.ok = true;
-      rt.msg = 'login success';
-      rt.result = {
-        accessToken: token.accessToken,
-        refreshToken: token.refreshToken
-      }
+      // info.uid = uid;
+      // info.user_nm = '';
+      // const token = makeToken(info);
+      // rt.ok = true;
+      // rt.msg = '로그인 성공';
+      // rt.result = {
+      //   accessToken: token.accessToken,
+      //   refreshToken: token.refreshToken
+      // }
     }
   } catch (err) {
     console.error('===== login Error =====');
@@ -61,7 +61,7 @@ router.post('/login', async(req,res) => {
   res.send(rt);
 })
 
-//accessToken 유효한지 체크하기
+//accessToken 검증
 router.post('/accessTokenCheck', async (req, res) => {
   console.log('accessTokenCheck!');
   let rt = {
@@ -70,7 +70,7 @@ router.post('/accessTokenCheck', async (req, res) => {
     result: null
   }
   try {
-    const rs = await certifyAccessToken(req.headers['access-token']);
+    const rs = await certifyAccessToken(req.headers['x-access-token']);
     rt.ok = true;
     rt.msg = 'ok';
     rt.result = true;
@@ -79,7 +79,7 @@ router.post('/accessTokenCheck', async (req, res) => {
     if(err.message.indexOf('jwt expired') !== -1) {
       rt.msg = '토큰 만료';
     } else {
-      rt.msg = 'accessTokenCheck fail...';
+      rt.msg = '토큰 변조 의심됨';
     }
     rt.result = err.message;
   }
@@ -95,7 +95,7 @@ router.post('/refreshToken', async(req,res) => {
     result: null
   }
   try {
-    const check = await certifyRefreshToken(req.headers['refresh-token']);
+    const check = await certifyRefreshToken(req.headers['x-refresh-token']);
     const info = {
       uid : check.uid,
       user_nm : check.user_nm
