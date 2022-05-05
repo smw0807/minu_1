@@ -1,0 +1,20 @@
+{
+  "name": "study_1",
+  "version": "1.0.0",
+  "description": "package.json에 대해 알아보자",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Song Min Woo",
+  "license": "ISC",
+  "dependencies": {
+    "cookie-parser": "^1.4.6",
+    "express": "^4.18.1",
+    "express-session": "^1.17.2",
+    "morgan": "^1.10.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.16"
+  }
+}
