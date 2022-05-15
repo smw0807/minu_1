@@ -26,8 +26,10 @@ app.use('/api/test/', require('./routes/test'));
 
 app.use('/api/auth', require('./routes/auth'));
 if (STORAGE === 'es') {
+  app.use('/api/es/idx', require('./routes/es/idx'));
   app.use('/api/es/code', require('./routes/es/code'));
-  app.use('/api/es/info', require('./routes/es/els_info'));
+  app.use('/api/es/info', require('./routes/es/info'));
+  app.use('/api/es/user', require('./routes/es/user'));
 }
 if (STORAGE === 'mysql') {
   app.use('/api/mysql/make', require('./routes/mysql/makeTable'));
