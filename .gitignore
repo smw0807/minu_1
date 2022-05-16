@@ -4,3 +4,5 @@ node/es_functions/_template/*
 node/nct_test
 
 back-end/.env
+.env
+.env.*
