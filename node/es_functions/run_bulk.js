@@ -24,11 +24,17 @@ async function asyncForEach (array, callback) {
 // }
 async function run() {
   try {
-    const data = fs.readFileSync('./_bulk/backupOrg', 'utf8');
+    const data = fs.readFileSync('./_bulk/ni_setting_test', 'utf8');
     let bulk = await es_client.bulk({
       body: data
     })
-    console.log(bulk);
+    if (bulk.errors) { //벌크 결과 중에 에러가 1개라도 있으면...
+      for (let item of bulk.items) {
+        if (item.index.status !== 200) { //결과중에 status가 200이 아닌것만 출력
+          console.log(JSON.stringify(item));
+        }
+      }
+    }
   } catch (err) {
     console.error(err);
   }
