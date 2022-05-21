@@ -1,5 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const morgan = require('morgan');
 const path = require('path');
 
 const util = require('./utils/utils');
@@ -15,6 +16,7 @@ const server = app.listen(server_port, function() {
   console.info(`Storage Mode : ${STORAGE} | Server Port : ${server_port}`)
 });
 
+app.use(morgan('dev'));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 app.use(bodyParser.json());
