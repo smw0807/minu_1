@@ -9,11 +9,21 @@ dotenv.config();
 
 const app = express();
 app.set('port', process.env.PORT || 3000);
-
-app.use(morgan('dev'));
+console.log(process.env.NODE_ENV);
+// app.use(morgan('dev'));
+app.use((req, res, next) => {
+  // morgan('dev')(req, res, next);
+  if (process.env.NODE_ENV === 'production') {
+    morgan('combined')(req, res, next);
+    // morgan('combined'); //next 없어서 여기서 다음으로 안넘어감
+  } else {
+    morgan('dev')(req, res, next);
+    // morgan('dev'); //next 없어서 여기서 다음으로 안넘어감
+  }
+})
 app.use('/', express.static(path.join(__dirname, 'public')));
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: false })); //querystring 모듈을 이용하여 쿼리스트링을 해석한다.
 app.use(cookieParser(process.env.COOKIE_SECRET));
 app.use(session({
   resave: false,
@@ -26,10 +36,18 @@ app.use(session({
   name: 'session-cookie'
 }))
 
-// app.use( (req, res, next) => {
-//   console.log('모든 요청에 다 실행된다.');
-//   next();
-// });
+app.use( (req, res, next) => {
+  console.log('모든 요청에 다 실행된다.');
+  next();
+});
+
+app.use((req, res, next) => { //요청이 끝날 때까지만 데이터를 유지하는 방법?
+	req.data = '데이터 넣기';
+	next();
+}, (req, res, next) => {
+	console.log(req.data); //데이터 받기
+	next();
+});
 
 app.get('/', (req, res, next) => {
   // res.send('hello, Express');
