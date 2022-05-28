@@ -7,6 +7,8 @@ const multer = require('multer');
 const fs = require('fs');
 const dotenv = require('dotenv');
 
+const user = require('./user');
+
 try {
   fs.readdirSync('uploads');
 } catch (err) {
@@ -110,6 +112,12 @@ app.post('/upload', upload.single('image'), (req, res) => {
 //   res.send('ok');
 // })
 
+app.use('/user', user);
+
+//경로 없음
+app.use((req, res, next) => {
+  res.status(404).send('Not Found');
+})
 app.listen(app.get('port'), () => {
   console.log(app.get('port'), '번 포트로 express 실행 중');
 });
