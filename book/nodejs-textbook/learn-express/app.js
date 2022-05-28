@@ -3,9 +3,30 @@ const path = require('path');
 const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
+const multer = require('multer');
+const fs = require('fs');
 const dotenv = require('dotenv');
 
+try {
+  fs.readdirSync('uploads');
+} catch (err) {
+  console.log('make upload dir');
+  fs.mkdirSync('uploads');
+}
 dotenv.config();
+
+const upload = multer({
+  storage: multer.diskStorage({
+    destination(req, file, done) { //파일 저장할 곳
+      done(null, 'uploads/');
+    },
+    filename(req, file, done) { //저장 할 파일 이름
+      const ext = path.extname(file.originalname);
+      done(null, path.basename(file.originalname, ext) + Date.now() + ext);
+    }
+  }),
+  limits: { fileSize: 5 * 1024 * 1024 },
+})
 
 const app = express();
 app.set('port', process.env.PORT || 3000);
@@ -56,6 +77,38 @@ app.get('/', (req, res, next) => {
    */
   res.sendFile(path.join(__dirname, 'views', 'index.html'));
 });
+
+app.get('/file', (req, res) => {
+  console.log('file');
+  res.sendFile(path.join(__dirname, 'views', 'file.html'));
+})
+//파일이 한 개 일 때
+app.post('/upload', upload.single('image'), (req, res) => {
+  console.log('upload');
+  console.log(req.file, req.body);
+  res.send('ok');
+})
+//파일이 여러개 일 때 upload.single => upload.array, req.file => req.files
+// app.post('/upload', upload.array('image'), (req, res) => {
+//   console.log('upload');
+//   console.log(req.files, req.body);
+//   res.send('ok');
+// })
+//파일은 여러 개 지만 키가 다를 때
+// app.post('/upload', upload.fields([
+//   {name : 'image'}, 
+//   {name : 'image2'}
+// ]), (req, res) => {
+//   console.log('키가 다른 파일 여러개');
+//   console.log(req.files);
+//   res.send('ok');
+// })
+//멀티파트 인데 파일이 없을 경우
+// app.post('/upload', upload.none(), (req, res) => {
+//   console.log('이럴 땐 req.body만 존재한다.');
+//   console.log(res.body);
+//   res.send('ok');
+// })
 
 app.listen(app.get('port'), () => {
   console.log(app.get('port'), '번 포트로 express 실행 중');
