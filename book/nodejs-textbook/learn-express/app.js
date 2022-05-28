@@ -8,6 +8,7 @@ const fs = require('fs');
 const dotenv = require('dotenv');
 
 const user = require('./user');
+const pug = require('./pug');
 
 try {
   fs.readdirSync('uploads');
@@ -32,7 +33,10 @@ const upload = multer({
 
 const app = express();
 app.set('port', process.env.PORT || 3000);
-console.log(process.env.NODE_ENV);
+//pug 적용하기
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'pug');//어떤 종류의 템플릿 엔진을 사용할지를 나타냄
+
 // app.use(morgan('dev'));
 app.use((req, res, next) => {
   // morgan('dev')(req, res, next);
@@ -113,6 +117,7 @@ app.post('/upload', upload.single('image'), (req, res) => {
 // })
 
 app.use('/user', user);
+app.use('/pug', pug);
 
 //경로 없음
 app.use((req, res, next) => {
