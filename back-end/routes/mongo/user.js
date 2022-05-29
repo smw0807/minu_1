@@ -1,13 +1,30 @@
 const express = require('express');
 const router = express.Router();
-const mg = require('../../mongo');
-const user = require('../../model/user');
+const users = require('../../model/user');
 
-router.post('/makeUserCollection', (req, res) => {
-  const connect = mg.connect().then( (db) => {
-    // console.log(db);
-    user();
-  })
+router.post('/insert', async (req, res) => {
+  try {
+    const params = req.body;
+
+    const rs = await users.create({
+      user_id: params.user_id,
+      user_pw: params.user_pw,
+      user_nm: params.user_nm
+    })
+    console.log(rs);
+  } catch (err) {
+    console.error('mongo user insert Error : ', err);
+  }
+  res.send('ok');
+})
+
+router.post('/list', async (req, res) => {
+  try {
+    const rs = await users.find();
+    console.log(rs);
+  } catch (err) {
+    console.error('users list Error : ', err);
+  }
   res.send('ok');
 })
 

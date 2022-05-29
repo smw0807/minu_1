@@ -11,7 +11,7 @@ const { verifyToken } = require('./middleware/auth');
 
 const { server_port, STORAGE } = process.env;
 
-const server = app.listen(server_port, function() {
+app.listen(server_port, function() {
   console.info ("Server Start... [" + util.dateFormat('yyyy-MM-dd HH:mm:ss E') + ']');
   console.info(`Storage Mode : ${STORAGE} | Server Port : ${server_port}`)
 });
@@ -38,7 +38,6 @@ if (STORAGE === 'mysql') {
   app.use('/api/mysql/user', require('./routes/mysql/userTable'));
 }
 if (STORAGE === 'mg') {
+  require('./mongo');
   app.use('/api/mongo/user', require('./routes/mongo/user'));
-  // const mongo = require('./mongo');
-  // mongo();
 }
