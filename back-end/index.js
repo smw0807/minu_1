@@ -37,3 +37,8 @@ if (STORAGE === 'mysql') {
   app.use('/api/mysql/make', require('./routes/mysql/makeTable'));
   app.use('/api/mysql/user', require('./routes/mysql/userTable'));
 }
+if (STORAGE === 'mg') {
+  app.use('/api/mongo/user', require('./routes/mongo/user'));
+  // const mongo = require('./mongo');
+  // mongo();
+}
