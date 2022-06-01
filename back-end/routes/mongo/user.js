@@ -2,6 +2,22 @@ const express = require('express');
 const router = express.Router();
 const users = require('../../model/user');
 
+router.get('/', async (req, res) => {
+  let rt = {};
+  try {
+    const rs = await users.find({});
+    rt.ok = true;
+    rt.msg = 'ok';
+    rt.result = rs;
+  } catch (err) {
+    rt.ok = false;
+    rt.msg = err.message;
+    rt.result = err;
+    console.error(err);
+  }
+  res.send(rt);
+})
+
 router.post('/insert', async (req, res) => {
   try {
     const params = req.body;
