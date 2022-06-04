@@ -5,11 +5,9 @@ const cookieParser = require('cookie-parser');
 const session = require('express-session');
 const nunjucks = require('nunjucks');
 const dotenv = require('dotenv');
-const ColorHash = require('color-hash');
+const { default: ColorHash} = require('color-hash');
 
 dotenv.config();
-const indexRouter = require('./routes');
-const connect = require('./schemas');
 
 const app = express();
 app.set('port', process.env.PORT || 8005);
@@ -18,6 +16,9 @@ nunjucks.configure('views', {
   express: app,
   watch: true
 });
+
+//몽고디비 연결
+const connect = require('./schemas');
 connect();
 
 app.use(morgan('dev'));
@@ -25,16 +26,32 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser(process.env.COOKIE_SECRET));
-app.use(session({
+
+//Socket.IO도 미들웨어를 사용할 수 있으므로 세션 정보 변수화해서 같이 사용.
+const sessionMiddleware = session({
   resave: false,
   saveUninitialized: false,
   secret: process.env.COOKIE_SECRET,
   cookie: {
     httpOnly: true,
     secure: false,
-  },
-}));
+  }
+})
+app.use(sessionMiddleware);
 
+/**
+ * 세션에 color 속성이 없으면 세션 아이디로 HEX 형식의 색상 문자열로 만들어 준 뒤
+ * color 속성에 값을 넣어주기
+ */
+app.use((req, res, next) => {
+  if(!req.session.color) {
+    const colorHash = new ColorHash();
+    req.session.color = colorHash.hex(req.sessionID);
+  }
+  next();
+})
+
+const indexRouter = require('./routes');
 app.use('/', indexRouter);
 
 app.use((req, res, next) => {
@@ -53,3 +70,6 @@ app.use((err, req, res, next) => {
 const server = app.listen(app.get('port'), () => {
   console.log('Server Start!!!');
 })
+
+const WebSocket = require('./socket');
+WebSocket(server, app, sessionMiddleware);
