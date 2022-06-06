@@ -35,8 +35,7 @@ router.route('/room')
        * 메인 화면에 접속 중인 모든 클라이언트가 새로 생성된 채팅방에 대한 데이터를 받을 수 있다.
        */
       io.of('/room').emit('newRoom', newRoom); //웹에 방정보 전달
-      res.redirect('/'); //만들고 메인으로
-      // res.redirect(`/room/${newRoom._id}?password=${req.body.password}`); //만들고 만든방으로 접속
+      res.redirect(`/room/${newRoom._id}?password=${req.body.password}`); //만들고 만든방으로 접속
     } catch(err) {
       console.error(err);
       next(err);

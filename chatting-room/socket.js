@@ -1,3 +1,7 @@
+/**
+ * socket.io 버전으로 인한 socket.request.session 문제 관련 이슈 내용
+ * https://github.com/ZeroCho/nodejs-book/issues/160
+ */
 const SocketIO = require('socket.io');
 const axios = require('axios');
 const cookieParser = require('cookie-parser');
@@ -14,18 +18,20 @@ module.exports = (server, app, sessionMiddleware) => {
    * 모든 웹 소켓 연결 시마다 실행된다.
    * 요청(socket.request), 응답(socket.request.res), next 함수를 인수로 넣으면 된다.
    */
-  io.use((socket, next) => {
-    cookieParser(process.env.COOKIE_SECRET)(socket.request, socket.request.res, next);
-    sessionMiddleware(socket.request, socket.request.res, next);
-  })
-
+  const wrap = middleware => (socket, next) => middleware(socket.request, {}, next);
+  room.use(wrap(cookieParser(process.env.COOKIE_SECRET)));
+  room.use(wrap(sessionMiddleware));
+  chat.use(wrap(cookieParser(process.env.COOKIE_SECRET)));
+  chat.use(wrap(sessionMiddleware));
+   
   room.on('connection', (socket) => {
     console.log('room 네임스페이스 접속');
+    console.log('test : ', socket.request.session.color);
     socket.on('disconnect', () => {
       console.log('room 네임스페이스 접속 해제');
     });
   });
-
+    
   chat.on('connection', (socket) => {
     console.log('chat 네임스페이스 접속');
     const req = socket.request;
