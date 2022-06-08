@@ -61,15 +61,34 @@ router.get('/room/:id', async (req, res, next) => {
     if (rooms && rooms[req.params.id] && room.max <= rooms[req.params.id].length) {
       return res.redirect('/?error=허용 인원이 초과하였습니다.');
     }
+    const chats = await Chat.find({ room: room._id }).sort('createAt'); //디비에 저장된 채팅 내역 가져오기
     return res.render('chat', {
       room,
       title: room.title,
-      chat: [],
+      chats,
       user: req.session.color
     });
   } catch (err) {
     console.error(err);
     return next(err);
+  }
+})
+
+/**
+ * 채팅을 데이터베이스에 저장 한 후 웹 소켓을 이용해 방에 채팅 메시지 데이터를 전송
+ */
+router.post('/room/:id/chat', async (req, res, next) => {
+  try {
+    const chat = await Chat.create({
+      room: req.params.id,
+      user: req.session.color,
+      chat: req.body.chat
+    })
+    req.app.get('io').of('/chat').to(req.params.id).emit('chat', chat);
+    res.send('ok');
+  } catch (err) {
+    console.error(err);
+    next(err);
   }
 })
 
@@ -90,5 +109,6 @@ router.delete('/room/:id', async (req, res, next) => {
     next(err);
   }
 })
+
 
 module.exports = router;

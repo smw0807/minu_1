@@ -39,6 +39,7 @@
     <input type="text" id="chat" name="chat">
     <button type="submit">전송</button>
   </form>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
   <script src="/socket.io/socket.io.js"></script>
   <script>
     // mine : 내 메시지
@@ -47,7 +48,7 @@
     const socket = io.connect('http://localhost:8005/chat', {
       path: '/socket.io',
     });
-    socket.on('join', function (data) { //사용자 입장
+    socket.on('join', (data) => { //사용자 입장
       const div = document.createElement('div');
       div.classList.add('system');
       const chat = document.createElement('div');
@@ -55,7 +56,7 @@
       div.appendChild(chat);
       document.querySelector('#chat-list').appendChild(div);
     });
-    socket.on('exit', function (data) { //사용자 퇴장
+    socket.on('exit', (data) => { //사용자 퇴장
       const div = document.createElement('div');
       div.classList.add('system');
       const chat = document.createElement('div');
@@ -63,5 +64,38 @@
       div.appendChild(chat);
       document.querySelector('#chat-list').appendChild(div);
     });
+    socket.on('chat', (data) => { //웹소켓에서 보내는 채팅 메시지 호출
+      const div = document.createElement('div');
+      if (data.user === '{{user}}') {
+        div.classList.add('mine');
+      } else {
+        div.classList.add('other');
+      }
+      const name = document.createElement('div');
+      name.textContent = data.user;
+      div.appendChild(name);
+      if (data.chat) {
+        const chat = document.createElement('div');
+        chat.textContent = data.chat;
+        div.appendChild(chat);
+      } else {
+        const gif = document.createElement('img');
+        gif.src = '/gif/' + data.gif;
+        div.appendChild(gif);
+      }
+      div.style.color = data.user;
+      document.querySelector('#chat-list').appendChild(div);
+    });
+    document.querySelector('#chat-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (e.target.chat.value) {
+        try {
+          await axios.post('/room/{{room._id}}/chat', { chat: this.chat.value });
+          e.target.chat.value = '';
+        } catch (err) {
+          console.error(err);
+        }
+      }
+    })
   </script>
 {% endblock %}

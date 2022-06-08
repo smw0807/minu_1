@@ -51,11 +51,11 @@ module.exports = (server, app, sessionMiddleware) => {
       user: 'system',
       chat: `${req.session.color} 님이 입장하셨습니다.`
     })
-    socket.on('discoonect', async () => {
+    socket.on('disconnect', async () => {
       console.log('chat 네임스페이스 접속 해제');
       socket.leave(roomId); //방에 나가는 메서드
-      const currentRoom = socket.adapter.rooms[roomId]; //참여 중인 소켓 정보가 들어있음.
-      const userCount = currentRoom ? currentRoom.length : 0;
+      const currentRoom = socket.adapter.rooms.get(roomId); //참여 중인 소켓 정보가 들어있음. (map 형식의 데이터임)
+      const userCount = currentRoom ? currentRoom.size : 0;
       if (userCount === 0) {
         //접속 해제 시 현재 방의 사람 수를 확인해서 0명이면 방 제거 요청을 보냄
         try {
@@ -63,14 +63,8 @@ module.exports = (server, app, sessionMiddleware) => {
            * 서버에서 axios를 요청하기 때문에 쿠키를 담아서 보내지 않음.
            * 요청해더에 직접 넣어줘야함
            */
-          const signedCookie = req.signedCookie['connect.sid']; 
-          const connectSID = cookie.sign(signedCookie, process.env.COOKIE_SECRET);
-          const del = await axios.delete(`http://localhost:8005/room/${roomId}`, {
-            headers: {
-              Cookie: `connect.sid=s%3A${connectSID}` //쿠키 암호화 했기 때문에 s%3A 붙임
-            }
-          })
-          console.log(`${roomId} 방 삭제 완료 : `, del);
+          await axios.delete(`http://localhost:8005/room/${roomId}`);
+          console.log(`${roomId} 방 삭제 완료`);
         } catch (err) {
           console.error(`${roomId} 방 삭제 실패 : `, err);
         }
