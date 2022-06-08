@@ -97,5 +97,16 @@
         }
       }
     })
+    document.querySelector('#gif').addEventListener('change', async (e) => {
+      console.log(e.target.files);
+      const formData = new FormData();
+      formData.append('gif', e.target.files[0]);
+      try {
+        await axios.post('/room/{{room._id}}/gif', formData);
+        e.target.file = null;
+      } catch (err) {
+        console.error(err);
+      }
+    });
   </script>
 {% endblock %}
