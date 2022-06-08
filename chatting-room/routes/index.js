@@ -122,11 +122,11 @@ try {
 }
 const upload = multer({
   storage: multer.diskStorage({
-    destination(req, file, done) {
+    destination(req, file, done) { //저장될 경로
       done(null, 'uploads/');
     },
-    filename(req, file, done) {
-      const ext = path.extname(file.originalname);
+    filename(req, file, done) { //파일명
+      const ext = path.extname(file.originalname); //파일 확장자 추출
       done(null, path.basename(file.originalname, ext) + Date.now() + ext);
     },
   }),
