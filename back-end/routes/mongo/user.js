@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const users = require('../../model/user');
+const users = require('../../schemas/user');
+const { encryptPassword } = require('../../utils/authenticate');
 
 router.get('/', async (req, res) => {
   let rt = {};
@@ -24,7 +25,7 @@ router.post('/insert', async (req, res) => {
 
     const rs = await users.create({
       user_id: params.user_id,
-      user_pw: params.user_pw,
+      user_pw: encryptPassword(params.user_pw),
       user_nm: params.user_nm
     })
     console.log(rs);
