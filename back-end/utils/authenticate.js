@@ -69,39 +69,39 @@ function encryptPassword(password) {
 
 //accessToken 만들기
 function generateAccessToken(information, time) {
-  const { uid, user_nm } = information;
-  // const { uid, user_auth_code, user_auth_nm, user_nm } = information;
-  if (!uid) {
-    throw 'uid 정보가 누락되었습니다.';
+  const { user_id, user_nm } = information;
+  // const { user_id, user_auth_code, user_auth_nm, user_nm } = information;
+  if (!user_id) {
+    throw 'user_id 정보가 누락되었습니다.';
   }
   //  else if (!user_auth_code) {
-  //   throw `${uid}: user_auth_code 정보가 누락되었습니다.`;
+  //   throw `${user_id}: user_auth_code 정보가 누락되었습니다.`;
   // } else if (!user_auth_nm) {
-  //   throw `${uid}: user_auth_nm 정보가 누락되었습니다.`;
+  //   throw `${user_id}: user_auth_nm 정보가 누락되었습니다.`;
   // }
-  return jwt.sign({ uid, user_nm }, ACCESS_KEY, { expiresIn: time });
+  return jwt.sign({ user_id, user_nm }, ACCESS_KEY, { expiresIn: time });
 }
 
 //refreshToken 만들기
 function generateRefreshToken(information, time) {
-  // const { uid, user_auth_code, user_auth_nm, user_nm } = information;
-  const { uid, user_nm } = information;
-  if (!uid) {
-    throw 'uid 정보가 누락되었습니다.';
+  // const { user_id, user_auth_code, user_auth_nm, user_nm } = information;
+  const { user_id, user_nm } = information;
+  if (!user_id) {
+    throw 'user_id 정보가 누락되었습니다.';
   } 
   // else if (!user_auth_code) {
-  //   throw `${uid}: user_auth_code 정보가 누락되었습니다.`;
+  //   throw `${user_id}: user_auth_code 정보가 누락되었습니다.`;
   // } else if (!user_auth_nm) {
-  //   throw `${uid}: user_auth_nm 정보가 누락되었습니다.`;
+  //   throw `${user_id}: user_auth_nm 정보가 누락되었습니다.`;
   // }
-  return jwt.sign({ uid,  user_nm }, REFRESH_KEY, { expiresIn: time });
+  return jwt.sign({ user_id,  user_nm }, REFRESH_KEY, { expiresIn: time });
 }
 
 function getUid(token) {
   if (token) {
     try {
       let decoded = jwt.decode(token);
-      return decoded.uid;
+      return decoded.user_id;
     } catch (err) {
       console.error(err);
       return null;

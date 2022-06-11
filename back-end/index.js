@@ -7,7 +7,10 @@ const util = require('./utils/utils');
 const app = express();
 
 require('dotenv').config();
-const { verifyToken } = require('./middleware/auth');
+// const { verifyToken } = require('./middleware/auth');
+const passport = require('passport');
+const passportConfig = require('./passport');
+passportConfig();
 
 const { server_port, STORAGE } = process.env;
 
@@ -21,7 +24,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 app.use(bodyParser.json());
 
-app.use(verifyToken); //토큰 체크 미들웨어
+// app.use(verifyToken); //토큰 체크 미들웨어
+app.use(passport.initialize());
 
 //test
 app.use('/api/test/', require('./routes/test'));
