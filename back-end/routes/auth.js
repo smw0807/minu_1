@@ -78,15 +78,6 @@ router.post('/login', async(req,res) => {
       // })
       // console.log('!!');
       //====== user check logic ======E
-      // info.uid = uid;
-      // info.user_nm = '';
-      // const token = makeToken(info);
-      // rt.ok = true;
-      // rt.msg = '로그인 성공';
-      // rt.result = {
-      //   accessToken: token.accessToken,
-      //   refreshToken: token.refreshToken
-      // }
     }
   } catch (err) {
     console.error('===== login Error =====');
