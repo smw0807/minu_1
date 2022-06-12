@@ -1,16 +1,15 @@
 const express = require('express');
-const bodyParser = require('body-parser');
 const morgan = require('morgan');
 const path = require('path');
+const passport = require('passport');
 
 const util = require('./utils/utils');
 const app = express();
 
 require('dotenv').config();
 // const { verifyToken } = require('./middleware/auth');
-const passport = require('passport');
-const passportConfig = require('./passport');
-passportConfig();
+// const passportConfig = require('./passport');
+// passportConfig();
 
 const { server_port, STORAGE } = process.env;
 
@@ -22,7 +21,6 @@ app.listen(server_port, function() {
 app.use(morgan('dev'));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
-app.use(bodyParser.json());
 
 // app.use(verifyToken); //토큰 체크 미들웨어
 app.use(passport.initialize());
