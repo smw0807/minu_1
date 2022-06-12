@@ -65,17 +65,7 @@ router.post('/login', async(req,res) => {
         } 
         res.send(rt);
       }
-      // passport.authenticate('local', (passportError, user, info) => {
-      //   console.log('authenticate...', passportError, user, info);
-      //   if (passportError || !user) {
-      //     rt.msg = '로그인 실패';
-      //     rt.result = passportError;
-      //   } else {
-      //     console.log('success');
-      //     console.log(user);
-      //     console.log(info);
-      //   }
-      // })
+      
       // console.log('!!');
       //====== user check logic ======E
     }
@@ -85,6 +75,36 @@ router.post('/login', async(req,res) => {
     rt.ok = false;
     rt.msg = 'error';
     rt.result = err.message;
+    res.send(rt);
+  }
+})
+
+router.post('/login2', async (req, res) => {
+  console.log('login2');
+  console.log(passport);
+  const rt = {
+    ok: false,
+    msg: '',
+    result: null
+  }
+  try {
+    await passport.authenticate('local', (passportError, user, info) => {
+      console.log('authenticate...', passportError, user, info);
+      if (passportError || !user) {
+        rt.msg = '로그인 실패';
+        rt.result = passportError;
+      } else {
+        console.log('success');
+        console.log(user);
+        console.log(info);
+      }
+      res.send(rt);
+    })
+    console.log("???");
+  } catch (err) {
+    console.log('login2 Error : ', err);
+    rt.msg = '로그인 에러';
+    rt.result = err;
     res.send(rt);
   }
 })

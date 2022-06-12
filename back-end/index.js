@@ -1,7 +1,8 @@
 const express = require('express');
 const morgan = require('morgan');
 const path = require('path');
-const passport = require('passport');
+// const passport = require('passport');
+// const passportConfig = require('./passport');
 
 const util = require('./utils/utils');
 const app = express();
@@ -23,7 +24,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 
 // app.use(verifyToken); //토큰 체크 미들웨어
-app.use(passport.initialize());
+// app.use(passport.initialize());
+// passportConfig();
 
 //test
 app.use('/api/test/', require('./routes/test'));
