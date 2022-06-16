@@ -10,15 +10,16 @@
         만약 제거 후 마침표(.)가 new_id의 끝에 위치한다면 끝에 위치한 마침표(.) 문자를 제거합니다.
     7단계 new_id의 길이가 2자 이하라면, new_id의 마지막 문자를 new_id의 길이가 3이 될 때까지 반복해서 끝에 붙입니다.
  */
+const assert = require('assert');
 
 function solution(new_id) {
   let answer = new_id.toLowerCase()
-              .replace(/[^a-z0-9-_.]/g, '') //1
-              .replace(/(\.){2,}/g, '.') //2
-              .replace(/^[.]/g, '') //3
-              .replace(/[.]$/g, ''); //4
+              .replace(/[^a-z0-9-_.]/g, "") //1
+              .replace(/(\.){2,}/g, ".") //2
+              .replace(/^[.]/g, "") //3
+              .replace(/[.]$/g, ""); //4
   
-  if (answer === '') answer = 'a'; //5
+  if (answer === "") answer = "a"; //5
   answer = limit_id_length(answer); //6
   answer = check_id_length(answer); //7
   return answer;
@@ -27,7 +28,7 @@ function solution(new_id) {
 function limit_id_length (v) {
   let result = v;
   if (result.length > 15) {
-    result = result.substring(0, 15).replace(/[.]$/g, '');
+    result = result.substring(0, 15).replace(/[.]$/g, "");
   }
   return result;
 }
@@ -57,4 +58,4 @@ const expectedValue = "bat.y.abcdefghi";
 // const expectedValue = "abcdefghijklmn";
 
 const result = solution(data);
-console.log(result === expectedValue);
+assert.strictEqual(result, expectedValue);
