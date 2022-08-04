@@ -1,6 +1,7 @@
 const { classIpToRange } = require('./ip');
 const org_depth = '4';
-const orgDatas = []; //엘라스틱 형식으로 변환시킨 데이터 담을 곳
+const depthLastCode = new Map(); //뎁스별 마지막 코드값 저장
+const orgDataMap = new Map(); //엘라스틱 형식으로 변환시킨 데이터 담을 곳
 const baseFormat = {
   "type": "org",
   "sensor_id": 0,
@@ -31,6 +32,14 @@ function data() {
       depth4: '최하위2',
       'IP Address': '192.1.1.30'
     },
+    {
+      depth4: '최하위3',
+      'IP Address': '192.1.1.30'
+    },
+    {
+      depth4: '최하위4',
+      'IP Address': '192.1.1.30'
+    },
     { 
       depth2: '상위2',
       depth3: '하위2',
@@ -57,6 +66,7 @@ function data() {
 
 /**
  * 기본 데이터 생성
+ * [센서, 내부그룹, 외부그룹, 미분류]
  * @param {Number} id 센서 아이디
  * @param {String} nm 센서 명
  */
@@ -65,7 +75,7 @@ function makeDefaultData({sensor_id, sensor_nm}) {
   const sensor = JSON.parse(JSON.stringify(baseFormat));
   sensor.sensor_id = sensor_id;
   sensor.org.org_nm = sensor_nm;
-  orgDatas.push(sensor);
+  orgDataMap.set(0, sensor);
 
   //내부 그룹 데이터
   const nOrg = JSON.parse(JSON.stringify(baseFormat));
@@ -76,7 +86,7 @@ function makeDefaultData({sensor_id, sensor_nm}) {
   nOrg.org.org_level = 3;
   nOrg.org.org_num = 0;
   nOrg.org.org_flag = '0-1';
-  orgDatas.push(nOrg);
+  orgDataMap.set(1, nOrg);
 
   //외부 그룹 데이터
   const outOrg = JSON.parse(JSON.stringify(baseFormat));
@@ -87,7 +97,7 @@ function makeDefaultData({sensor_id, sensor_nm}) {
   outOrg.org.org_level = 3;
   outOrg.org.org_num = 1;
   outOrg.org.org_flag = '0-100';
-  orgDatas.push(outOrg);
+  orgDataMap.set(100, outOrg);
 
   //미분류 데이터
   const unknown = JSON.parse(JSON.stringify(baseFormat));
@@ -98,9 +108,19 @@ function makeDefaultData({sensor_id, sensor_nm}) {
   unknown.org.org_level = 4;
   unknown.org.org_num = 999;
   unknown.org.org_flag = '0-1-999';
-  orgDatas.push(unknown);
+  orgDataMap.set(999, unknown);
 }
 
+/**
+ * 마지막 코드가 특정 값이면 +1 시키기
+ * @param {Number} v 
+ * @returns 
+ * 0은 센서, 1은 내부그룹, 100은 외부그룹, 999는 미분류라 사용하면 안됨
+ */
+function getLastCode(v) {
+  if ([0, 1, 100, 999].includes(v)) v++
+  return v;
+}
 /**
  * 그룹 레벨...(4부터 시작함)
  * @param {Number} v 레벨값
@@ -115,50 +135,52 @@ function setLevel(v) {
 }
 
 /**
+ * 웹에서 받은 데이터로 엘라스틱 매핑 형식에 맞게 데이터 가공
  * ! org_code 0, 1, 100, 999는 사용 안할것
  * @param {Array} data 
  * @returns 
  */
-function trimDatas({sensor_id, sensor_nm, rows}) {
-  const maxDepth = parseInt(org_depth);
-  const depthLastCode = new Map(); //뎁스별 마지막 코드값 저장
-  const orgDataMap = new Map();
-  let lastCode = 2; 
-  /**
-   * 상위 뎁스 저장 방식 생각해보기.
-   * 어떻게??
-   */
-  const result = rows.map( (cur) => {
-    for (const key of Object.keys(cur)) {
+function trimDatas({sensor_id, rows}) {
+  const maxDepth = parseInt(org_depth); //최대 뎁스 설정 값
+  let lastCode = 2; //0은 센서, 1은 내부그룹이라 2부터 시작
+  let org_num = 0; //
+  let lastPcode = 0;
+  rows.map( (v) => {
+    for (const key of Object.keys(v)) {
       const base = JSON.parse(JSON.stringify(baseFormat));
       base.sensor_id = sensor_id;
       if (key.indexOf('depth') !== -1) {
-        const data = cur[key];
-        //depth Number
-        const depthNum = parseInt(key.substr(key.length -1 , key.length));
-        if (depthNum > maxDepth) continue;
-        if (depthLastCode.has(depthNum)) {
-          base.org.org_pcode = depthLastCode.get(depthNum - 1);
-          lastCode = depthLastCode.get(depthNum) + 1;
-          base.org.org_code = lastCode;
-        } else {
-          base.org.org_pcode = 1;
-          base.org.org_code = lastCode;
-        }
-        depthLastCode.set(depthNum, lastCode);
-        base.org.org_nm = data;
+        lastCode = getLastCode(lastCode); //번호 세팅
+        const orgName = v[key]; 
+        const depthNum = parseInt(key.substr(key.length -1 , key.length)); //뎁스 번호 가져오기
+        if (depthNum > maxDepth) continue; //뎁스 최대 설정값보다 크면 패스
+
+        base.org.org_pcode = depthLastCode.get(depthNum - 1) || 1;
+        base.org.org_code = lastCode;
+        base.org.org_nm = orgName;
         base.org.org_level = setLevel(depthNum);
-        base.org.org_num = null;
-        base.org.org_flag = null;
-        //그룹 데이터
-        // console.log(lastCode, JSON.stringify(base));
+        if (lastPcode === base.org.org_pcode) {
+          base.org.org_num = ++org_num
+        } else {
+          base.org.org_num = 0;
+          org_num = 0;
+        }
+        lastPcode = base.org.org_pcode;
+        depthLastCode.set(depthNum, lastCode);
+        
+        let flag = '0-1';
+        for (let i = 1; i <= depthNum; i++) {
+          const code = depthLastCode.get(i - 1);
+          if (code) flag += `-${code}`;
+        }
+        flag += `-${lastCode}`;
+        base.org.org_flag = flag;
+
         orgDataMap.set(lastCode, base);
-        console.log(JSON.stringify(orgDataMap));
         lastCode++;
       } else if (key.indexOf('IP Address') !== -1) {
         //아이피 데이터
-        let ip = cur['IP Address'];
-        const desc = cur['desc'] || '';
+        let ip = v['IP Address'];
         let ipObj = {};
         if (ip.indexOf('-') != -1) {
           ipObj.s_ip = ip.split('-')[0];
@@ -170,21 +192,24 @@ function trimDatas({sensor_id, sensor_nm, rows}) {
           ipObj.e_ip = ip;
         }
         ipObj.is_use = true;
-        ipObj.desc = desc ? '' : desc;
+        ipObj.desc = v['desc'] || '';
         const data = orgDataMap.get(lastCode - 1);
-        // console.log(data);
         data.org.use_ip.push(ipObj)
-        orgDataMap.set(lastCode, data);
+        orgDataMap.set(lastCode - 1, data);
       }
-      
-      // console.log(JSON.stringify(orgDataMap));
     }
-    // console.log('=====');
-    // console.log(cur)
-    // console.log('-----');
   });
-  // console.log(depthLastCode);
-  // console.log(result);
+}
+
+/**
+ * 만들어진 Map 데이터들 bulk 데이터로 변환
+ */
+function makeBulkData({sensor_id}) {
+  let result = [];
+  orgDataMap.forEach( (v, k) => {
+    result.push({"index": {"_index": "ni_setting", "_id": `org_${v.org.org_code}_${sensor_id}`}});
+    result.push(v);
+  })
   return result;
 }
 
@@ -192,11 +217,11 @@ function makeCsvUploadData(param) {
   //기본 데이터 생성
   makeDefaultData(param);
   //데이터를 인덱스 맵핑에 맞게 변환
-  const tData = trimDatas(param);
+  trimDatas(param);
   //변환된 데이터들 벌크 데이터화
-
+  const bulkData = makeBulkData(param);
   //엘라스틱에 벌크시키기
-
+  console.log(bulkData);
 }
 const param = {
   sensor_id : 1,
