@@ -23,6 +23,7 @@
   "dependencies": {
     "app-root-path": "^3.0.0",
     "axios": "^0.25.0",
+    "basic-ftp": "^5.0.1",
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.6",
     "directory-watcher": "^2.0.3",
