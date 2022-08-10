@@ -18,9 +18,9 @@ class Person {
 const a = new Person('a', 0);
 const b = new Person('b', 0);
 
-Person.counter++; //클래스 이름으로 정적 프로퍼티에 접근?
+Person.counter++; //클래스 이름을 참조로 정적 프로퍼티에 접근?
 a.printCounter();
 Person.counter++;
-b.printCounter(); //클래스 이름으로 정적 프로퍼티에 접근?
-console.log(a.counter); //안나옴
-console.log(b.counter); //안나옴
+b.printCounter(); //클래스 이름을 참조로 정적 프로퍼티에 접근?
+console.log(a.counter); //안나옴, 인스턴스에 없기 때문에 접근 안됨
+console.log(b.counter); //안나옴, 인스턴스에 없기 때문에 접근 안됨
