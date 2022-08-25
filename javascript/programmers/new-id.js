@@ -13,37 +13,38 @@
 const assert = require('assert');
 
 function solution(new_id) {
-  let answer = new_id.toLowerCase()
-              .replace(/[^a-z0-9-_.]/g, "") //1
-              .replace(/(\.){2,}/g, ".") //2
-              .replace(/^[.]/g, "") //3
-              .replace(/[.]$/g, ""); //4
-  
-  if (answer === "") answer = "a"; //5
+  let answer = new_id
+    .toLowerCase()
+    .replace(/[^a-z0-9-_.]/g, '') //1
+    .replace(/(\.){2,}/g, '.') //2
+    .replace(/^[.]/g, '') //3
+    .replace(/[.]$/g, ''); //4
+
+  if (answer === '') answer = 'a'; //5
   answer = limit_id_length(answer); //6
   answer = check_id_length(answer); //7
   return answer;
 }
 
-function limit_id_length (v) {
+function limit_id_length(v) {
   let result = v;
   if (result.length > 15) {
-    result = result.substring(0, 15).replace(/[.]$/g, "");
+    result = result.substring(0, 15).replace(/[.]$/g, '');
   }
   return result;
 }
 
-function check_id_length (v) {
+function check_id_length(v) {
   let result = v;
   if (result.length <= 2) {
-    result = result + result.substring(result.length -1 , result.length);
+    result = result + result.substring(result.length - 1, result.length);
     return check_id_length(result);
   }
   return result;
 }
 
-const data = "...!@BaT#*..y.abcdefghijklm."; //"bat.y.abcdefghi"
-const expectedValue = "bat.y.abcdefghi";
+const data = '...!@BaT#*..y.abcdefghijklm.'; //"bat.y.abcdefghi"
+const expectedValue = 'bat.y.abcdefghi';
 
 // const data = "z-+.^."; //"z--"
 // const expectedValue = "z--";

@@ -5,7 +5,7 @@ const cookieParser = require('cookie-parser');
 const session = require('express-session');
 const nunjucks = require('nunjucks');
 const dotenv = require('dotenv');
-const { default: ColorHash} = require('color-hash');
+const { default: ColorHash } = require('color-hash');
 
 dotenv.config();
 
@@ -14,7 +14,7 @@ app.set('port', process.env.PORT || 8005);
 app.set('view engine', 'html');
 nunjucks.configure('views', {
   express: app,
-  watch: true
+  watch: true,
 });
 
 //몽고디비 연결
@@ -36,8 +36,8 @@ const sessionMiddleware = session({
   cookie: {
     httpOnly: true,
     secure: false,
-  }
-})
+  },
+});
 app.use(sessionMiddleware);
 
 /**
@@ -45,12 +45,12 @@ app.use(sessionMiddleware);
  * color 속성에 값을 넣어주기
  */
 app.use((req, res, next) => {
-  if(!req.session.color) {
+  if (!req.session.color) {
     const colorHash = new ColorHash();
     req.session.color = colorHash.hex(req.sessionID);
   }
   next();
-})
+});
 
 const indexRouter = require('./routes');
 app.use('/', indexRouter);
@@ -66,11 +66,11 @@ app.use((err, req, res, next) => {
   res.locals.error = process.env.NODE_ENV !== 'production' ? err : {};
   res.status(err.status || 500);
   res.render('error');
-})
+});
 
 const server = app.listen(app.get('port'), () => {
   console.log('Server Start!!!');
-})
+});
 
 const WebSocket = require('./socket');
 WebSocket(server, app, sessionMiddleware);

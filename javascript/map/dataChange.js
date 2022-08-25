@@ -23,14 +23,12 @@ const myTree = [
     title: 'hi333',
     content: 'hihi',
   },
-]
+];
 
 function change(idx) {
   return myTree.map((v, k) => {
     if (k === idx) v.select = true;
     else v.select = false;
-  })
+  });
 }
 change(1);
-
-

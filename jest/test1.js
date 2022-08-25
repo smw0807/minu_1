@@ -15,5 +15,5 @@ function func1(v) {
 }
 
 module.exports = {
-  func1
-}
+  func1,
+};

@@ -1,5 +1,6 @@
 {
-    "git.ignoreLimitWarning": true,
-    "editor.formatOnSave": false,
-    "tslint.autoFixOnSave": true,
+  "git.ignoreLimitWarning": true,
+  "editor.formatOnSave": true,
+  "tslint.autoFixOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode"
 }
