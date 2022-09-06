@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import superagent from 'superagent';
 import mkdirp from 'mkdirp';
-import { urlToFilename } from '../utils.mjs';
+import { urlToFilename, getPageLinks } from '../utils.mjs';
 import { spider } from '../web-spider/spider.mjs';
 
 function saveFile(filename, contents, db) {
@@ -26,21 +26,23 @@ function download(url, filename, cb) {
 
 function spiderLinks(currentUrl, body, nesting, cb) {
   if (nesting === 0) return process.nextTick(cb);
-
-  const links = getPageLinks(currentUrl, body); //1
+  //1
+  //페이지에 포함된 모든 링크들을 획득한다.
+  //내부적 목적지(동일 호스트 네임)를 가리키는 링크들만 반환한다.
+  const links = getPageLinks(currentUrl, body);
   if (links.length === 0) return process.nextTick(cb);
 
+  //2
+  //인덱스가 링크 배열의 길이와 같은지 확인한다.
   function iterate(index) {
-    //2
     if (index === links.length) return cb();
 
     spider(links[index], nesting - 1, function (err) {
-      //3
       if (err) return cb(err);
       iterate(index + 1);
     });
   }
-  iterate(0); //4
+  iterate(0); //4 함수를 다시 호출해서 반복 시작
 }
 
 export function spider(rul, nesting, db) {
