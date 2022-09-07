@@ -8,3 +8,5 @@ back-end/.env
 .env.*
 
 none-commit
+
+book/typescript/*/*.js
