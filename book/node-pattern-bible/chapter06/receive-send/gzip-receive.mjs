@@ -11,12 +11,9 @@ const server = createServer((req, res) => {
     .pipe(createGunzip())
     .pipe(createWriteStream(destFilename))
     .on('finish', () => {
-      res.writeHead(201, { 'Content-Type': 'text/plan' });
+      res.writeHead(201, { 'Content-Type': 'text/planin' });
       res.end('OK\n');
       console.log(`File saved: ${destFilename}`);
-    })
-    .on('error', err => {
-      console.log('req Error : ', err);
     });
 });
 

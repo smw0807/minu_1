@@ -9,7 +9,7 @@ const httpRequestOptions = {
   hostname: 'localhost',
   port: 3000,
   path: '/',
-  methods: 'PUT',
+  method: 'PUT',
   headers: {
     'Content-Type': 'application/octet-stream',
     'Content-Encoding': 'gzip',
@@ -24,9 +24,6 @@ const req = request(httpRequestOptions, res => {
 createReadStream(fileName)
   .pipe(createGzip())
   .pipe(req)
-  .on('error', err => {
-    console.error('ReadStream Error : ', err);
-  })
   .on('finish', () => {
-    console.log('File successfuly sent!!');
+    console.log('File successfulLy sent!!');
   });
