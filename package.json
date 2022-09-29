@@ -45,7 +45,7 @@
     "mkdirp": "^1.0.4",
     "mkdirp-promise": "^5.0.1",
     "mocha": "^9.2.0",
-    "moment": "^2.29.1",
+    "moment": "^2.29.4",
     "mongoose": "^5.13.0",
     "morgan": "^1.10.0",
     "mysql": "^2.18.1",
