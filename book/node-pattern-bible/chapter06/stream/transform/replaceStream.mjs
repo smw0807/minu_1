@@ -9,15 +9,22 @@ export class ReplaceStream extends Transform {
 
   _transform(chunk, encoding, callback) {
     console.log('------ _transform -------- S');
-    const pieces = (this.tail + chunk).split(this.searchStr);
+    console.log('this.tail :', this.tail);
+    console.log('chunk :', chunk.toString());
+    console.log('this.searchStr :', this.searchStr);
+    const pieces = (this.tail + chunk.toString()).split(this.searchStr);
     console.log('pieces : ', pieces);
+
     const lastPiece = pieces[pieces.length - 1];
     console.log('lastPiece : ', lastPiece);
+
     const tailLen = this.searchStr.length - 1;
     console.log('tailLen : ', tailLen);
+
     this.tail = lastPiece.slice(-tailLen);
     console.log('this.tail : ', this.tail);
     console.log('-tailLen : ', -tailLen);
+
     pieces[pieces.length - 1] = lastPiece.slice(0, -tailLen);
     console.log('pieces[pieces.length - 1] : ', pieces[pieces.length - 1]);
 
