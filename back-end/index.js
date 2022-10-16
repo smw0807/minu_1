@@ -14,9 +14,9 @@ require('dotenv').config();
 
 const { server_port, STORAGE } = process.env;
 
-app.listen(server_port, function() {
-  console.info ("Server Start... [" + util.dateFormat('yyyy-MM-dd HH:mm:ss E') + ']');
-  console.info(`Storage Mode : ${STORAGE} | Server Port : ${server_port}`)
+app.listen(server_port, function () {
+  console.info('Server Start... [' + util.dateFormat('yyyy-MM-dd HH:mm:ss E') + ']');
+  console.info(`Storage Mode : ${STORAGE} | Server Port : ${server_port}`);
 });
 
 app.use(morgan('dev'));
@@ -44,4 +44,5 @@ if (STORAGE === 'mysql') {
 if (STORAGE === 'mg') {
   require('./mongo');
   app.use('/api/mongo/user', require('./routes/mongo/user'));
+  app.use('/api/mongo/guestbook', require('./routes/mongo/guestbook'));
 }
