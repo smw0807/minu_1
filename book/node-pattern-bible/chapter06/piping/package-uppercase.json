@@ -1,0 +1,260 @@
+{
+  "NAME": "MINU_1",
+  "VERSION": "1.0.0",
+  "DESCRIPTION": "NODE TEST AND STUDY PROJECT",
+  "MAIN": "INDEX.JS",
+  "DIRECTORIES": {
+    "LIB": "LIB",
+    "TEST": "TEST"
+  },
+  "SCRIPTS": {
+    "TEST": "JEST"
+  },
+  "REPOSITORY": {
+    "TYPE": "GIT",
+    "URL": "GIT+HTTPS://GITHUB.COM/SMW0807/MINU_1.GIT"
+  },
+  "AUTHOR": "SMW0807",
+  "LICENSE": "ISC",
+  "BUGS": {
+    "URL": "HTTPS://GITHUB.COM/SMW0807/MINU_1/ISSUES"
+  },
+  "HOMEPAGE": "HTTPS://GITHUB.COM/SMW0807/MINU_1#README",
+  "DEPENDENCIES": {
+    "APP-ROOT-PATH": "^3.0.0",
+    "AXIOS": "^0.25.0",
+    "BASIC-FTP": "^5.0.1",
+    "BCRYPTJS": "^2.4.3",
+    "CHANCE": "^1.1.8",
+    "CHEERIO": "^1.0.0-RC.12",
+    "COOKIE-PARSER": "^1.4.6",
+    "CSV-PARSE": "^5.3.0",
+    "DIRECTORY-WATCHER": "^2.0.3",
+    "DOTENV": "^10.0.0",
+    "EJS": "^3.1.6",
+    "ELASTICSEARCH": "^16.7.2",
+    "EXPRESS": "^4.17.1",
+    "EXPRESS-BASIC-AUTH": "^1.2.1",
+    "EXPRESS-EJS-LAYOUTS": "^2.5.1",
+    "EXPRESS-SESSION": "^1.17.2",
+    "ICONV-LITE": "^0.6.3",
+    "IP": "^1.1.5",
+    "JEST": "^27.4.7",
+    "JS-YAML": "^4.1.0",
+    "JSONWEBTOKEN": "^8.5.1",
+    "MD5": "^2.3.0",
+    "MKDIRP": "^1.0.4",
+    "MKDIRP-PROMISE": "^5.0.1",
+    "MOCHA": "^9.2.0",
+    "MOMENT": "^2.29.1",
+    "MONGOOSE": "^5.13.0",
+    "MORGAN": "^1.10.0",
+    "MYSQL": "^2.18.1",
+    "MYSQL2": "^2.3.3",
+    "NODE-SCHEDULE": "^2.0.0",
+    "NUNJUCKS": "^3.2.3",
+    "PARALLEL-TRANSFORM": "^1.2.0",
+    "REQUEST": "^2.88.2",
+    "SLUG": "^8.0.0",
+    "SOCKET.IO": "^4.4.1",
+    "SPLIT": "^1.0.1",
+    "STATMAN-STOPWATCH": "^2.13.0",
+    "SUPERAGENT": "^8.0.0",
+    "WS": "^8.5.0"
+  }
+}
+{
+  "NAME": "MINU_1",
+  "VERSION": "1.0.0",
+  "DESCRIPTION": "NODE TEST AND STUDY PROJECT",
+  "MAIN": "INDEX.JS",
+  "DIRECTORIES": {
+    "LIB": "LIB",
+    "TEST": "TEST"
+  },
+  "SCRIPTS": {
+    "TEST": "JEST"
+  },
+  "REPOSITORY": {
+    "TYPE": "GIT",
+    "URL": "GIT+HTTPS://GITHUB.COM/SMW0807/MINU_1.GIT"
+  },
+  "AUTHOR": "SMW0807",
+  "LICENSE": "ISC",
+  "BUGS": {
+    "URL": "HTTPS://GITHUB.COM/SMW0807/MINU_1/ISSUES"
+  },
+  "HOMEPAGE": "HTTPS://GITHUB.COM/SMW0807/MINU_1#README",
+  "DEPENDENCIES": {
+    "APP-ROOT-PATH": "^3.0.0",
+    "AXIOS": "^0.25.0",
+    "BASIC-FTP": "^5.0.1",
+    "BCRYPTJS": "^2.4.3",
+    "CHANCE": "^1.1.8",
+    "CHEERIO": "^1.0.0-RC.12",
+    "COOKIE-PARSER": "^1.4.6",
+    "CSV-PARSE": "^5.3.0",
+    "DIRECTORY-WATCHER": "^2.0.3",
+    "DOTENV": "^10.0.0",
+    "EJS": "^3.1.6",
+    "ELASTICSEARCH": "^16.7.2",
+    "EXPRESS": "^4.17.1",
+    "EXPRESS-BASIC-AUTH": "^1.2.1",
+    "EXPRESS-EJS-LAYOUTS": "^2.5.1",
+    "EXPRESS-SESSION": "^1.17.2",
+    "ICONV-LITE": "^0.6.3",
+    "IP": "^1.1.5",
+    "JEST": "^27.4.7",
+    "JS-YAML": "^4.1.0",
+    "JSONWEBTOKEN": "^8.5.1",
+    "MD5": "^2.3.0",
+    "MKDIRP": "^1.0.4",
+    "MKDIRP-PROMISE": "^5.0.1",
+    "MOCHA": "^9.2.0",
+    "MOMENT": "^2.29.1",
+    "MONGOOSE": "^5.13.0",
+    "MORGAN": "^1.10.0",
+    "MYSQL": "^2.18.1",
+    "MYSQL2": "^2.3.3",
+    "NODE-SCHEDULE": "^2.0.0",
+    "NUNJUCKS": "^3.2.3",
+    "PARALLEL-TRANSFORM": "^1.2.0",
+    "REQUEST": "^2.88.2",
+    "SLUG": "^8.0.0",
+    "SOCKET.IO": "^4.4.1",
+    "SPLIT": "^1.0.1",
+    "STATMAN-STOPWATCH": "^2.13.0",
+    "SUPERAGENT": "^8.0.0",
+    "WS": "^8.5.0"
+  }
+}
+{
+  "NAME": "MINU_1",
+  "VERSION": "1.0.0",
+  "DESCRIPTION": "NODE TEST AND STUDY PROJECT",
+  "MAIN": "INDEX.JS",
+  "DIRECTORIES": {
+    "LIB": "LIB",
+    "TEST": "TEST"
+  },
+  "SCRIPTS": {
+    "TEST": "JEST"
+  },
+  "REPOSITORY": {
+    "TYPE": "GIT",
+    "URL": "GIT+HTTPS://GITHUB.COM/SMW0807/MINU_1.GIT"
+  },
+  "AUTHOR": "SMW0807",
+  "LICENSE": "ISC",
+  "BUGS": {
+    "URL": "HTTPS://GITHUB.COM/SMW0807/MINU_1/ISSUES"
+  },
+  "HOMEPAGE": "HTTPS://GITHUB.COM/SMW0807/MINU_1#README",
+  "DEPENDENCIES": {
+    "APP-ROOT-PATH": "^3.0.0",
+    "AXIOS": "^0.25.0",
+    "BASIC-FTP": "^5.0.1",
+    "BCRYPTJS": "^2.4.3",
+    "CHANCE": "^1.1.8",
+    "CHEERIO": "^1.0.0-RC.12",
+    "COOKIE-PARSER": "^1.4.6",
+    "CSV-PARSE": "^5.3.0",
+    "DIRECTORY-WATCHER": "^2.0.3",
+    "DOTENV": "^10.0.0",
+    "EJS": "^3.1.6",
+    "ELASTICSEARCH": "^16.7.2",
+    "EXPRESS": "^4.17.1",
+    "EXPRESS-BASIC-AUTH": "^1.2.1",
+    "EXPRESS-EJS-LAYOUTS": "^2.5.1",
+    "EXPRESS-SESSION": "^1.17.2",
+    "ICONV-LITE": "^0.6.3",
+    "IP": "^1.1.5",
+    "JEST": "^27.4.7",
+    "JS-YAML": "^4.1.0",
+    "JSONWEBTOKEN": "^8.5.1",
+    "MD5": "^2.3.0",
+    "MKDIRP": "^1.0.4",
+    "MKDIRP-PROMISE": "^5.0.1",
+    "MOCHA": "^9.2.0",
+    "MOMENT": "^2.29.1",
+    "MONGOOSE": "^5.13.0",
+    "MORGAN": "^1.10.0",
+    "MYSQL": "^2.18.1",
+    "MYSQL2": "^2.3.3",
+    "NODE-SCHEDULE": "^2.0.0",
+    "NUNJUCKS": "^3.2.3",
+    "PARALLEL-TRANSFORM": "^1.2.0",
+    "REQUEST": "^2.88.2",
+    "SLUG": "^8.0.0",
+    "SOCKET.IO": "^4.4.1",
+    "SPLIT": "^1.0.1",
+    "STATMAN-STOPWATCH": "^2.13.0",
+    "SUPERAGENT": "^8.0.0",
+    "WS": "^8.5.0"
+  }
+}
+{
+  "NAME": "MINU_1",
+  "VERSION": "1.0.0",
+  "DESCRIPTION": "NODE TEST AND STUDY PROJECT",
+  "MAIN": "INDEX.JS",
+  "DIRECTORIES": {
+    "LIB": "LIB",
+    "TEST": "TEST"
+  },
+  "SCRIPTS": {
+    "TEST": "JEST"
+  },
+  "REPOSITORY": {
+    "TYPE": "GIT",
+    "URL": "GIT+HTTPS://GITHUB.COM/SMW0807/MINU_1.GIT"
+  },
+  "AUTHOR": "SMW0807",
+  "LICENSE": "ISC",
+  "BUGS": {
+    "URL": "HTTPS://GITHUB.COM/SMW0807/MINU_1/ISSUES"
+  },
+  "HOMEPAGE": "HTTPS://GITHUB.COM/SMW0807/MINU_1#README",
+  "DEPENDENCIES": {
+    "APP-ROOT-PATH": "^3.0.0",
+    "AXIOS": "^0.25.0",
+    "BASIC-FTP": "^5.0.1",
+    "BCRYPTJS": "^2.4.3",
+    "CHANCE": "^1.1.8",
+    "CHEERIO": "^1.0.0-RC.12",
+    "COOKIE-PARSER": "^1.4.6",
+    "CSV-PARSE": "^5.3.0",
+    "DIRECTORY-WATCHER": "^2.0.3",
+    "DOTENV": "^10.0.0",
+    "EJS": "^3.1.6",
+    "ELASTICSEARCH": "^16.7.2",
+    "EXPRESS": "^4.17.1",
+    "EXPRESS-BASIC-AUTH": "^1.2.1",
+    "EXPRESS-EJS-LAYOUTS": "^2.5.1",
+    "EXPRESS-SESSION": "^1.17.2",
+    "ICONV-LITE": "^0.6.3",
+    "IP": "^1.1.5",
+    "JEST": "^27.4.7",
+    "JS-YAML": "^4.1.0",
+    "JSONWEBTOKEN": "^8.5.1",
+    "MD5": "^2.3.0",
+    "MKDIRP": "^1.0.4",
+    "MKDIRP-PROMISE": "^5.0.1",
+    "MOCHA": "^9.2.0",
+    "MOMENT": "^2.29.1",
+    "MONGOOSE": "^5.13.0",
+    "MORGAN": "^1.10.0",
+    "MYSQL": "^2.18.1",
+    "MYSQL2": "^2.3.3",
+    "NODE-SCHEDULE": "^2.0.0",
+    "NUNJUCKS": "^3.2.3",
+    "PARALLEL-TRANSFORM": "^1.2.0",
+    "REQUEST": "^2.88.2",
+    "SLUG": "^8.0.0",
+    "SOCKET.IO": "^4.4.1",
+    "SPLIT": "^1.0.1",
+    "STATMAN-STOPWATCH": "^2.13.0",
+    "SUPERAGENT": "^8.0.0",
+    "WS": "^8.5.0"
+  }
+}

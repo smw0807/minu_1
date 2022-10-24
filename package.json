@@ -54,6 +54,7 @@
     "node-schedule": "^2.0.0",
     "nunjucks": "^3.2.3",
     "parallel-transform": "^1.2.0",
+    "pumpify": "^2.0.1",
     "request": "^2.88.2",
     "slug": "^8.0.0",
     "socket.io": "^4.4.1",
