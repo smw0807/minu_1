@@ -26,8 +26,8 @@ export class Url {
     }
     url += this.hostname;
     if (this.port) {
-      // url += `:${this.port}`
-      url += this.port;
+      url += `:${this.port}`;
+      // url += this.port;
     }
     if (this.pathname) {
       url += this.pathname;
