@@ -32,10 +32,10 @@
         <div class="collapse navbar-collapse" id="navbarNav">
           <ul class="navbar-nav">
             <li class="nav-item">
-              <a class="nav-link active" aria-current="page" href="#">Home</a>
+              <a class="nav-link active" aria-current="page" href="/">Home</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#">Features</a>
+              <a class="nav-link" href="/upload.html">Upload</a>
             </li>
             <li class="nav-item">
               <a class="nav-link" href="#">Pricing</a>
@@ -74,18 +74,48 @@
     <script>
       firebase.initializeApp(config());
       const db = firebase.firestore();
+      const storage = firebase.storage();
       $('#send').on('click', function () {
-        const title = $('#title').val();
-        const content = $('#content').val();
-        const price = $('#price').val();
-        const params = {
-          제목: title,
-          내용: content,
-          가격: parseInt(price),
-        };
-        console.log(params);
-        console.log('send!!');
-        db.collection('product').add(params);
+        const file = document.querySelector('#image').files[0];
+        //저장 경로 정하는 부분
+        const storageRef = storage.ref();
+        const path = storageRef.child('image/' + file.name);
+        //업로드
+        const fileUpload = path.put(file);
+
+        fileUpload.on(
+          'state_changed',
+          null, // 업로드 중에 상황 체크하고 싶으면 함수 만들어서 여기다 넣으면 됨(% 같은거)
+          error => {
+            console.error('fileUpload fail....', error);
+          },
+          () => {
+            fileUpload.snapshot.ref.getDownloadURL().then(url => {
+              console.log('fileUpload success ', url);
+              const title = $('#title').val();
+              const content = $('#content').val();
+              const price = $('#price').val();
+              const params = {
+                제목: title,
+                내용: content,
+                가격: parseInt(price),
+                날짜: new Date(),
+                이미지: url,
+              };
+              db.collection('product')
+                .add(params)
+                .then(rs => {
+                  console.log('insert success!!');
+                  console.log(rs);
+                  window.location.href = '/';
+                })
+                .catch(error => {
+                  console.log('insert fail...');
+                  console.log(error);
+                });
+            });
+          }
+        );
       });
     </script>
   </body>
