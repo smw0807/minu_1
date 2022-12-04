@@ -52,7 +52,16 @@
     </nav>
     <!-- ######################################################################## -->
     <div class="container mt-3">
-      <div class="product"></div>
+      <div class="mb-3">
+        <input type="text" class="form-control" placeholder="name" id="name-new" />
+      </div>
+      <div class="mb-3">
+        <input type="email" class="form-control" placeholder="email" id="email-new" />
+      </div>
+      <div class="mb-3">
+        <input type="password" class="form-control" placeholder="pw" id="pw-new" />
+      </div>
+      <button type="submit" class="btn btn-primary" id="register">가입하기</button>
     </div>
     <!-- ######################################################################## -->
     <script
@@ -73,27 +82,13 @@
     <script>
       firebase.initializeApp(config());
       const db = firebase.firestore();
-      db.collection('product')
-        .get()
-        .then(rs => {
-          rs.forEach(doc => {
-            const data = doc.data();
-            console.log(doc);
-            let template = `
-            <div class="product">
-              <div
-                class="thumbnail"
-                style="background-image: url('${data.이미지}'); width:200px; height:200px;"
-              ></div>
-              <div class="flex-grow-1 p-4">
-                <h5 class="title"><a href="/detail.html?id=${doc.id}">${data.제목}</a></h5>
-                <p class="date">2030년 1월 8일</p>
-                <p class="price">${data.가격}원</p>
-                <p class="float-end">❤️0</p>
-              </div>
-            </div>`;
-            $('.container').append(template);
-          });
+      const storage = firebase.storage();
+
+      firebase
+        .auth()
+        .signOut()
+        .then(() => {
+          window.location.href = '/';
         });
     </script>
   </body>

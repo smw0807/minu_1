@@ -38,10 +38,13 @@
               <a class="nav-link" href="/upload.html">Upload</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#">Pricing</a>
+              <a class="nav-link" href="/signup.html">SignUp</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link disabled">Disabled</a>
+              <a class="nav-link" href="/signin.html">SignIn</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/logout.html">Logout</a>
             </li>
           </ul>
         </div>
@@ -85,8 +88,7 @@
         const name = $('#name-new').val();
         const email = $('#email-new').val();
         const pw = $('#pw-new').val();
-        console.log(email);
-        console.log(pw);
+
         //로그인 관련 기능
         firebase
           .auth()
@@ -94,6 +96,9 @@
           .then(rs => {
             console.log(rs);
             console.log(rs.user);
+            rs.user.updateProfile({ displayName: name }).then(result => {
+              console.log(result);
+            });
           })
           .catch(error => {
             console.error(error);

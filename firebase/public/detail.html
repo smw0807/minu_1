@@ -51,8 +51,19 @@
       </div>
     </nav>
     <!-- ######################################################################## -->
-    <div class="container mt-3">
-      <div class="product"></div>
+    <div class="container">
+      상세페이지임
+      <div
+        class="detail-pic my-4"
+        style="background-image: url('https://placeimg.com/640/380/tech')"
+      ></div>
+      <div>
+        <h5>올린사람 : 모름</h5>
+        <hr />
+        <h5 class="title">상품명</h5>
+        <p class="date">올린날짜</p>
+        <p class="price">가격</p>
+      </div>
     </div>
     <!-- ######################################################################## -->
     <script
@@ -73,27 +84,21 @@
     <script>
       firebase.initializeApp(config());
       const db = firebase.firestore();
+      const storage = firebase.storage();
+      const query = new URLSearchParams(window.location.search);
+      const id = query.get('id');
       db.collection('product')
+        .doc(id)
         .get()
         .then(rs => {
-          rs.forEach(doc => {
-            const data = doc.data();
-            console.log(doc);
-            let template = `
-            <div class="product">
-              <div
-                class="thumbnail"
-                style="background-image: url('${data.이미지}'); width:200px; height:200px;"
-              ></div>
-              <div class="flex-grow-1 p-4">
-                <h5 class="title"><a href="/detail.html?id=${doc.id}">${data.제목}</a></h5>
-                <p class="date">2030년 1월 8일</p>
-                <p class="price">${data.가격}원</p>
-                <p class="float-end">❤️0</p>
-              </div>
-            </div>`;
-            $('.container').append(template);
-          });
+          const data = rs.data();
+          console.log(rs.data());
+          $('.title').html(data.제목);
+          $('.date').html(new Date(data.날짜.nanoseconds));
+          $('.price').html(data.가격);
+        })
+        .catch(errer => {
+          console.error(error);
         });
     </script>
   </body>
