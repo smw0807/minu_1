@@ -54,15 +54,15 @@
     <!-- ######################################################################## -->
     <div class="container">
       상세페이지임
-      <button>수정</button>
       <div class="detail-pic my-4"></div>
       <div>
-        <h5>올린사람 : 모름</h5>
+        <h5>올린사람 : <span id="writer"></span></h5>
         <hr />
         <h5 class="title">상품명</h5>
         <p class="date">올린날짜</p>
         <p class="price">가격</p>
       </div>
+      <button id="edit" class="btn btn-primary" disabled>수정</button>
     </div>
     <!-- ######################################################################## -->
     <script
@@ -86,7 +86,6 @@
     <script src="auth.js"></script>
     <script>
       const db = firebase.firestore();
-      const storage = firebase.storage();
       const query = new URLSearchParams(window.location.search);
       const id = query.get('id');
       db.collection('product')
@@ -95,14 +94,25 @@
         .then(rs => {
           const data = rs.data();
           console.log(rs.data());
+          $('#writer').html(data.이름);
           $('.title').html(data.제목);
           $('.date').html(new Date(data.날짜.nanoseconds));
           $('.price').html(data.가격);
           $('.detail-pic').css('background-image', `url(${data.이미지})`);
+
+          const user = localStorage.getItem('user');
+          const uid = JSON.parse(user).uid;
+          if (uid === data.uid) {
+            $('#edit').removeAttr('disabled');
+          }
         })
         .catch(errer => {
           console.error(error);
         });
+
+      $('#edit').click(function () {
+        window.location.href = `edit.html?id=${id}`;
+      });
     </script>
   </body>
 </html>

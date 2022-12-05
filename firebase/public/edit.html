@@ -57,7 +57,7 @@
       <textarea class="form-control mt-2" id="content">content</textarea>
       <input type="text" class="form-control mt-2" id="price" placeholder="price" />
       <input class="form-control mt-2" type="file" id="image" />
-      <button class="btn btn-danger mt-3" id="send">올리기</button>
+      <button class="btn btn-danger mt-3" id="send">수정하기</button>
     </div>
     <!-- ######################################################################## -->
     <script
@@ -87,7 +87,23 @@
       const uid = JSON.parse(user).uid;
       const name = JSON.parse(user).displayName;
 
-      $('#send').on('click', function () {
+      const query = new URLSearchParams(window.location.search);
+      const id = query.get('id');
+      db.collection('product')
+        .doc(id)
+        .get()
+        .then(rs => {
+          const data = rs.data();
+          console.log(rs.data());
+          $('#title').val(data.제목);
+          $('#content').val(data.내용);
+          $('#price').val(data.가격);
+        })
+        .catch(errer => {
+          console.error(error);
+        });
+
+      $('#send').click(function () {
         const file = document.querySelector('#image').files[0];
         //저장 경로 정하는 부분
         const storageRef = storage.ref();
@@ -117,7 +133,8 @@
                 이름: name,
               };
               db.collection('product')
-                .add(params)
+                .doc(id)
+                .update(params)
                 .then(rs => {
                   console.log('insert success!!');
                   console.log(rs);
