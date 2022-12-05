@@ -80,18 +80,9 @@
     <script>
       firebase.initializeApp(config());
     </script>
+    <script src="auth.js"></script>
     <script>
       const db = firebase.firestore();
-
-      const ls = localStorage.getItem('user');
-      $('#userName').html(JSON.parse(ls).displayName);
-      firebase.auth().onAuthStateChanged(user => {
-        if (user) {
-          console.log(user);
-          localStorage.setItem('user', JSON.stringify(user));
-          $('#userName').html(`[${user.displayName}]`);
-        }
-      });
 
       $('#login').click(() => {
         const email = $('#email').val();
@@ -100,6 +91,7 @@
           .auth()
           .signInWithEmailAndPassword(email, pw)
           .then(rs => {
+            localStorage.setItem('user', JSON.stringify(rs));
             console.log(rs);
           });
       });
