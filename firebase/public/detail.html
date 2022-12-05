@@ -53,10 +53,8 @@
     <!-- ######################################################################## -->
     <div class="container">
       상세페이지임
-      <div
-        class="detail-pic my-4"
-        style="background-image: url('https://placeimg.com/640/380/tech')"
-      ></div>
+      <button>수정</button>
+      <div class="detail-pic my-4"></div>
       <div>
         <h5>올린사람 : 모름</h5>
         <hr />
@@ -83,6 +81,8 @@
     <script src="config.js"></script>
     <script>
       firebase.initializeApp(config());
+    </script>
+    <script>
       const db = firebase.firestore();
       const storage = firebase.storage();
       const query = new URLSearchParams(window.location.search);
@@ -96,6 +96,7 @@
           $('.title').html(data.제목);
           $('.date').html(new Date(data.날짜.nanoseconds));
           $('.price').html(data.가격);
+          $('.detail-pic').css('background-image', `url(${data.이미지})`);
         })
         .catch(errer => {
           console.error(error);
