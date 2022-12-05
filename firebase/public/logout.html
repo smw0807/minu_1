@@ -51,18 +51,7 @@
       </div>
     </nav>
     <!-- ######################################################################## -->
-    <div class="container mt-3">
-      <div class="mb-3">
-        <input type="text" class="form-control" placeholder="name" id="name-new" />
-      </div>
-      <div class="mb-3">
-        <input type="email" class="form-control" placeholder="email" id="email-new" />
-      </div>
-      <div class="mb-3">
-        <input type="password" class="form-control" placeholder="pw" id="pw-new" />
-      </div>
-      <button type="submit" class="btn btn-primary" id="register">가입하기</button>
-    </div>
+
     <!-- ######################################################################## -->
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
@@ -92,6 +81,7 @@
             localStorage.removeItem('user');
           });
       }
+      logout();
     </script>
   </body>
 </html>
