@@ -56,13 +56,14 @@
       상세페이지임
       <div class="detail-pic my-4"></div>
       <div>
-        <h5>올린사람 : <span id="writer"></span></h5>
+        <h5>올린사람 : <span class="author">몰라</span></h5>
         <hr />
         <h5 class="title">상품명</h5>
         <p class="date">올린날짜</p>
         <p class="price">가격</p>
       </div>
       <button id="edit" class="btn btn-primary" disabled>수정</button>
+      <button id="chat" class="btn btn-outline-secondary" disabled>채팅</button>
     </div>
     <!-- ######################################################################## -->
     <script
@@ -88,13 +89,18 @@
       const db = firebase.firestore();
       const query = new URLSearchParams(window.location.search);
       const id = query.get('id');
+
+      let seller = '';
+      let product = '';
       db.collection('product')
         .doc(id)
         .get()
         .then(rs => {
           const data = rs.data();
           console.log(rs.data());
-          $('#writer').html(data.이름);
+          seller = data.uid;
+          product = data.제목;
+          $('.author').html(data.이름);
           $('.title').html(data.제목);
           $('.date').html(new Date(data.날짜.nanoseconds));
           $('.price').html(data.가격);
@@ -105,6 +111,9 @@
           if (uid === data.uid) {
             $('#edit').removeAttr('disabled');
           }
+          if (uid) {
+            $('#chat').removeAttr('disabled');
+          }
         })
         .catch(errer => {
           console.error(error);
@@ -112,6 +121,25 @@
 
       $('#edit').click(function () {
         window.location.href = `edit.html?id=${id}`;
+      });
+      //언제, 참여자
+      $('#chat').click(function () {
+        const user = localStorage.getItem('user');
+        const uid = JSON.parse(user).uid;
+        const params = {
+          who: [uid, seller],
+          product: product,
+          date: new Date(),
+        };
+        db.collection('chatroom')
+          .add(params)
+          .then(rs => {
+            console.log(rs);
+            window.location.href = `chat.html?id=${rs.id}`;
+          })
+          .catch(error => {
+            console.error(error);
+          });
       });
     </script>
   </body>

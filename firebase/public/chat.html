@@ -52,17 +52,30 @@
       </div>
     </nav>
     <!-- ######################################################################## -->
-    <div class="container mt-3">
-      <div class="mb-3">
-        <input type="text" class="form-control" placeholder="name" id="name-new" />
+    <div class="container p-4 detail">
+      <div class="row">
+        <div class="col-3 p-0">
+          <ul class="list-group chat-list">
+            <li class="list-group-item">
+              <h6>채팅방1</h6>
+              <h6 class="text-small">채팅방아이디</h6>
+            </li>
+          </ul>
+        </div>
+        <div class="col-9 p-0">
+          <div class="chat-room">
+            <ul class="list-group chat-content">
+              <li><span class="chat-box">채팅방1 내용</span></li>
+              <li><span class="chat-box">채팅방1 내용</span></li>
+              <li><span class="chat-box mine">채팅방1 내용</span></li>
+            </ul>
+            <div class="input-group">
+              <input class="form-control" id="chat-input" />
+              <button class="btn btn-secondary" id="send">전송</button>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="mb-3">
-        <input type="email" class="form-control" placeholder="email" id="email-new" />
-      </div>
-      <div class="mb-3">
-        <input type="password" class="form-control" placeholder="pw" id="pw-new" />
-      </div>
-      <button type="submit" class="btn btn-primary" id="register">가입하기</button>
     </div>
     <!-- ######################################################################## -->
     <script
@@ -86,28 +99,55 @@
     <script src="auth.js"></script>
     <script>
       const db = firebase.firestore();
-      const storage = firebase.storage();
+      const query = new URLSearchParams(window.location.search);
+      const id = query.get('id');
 
-      $('#register').click(() => {
-        const name = $('#name-new').val();
-        const email = $('#email-new').val();
-        const pw = $('#pw-new').val();
+      let seller = '';
+      let product = '';
+      // db.collection('product')
+      //   .doc(id)
+      //   .get()
+      //   .then(rs => {
+      //     const data = rs.data();
+      //     console.log(rs.data());
+      //     seller = data.uid;
+      //     product = data.제목;
+      //     $('.author').html(data.이름);
+      //     $('.title').html(data.제목);
+      //     $('.date').html(new Date(data.날짜.nanoseconds));
+      //     $('.price').html(data.가격);
+      //     $('.detail-pic').css('background-image', `url(${data.이미지})`);
 
-        //로그인 관련 기능
-        firebase
-          .auth()
-          .createUserWithEmailAndPassword(email, pw)
+      //     const user = localStorage.getItem('user');
+      //     const uid = JSON.parse(user).uid;
+      //     if (uid === data.uid) {
+      //       $('#edit').removeAttr('disabled');
+      //     }
+      //     if (uid) {
+      //       $('#chat').removeAttr('disabled');
+      //     }
+      //   })
+      //   .catch(errer => {
+      //     console.error(error);
+      //   });
+
+      $('#edit').click(function () {
+        window.location.href = `edit.html?id=${id}`;
+      });
+      //언제, 참여자
+      $('#chat').click(function () {
+        const user = localStorage.getItem('user');
+        const uid = JSON.parse(user).uid;
+        const params = {
+          who: [uid, seller],
+          product: product,
+          date: new Date(),
+        };
+        db.collection('chatroom')
+          .add(params)
           .then(rs => {
             console.log(rs);
-            console.log(rs.user);
-            const params = {
-              email: email,
-              name: name,
-            };
-            db.collection('user').doc(rs.user.uid).set(params);
-            rs.user.updateProfile({ displayName: name }).then(result => {
-              console.log(result);
-            });
+            window.location.href = `chat.html?id=${rs.id}`;
           })
           .catch(error => {
             console.error(error);
