@@ -57,8 +57,8 @@
         <div class="col-3 p-0">
           <ul class="list-group chat-list">
             <li class="list-group-item">
-              <h6>채팅방1</h6>
-              <h6 class="text-small">채팅방아이디</h6>
+              <!-- <h6>채팅방1</h6>
+              <h6 class="text-small">채팅방아이디</h6> -->
             </li>
           </ul>
         </div>
@@ -99,60 +99,25 @@
     <script src="auth.js"></script>
     <script>
       const db = firebase.firestore();
-      const query = new URLSearchParams(window.location.search);
-      const id = query.get('id');
-
-      let seller = '';
-      let product = '';
-      // db.collection('product')
-      //   .doc(id)
-      //   .get()
-      //   .then(rs => {
-      //     const data = rs.data();
-      //     console.log(rs.data());
-      //     seller = data.uid;
-      //     product = data.제목;
-      //     $('.author').html(data.이름);
-      //     $('.title').html(data.제목);
-      //     $('.date').html(new Date(data.날짜.nanoseconds));
-      //     $('.price').html(data.가격);
-      //     $('.detail-pic').css('background-image', `url(${data.이미지})`);
-
-      //     const user = localStorage.getItem('user');
-      //     const uid = JSON.parse(user).uid;
-      //     if (uid === data.uid) {
-      //       $('#edit').removeAttr('disabled');
-      //     }
-      //     if (uid) {
-      //       $('#chat').removeAttr('disabled');
-      //     }
-      //   })
-      //   .catch(errer => {
-      //     console.error(error);
-      //   });
-
-      $('#edit').click(function () {
-        window.location.href = `edit.html?id=${id}`;
-      });
-      //언제, 참여자
-      $('#chat').click(function () {
-        const user = localStorage.getItem('user');
-        const uid = JSON.parse(user).uid;
-        const params = {
-          who: [uid, seller],
-          product: product,
-          date: new Date(),
-        };
-        db.collection('chatroom')
-          .add(params)
-          .then(rs => {
-            console.log(rs);
-            window.location.href = `chat.html?id=${rs.id}`;
-          })
-          .catch(error => {
-            console.error(error);
+      const user = localStorage.getItem('user');
+      const uid = JSON.parse(user).uid;
+      //내가 들어가있는 채팅방 목록 가져오기
+      db.collection('chatroom')
+        .where('who', 'array-contains', uid)
+        .get()
+        .then(rs => {
+          console.log(rs);
+          rs.forEach(a => {
+            console.log(a.data());
+            var template = `<li class="list-group-item">
+            <h6>${a.data().product}</h6>
+            <h6 class="text-small">${a.id}</h6>
+          </li>`;
+            $('.chat-list').append(template);
           });
-      });
+        });
+
+      $('#send').click(function () {});
     </script>
   </body>
 </html>
