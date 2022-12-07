@@ -55,19 +55,14 @@
     <div class="container p-4 detail">
       <div class="row">
         <div class="col-3 p-0">
-          <ul class="list-group chat-list">
-            <li class="list-group-item">
-              <!-- <h6>채팅방1</h6>
-              <h6 class="text-small">채팅방아이디</h6> -->
-            </li>
-          </ul>
+          <ul class="list-group chat-list"></ul>
         </div>
         <div class="col-9 p-0">
           <div class="chat-room">
             <ul class="list-group chat-content">
+              <!-- <li><span class="chat-box">채팅방1 내용</span></li>
               <li><span class="chat-box">채팅방1 내용</span></li>
-              <li><span class="chat-box">채팅방1 내용</span></li>
-              <li><span class="chat-box mine">채팅방1 내용</span></li>
+              <li><span class="chat-box mine">채팅방1 내용</span></li> -->
             </ul>
             <div class="input-group">
               <input class="form-control" id="chat-input" />
@@ -99,25 +94,77 @@
     <script src="auth.js"></script>
     <script>
       const db = firebase.firestore();
+      const query = new URLSearchParams(window.location.search);
+      let chatroomId = query.get('id');
+
       const user = localStorage.getItem('user');
       const uid = JSON.parse(user).uid;
+
       //내가 들어가있는 채팅방 목록 가져오기
       db.collection('chatroom')
         .where('who', 'array-contains', uid)
         .get()
         .then(rs => {
-          console.log(rs);
           rs.forEach(a => {
-            console.log(a.data());
             var template = `<li class="list-group-item">
-            <h6>${a.data().product}</h6>
-            <h6 class="text-small">${a.id}</h6>
-          </li>`;
+              <h6>${a.data().product}</h6>
+              <h6 class="text-small">${a.id}</h6>
+            </li>`;
             $('.chat-list').append(template);
           });
+          getMessages();
         });
 
-      $('#send').click(function () {});
+      function getMessages() {
+        db.collection('chatroom')
+          .doc(chatroomId)
+          .collection('messages')
+          .orderBy('date')
+          //onSnapshot 실시간으로 디비가 변경되면 반응함
+          .onSnapshot(rs => {
+            $('.chat-content').html('');
+            rs.forEach(doc => {
+              if (uid === doc.data().uid) {
+                $('.chat-content').append(
+                  `<li><span class="chat-box mine">${doc.data().content}</span></li>`
+                );
+              } else {
+                $('.chat-content').append(
+                  `<li><span class="chat-box">${doc.data().content}</span></li>`
+                );
+              }
+            });
+          });
+      }
+
+      $('.list-group-item').click(function (e) {
+        console.log('????');
+        chatroomId = $(this).children('.text-small').text();
+        e.stopImmediatePropagation();
+        getMessages();
+      });
+
+      $('#send').click(function () {
+        const params = {
+          content: $('#chat-input').val(),
+          date: new Date(),
+          uid: uid,
+        };
+        db.collection('chatroom')
+          .doc(chatroomId)
+          .collection('messages')
+          .add(params)
+          .then(rs => {
+            console.log(rs);
+            $('.chat-content').append(
+              `<li><span class="chat-box mine">${$('#chat-input').val()}</span></li>`
+            );
+            $('#chat-input').val('');
+          })
+          .catch(error => {
+            console.error(error);
+          });
+      });
     </script>
   </body>
 </html>
