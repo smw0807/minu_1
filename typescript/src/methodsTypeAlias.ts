@@ -72,3 +72,29 @@ const run1 = (x: string, cutZero: CutType, removeDash: RemoveType): void => {
   console.log(remove); //1012345678
 };
 run1('010-1234-5678', cutZero, removeDash);
+
+type Params = {
+  a: number;
+  b: number;
+};
+type MathType = {
+  a: number;
+  b: number;
+  plus: () => number;
+  minus: () => number;
+};
+let mathMethods: MathType = {
+  a: 1,
+  b: 2,
+  plus() {
+    return this.a + this.b;
+  },
+  minus() {
+    return this.a - this.b;
+  },
+};
+console.log(mathMethods);
+console.log(mathMethods.a); //1
+console.log(mathMethods.b); //2
+console.log(mathMethods.plus()); //3
+console.log(mathMethods.minus()); //-1
