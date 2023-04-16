@@ -1,15 +1,15 @@
 import { mailSand } from './mailSender.js'
 
-const params = {
-  to: 'a@naver.com',
-  subject: 'TEST',
-  text: 'This is text...',
-  html: null
-}
-
 var run = (async function() {
   try {
-    const result = await mailSand();
+    const params = {
+      to: 'minwoo2596@',
+      subject: '이메일 테스트',
+      // text: '테스트 이메일 입니다.',
+      html: `<h1>안녕하세요.</h1><p>이메일 테스트 중 입니다...</p>`
+    }
+
+    const result = await mailSand(params);
     console.log('result : ', result);
   } catch (err) {
     console.error(err);
