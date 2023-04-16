@@ -45,9 +45,9 @@ class Mail {
         pass: pass
       }
     });
-
-
   }
+
+  
 }
 
 export const mailSand = () => {

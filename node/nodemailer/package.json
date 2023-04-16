@@ -5,7 +5,7 @@
   "description": "NodeJS nodemailer",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node run.js",
     "start": "node index.js"
   },
   "author": "",

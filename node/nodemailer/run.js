@@ -6,11 +6,11 @@ const params = {
   text: 'This is text...',
   html: null
 }
-(() => {
+
+var run = (async function() {
   try {
-    // const result = await mailSand();
-    // console.log('result : ', result);
-    console.log('test')
+    const result = await mailSand();
+    console.log('result : ', result);
   } catch (err) {
     console.error(err);
   }
