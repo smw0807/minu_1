@@ -4,6 +4,7 @@ JavaScript로 정의된 변수, 함수, 모듈 등을 재정의할 때 사용함
 
 ```typescript
 declare let a: number;
+declare let b;
 declare module 'vue-timeago3';
 ```
 
