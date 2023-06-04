@@ -2,7 +2,6 @@ const express = require('express');
 const expressLayouts = require('express-ejs-layouts');
 const app = express();
 const path = require('path');
-const bodyParser = require('body-parser');
 const session = require('express-session');
 /**
  * 정적파일(Static files) 사용하기
@@ -18,7 +17,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 //express-ejs-layouts setting
 app.use(expressLayouts);
 app.set('layout', 'layout');
-app.set("layout extractScripts", true);
+app.set('layout extractScripts', true);
 
 //서버가 읽을 수 있도록 HTML의 위치를 정의해줌
 app.set('views', __dirname + '/views');
@@ -28,17 +27,18 @@ app.engine('html', require('ejs').renderFile);
 
 var util = require('./util');
 
-const server = app.listen(3000, function() {
-    console.log ("Server Start... [" + util.dateFormat('yyyy-MM-dd HH:mm:ss E') + ']');
+const server = app.listen(3000, function () {
+  console.log('Server Start... [' + util.dateFormat('yyyy-MM-dd HH:mm:ss E') + ']');
 });
 
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded());
-app.use(session({
-    secret: 'dhkffk!23#',   //쿠키를 임의로 변조하는 것을 방지하기 위한 sign값, 원하는 값을 넣으면 된다.
-    resave: false,          //세션을 언제나 저장할 지(변경되지 않아도) 정하는 값, express-session documentation에서는 false를 권장함, 필요에 따라 true로 설정
-    saveUninitialized: true //uninitialized 세션이란 새로 생겼지만 변경되지 않은 세션을 의미함, documentaion에서는 true로 설정하는 것을 권장함
-}))
+app.use(express.json());
+app.use(
+  session({
+    secret: 'dhkffk!23#', //쿠키를 임의로 변조하는 것을 방지하기 위한 sign값, 원하는 값을 넣으면 된다.
+    resave: false, //세션을 언제나 저장할 지(변경되지 않아도) 정하는 값, express-session documentation에서는 false를 권장함, 필요에 따라 true로 설정
+    saveUninitialized: true, //uninitialized 세션이란 새로 생겼지만 변경되지 않은 세션을 의미함, documentaion에서는 true로 설정하는 것을 권장함
+  })
+);
 
 //라우터 모듈인 main.js를 불러와서 app에 전달해준다.
 // var main = require('./route/main')(app, conf, fs, util);
