@@ -91,3 +91,8 @@ enhancedCalculator.putValue(3);
 console.log(enhancedCalculator.add()); // 4 + 3 = 7
 enhancedCalculator.putValue(2);
 console.log(enhancedCalculator.multiply()); // 7 * 2 = 14
+/**
+ * 컴포지션을 사용하면 데코레이트되는 컴포넌트는 일반적으로 이를 상속한 새로운 객체로 감싸진다.
+ * 이 경우 데코레이터는 기존 함수들을 원래 컴포넌트에 위임하면서 새로운 함수를 정의하기만 하면 된다.
+ * add() 함수를 만들고 원래 divide() 함수의 동작을 개선하고 그 외의 함수는 원래 객체에 위임
+ */
