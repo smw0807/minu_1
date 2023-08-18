@@ -6,6 +6,6 @@ export const iniStrategy = {
 };
 
 export const jsonStrategy = {
-  deserialize: data => ini.parse(data),
-  serialize: data => ini.stringify(data, null, '  '),
+  deserialize: data => JSON.parse(data),
+  serialize: data => JSON.stringify(data, null, '  '),
 };
