@@ -57,3 +57,77 @@ export class ConfigTemplate {
   }
 }
 ```
+
+\_serialize(), \_deserialize() 함수의 구현은 열어둔다.  
+이는 실제로 특정 환경설정 형식을 지원하는 구체적인 Config 클래스를 생성할 수 있도록 하는 템플릿 함수이다.  
+템플릿 함수 이름의 시작 부분에 있는 밑줄은 보호된 함수에 플래그를 지정하는 간편한 방법으로 내부 전용임을 나타낸다.  
+JavaScript에서는 함수를 추상으로 선언할 수 없기 때문에 **단순한 모형(stubs)**으로 정의하여 호출되면(즉, 구체적인 하위 클래스에 의해 재정의되지 않은 경우) 오류를 발생시킨다.
+
+이제 템플릿을 이용해 구체적인 클래스를 생성해보자.  
+예를 들어, JSON 형식으로 사용하여 구성을 로드하고 저장할 수 있다.
+
+```jsx
+//jsonConfig.js
+import { ConfigTemplate } from './ConfigTemplate.js';
+
+export class JsonConfig extends ConfigTemplate {
+  _deserialize(data) {
+    return JSON.parse(data);
+  }
+
+  _serialize(data) {
+    return JSON.stringify(data, null, ' ');
+  }
+}
+```
+
+JsonConfig 클래스는 템플릿 클래스인 ConfigTemplate를 확장하고 \_deserialize(), \_serialize() 함수에 대한 구체적인 구현을 제공한다.
+
+마찬가지로 .ini 파일 형식을 지원하는 IniConfig 클래스도 구현해보자.
+
+```jsx
+import { ConfigTemplate } from './ConfigTemplate.js';
+import ini from 'ini';
+
+export class IniConfig extends ConfigTemplate {
+  _deserialize(data) {
+    return ini.parse(data);
+  }
+
+  _serialize(data) {
+    return ini.stringify(data);
+  }
+}
+```
+
+이제 구체적은 환경설정 관리자 클래스를 사용하여 일부 환경설정 데이터를 로드하고 저장할 수 있다.
+
+```jsx
+import { JsonConfig } from './jsonConfig.js';
+import { IniConfig } from './iniConfig.js';
+
+async function main() {
+  const jsonConfig = new JsonConfig();
+  await jsonConfig.load('samples/conf.json');
+  jsonConfig.set('nodejs', 'design patterns');
+  await jsonConfig.save('samples/conf_mod.json');
+
+  const iniConfig = new IniConfig();
+  await iniConfig.load('samples/conf.ini');
+  iniConfig.set('nodejs', 'design pattern');
+  await iniConfig.save('samples/conf_mod.ini');
+}
+
+main();
+```
+
+전략 패턴과의 차이점에 유의해야 한다.  
+환경설정 데이터를 형식화하고 구문을 분석하는 로직은 런타임에 결정되지 않고 클래스 자체에 포함되어 있다.
+
+템플릿 패턴을 사용하여 부모 템플릿 클래스에 상속된 로직과 인터페이스들을 재사용하고 몇 가지 추상 함수의 구현만을 제공함으로써 최소한의 작업만으로도 새로운 환경설정 관리자를 만들 수 있다.
+
+## 9-3-2 실전에서
+
+6장에서 사용자 정의 스트림을 구현하기 위해 다른 스트림 클래스를 확장할 때 사용했었다.  
+거기서 템플릿 함수는 구현하려는 스트림 클래스에 따라 \_write(), \_read(), \_transform(), \_flash() 함수가 템플릿 함수였다.  
+새로운 사용자 정의 스트림을 생성하려면 특정 추상 스트림 클래스에서 상속을 받아 템플릿 함수들에 대한 구현을 제공해야 했다.
