@@ -77,3 +77,85 @@ while (!iterator.done) {
 두 함수 모두 기본적인 반복자에서는 거의 사용되지 않는다.
 
 </aside>
+
+## 9-4-2 반복가능자(iterable) 프로토콜
+
+반복가능자(iterable) 프로토콜은 객체가 반복자를 반환하는 표준화된 방법을 정의한다.  
+이러한 객체를 **반복가능자**(iterable)라고 한다.  
+일반적으로 반복가능자는 요소들의 컨테이너로 데이터구조와 같은 것이지만, 디렉터리의 파일들을 반복할 수 있도록 하는 Directory 객체와 같이 요소들의 집합을 가상적으로 나타내는 객체일 수도 있다.
+
+JavaScript에서 우리는 **@@iterator 함수**, 달리 말해, 내장 심볼인 Symbol.iterator 함수를 통해 접근 가능한 함수를 구현하여 반복가능자를 정의할 수 있다.
+
+@@iterator 함수는 반복자 객체를 반환해야 하며, 반복자 객체에서 표현되는 요소들을 반복하는 데 사용할 수 있다.
+
+```tsx
+//matrix.mjs
+export class Matrix {
+  constructor(inMatrix) {
+    this.data = inMatrix;
+  }
+
+  get(row, column) {
+    if (row >= this.data.length || column >= this.data[row].length) {
+      throw new RangeError('Out of bounds');
+    }
+    return this.data[row][column];
+  }
+
+  set(row, column, value) {
+    if (row >= this.data.length || column >= this.data[row].length) {
+      throw new RangeError('Out of bounds');
+    }
+    this.data[row][column] = value;
+  }
+
+  [Symbol.iterator]() {
+    let nextRow = 0;
+    let nextCol = 0;
+
+    return {
+      next: () => {
+        if (nextRow === this.data.length) {
+          return { done: true };
+        }
+        const currVar = this.data[nextRow][nextCol];
+        if (nextCol == this.data[nextRow].length - 1) {
+          nextRow++;
+          nextCol = 0;
+        } else {
+          nextCol++;
+        }
+
+        return { value: currVar };
+      },
+    };
+  }
+}
+```
+
+클래스에는 행렬의 값을 획득하고 설정하는 기본적인 함수들과 반복가능자 프로토콜을 구현하는 @@iterator 함수가 포함되어 있다.  
+@@iterator 함수는 반복가능자 프로토콜에 지정된 대로 반복자를 반환하며 이 반복자는 반복자 프로토콜을 준수한다.
+
+로직은 각 행의 각 열을 스캔하여 왼쪽 상단에서 오른쪽 하단으로 이동하며 반환한다.  
+nextRow와 nextCol이라는 두 인덱스를 사용하여 이를 수행한다.
+
+```tsx
+//index.mjs
+import { Matrix } from './matrix.mjs';
+
+const matrix2x2 = new Matrix([
+  ['11', '12'],
+  ['21', '22'],
+]);
+
+const iterator = matrix2x2[Symbol.iterator]();
+let iteratorResult = iterator.next();
+while (!iteratorResult.done) {
+  console.log(iteratorResult.value);
+  iteratorResult = iterator.next();
+}
+//11
+//12
+//21
+//22
+```
