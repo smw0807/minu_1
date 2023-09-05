@@ -159,3 +159,81 @@ while (!iteratorResult.done) {
 //21
 //22
 ```
+
+## 9-4-3 네이티브 JavaScript 인터페이스로서의 iterator와 iterable
+
+표준화된 인터페이스를 가지면 위 두 가지 프로토콜을 중심으로 언어 자체뿐만 아니라 제3자의 코드를 모델링할 수 있다.  
+이런 식으로 반복가능자를 입력 받는 문장뿐 아니라 API도 가질 수 있게 된다.  
+반복가능자를 허용하는 가장 분명한 구문은 for..of 루프이다.
+
+```tsx
+import { Matrix } from '../iterable/matrix.mjs';
+
+const matrix2x2 = new Matrix([
+  ['11', '12'],
+  ['21', '22'],
+]);
+
+for (const element of matrix2x2) {
+  console.log(element);
+}
+/**
+11
+12
+21
+22
+ */
+```
+
+반복가능자와 호환되는 또 다른 구조는 전개 구문(spread operator)이다.
+
+```tsx
+import { Matrix } from '../iterable/matrix.mjs';
+
+const matrix2x2 = new Matrix([
+  ['11', '12'],
+  ['21', '22'],
+]);
+
+const flattenedMatrix = [...matrix2x2];
+console.log(flattenedMatrix); //[ '11', '12', '21', '22' ]
+```
+
+비슷하게, 구조 분해 할당(destructuring assignment)과 함께 반복가능자를 사용할 수도 있다.
+
+```tsx
+import { Matrix } from '../iterable/matrix.mjs';
+
+const matrix2x2 = new Matrix([
+  ['11', '12'],
+  ['21', '22'],
+]);
+
+const [a, b, c, d] = matrix2x2;
+console.log(a, b, c, d); //11 12 21 22
+
+const [a1, b1, c1, d1] = [...matrix2x2]; //확인해보고 싶어서 작성한거...
+console.log(a1, b1, c1, d1); //11 12 21 22
+```
+
+이 외에 아래는 반복가능자를 허용하는 JavaScript 내장 API이다.
+
+- Map([iterable])
+- WeakMap([iterable])
+- Set([iterable])
+- WeakSet([iterable])
+- Promise.all(iterable)
+- Promise.race(iterable)
+- Array.from(iterable)
+
+노드 측면에서 반복가능자를 허용하는 주목할 만한 API는 stream.Readable, from(iterable, [options])이며, 반복가능자 객체를 읽어 스트림을 생성한다.  
+Javascript 자체는 위에 본 API 및 구조에서 함께 사용할 수 있는 많은 반복가능자를 정의하고 있다.  
+가장 볼만한 반복가능자는 Array이지만, Map 및 Set과 같은 다른 데이터 구조, 심지어는 String 조차도 @@iterator 함수를 구현하고 있다.  
+Node.js 영역에서 Buffer는 아마도 가장 주목할 만한 반복가능자일 것이다.
+
+<aside>
+💡 배열에 중복 요소가 포함되어 있지 않은지 확인하는 방법은 다음과 같다.   
+uniqArray = Array.from(new Set(arrayWithDuplicates)).   
+이것은 또한 반복가능자가 어떻게 공유 인터페이스를 사용하여 서로 다른 구성 요소끼리 통신할 수 있는 방법을 제공하는지 보여준다.
+
+</aside>
