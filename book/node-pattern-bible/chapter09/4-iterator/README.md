@@ -237,3 +237,72 @@ uniqArray = Array.from(new Set(arrayWithDuplicates)).
 이것은 또한 반복가능자가 어떻게 공유 인터페이스를 사용하여 서로 다른 구성 요소끼리 통신할 수 있는 방법을 제공하는지 보여준다.
 
 </aside>
+
+## 9-4-4 제네레이터
+
+ES2015(ES6) 사양은 반복자와 미접하게 관련된 구문 구조를 도입했다.  
+**세미코루틴**(semicoroutines)이라고 하는 **제네레이터**에 대해 이야기할 것이다.  
+이것은 다른 진입점이 있을 수 있는 표준 함수를 일반화 한다.
+
+표준 함수에서는 함수 자체의 호출에 해당하는 진입점을 하나만 가질 수 있지만 제네레이터는 (yield 문을 사용하여) 일시 중단된 다음 나중에 해당 지점에서 다시 시작할 수 있다.  
+무엇보다도, 제네레이터는 반복자를 구현하는데 매우 적합하다.  
+제네레이터 함수에서 반환하는 제네레이터 객체는 실제로 반복자면서 반복가능자이다.
+
+### 이론상의 제네레이터
+
+```tsx
+function* myGenerator() {
+  //제네레이터의 바디 부분
+}
+```
+
+제네레이터 함수를 호출해도 바로 본문이 실행되지는 않고, 반복자이면서 반복가능자인 **제네레이터 객체**를 반환한다.  
+그리고 제네레이터 객체에서 next()를 호출하면 yield 명령어가 호출되거나 제네레이터에서 반환이 발생할 때까지(암시적 혹은 명시적인 반환 명령어로) 제네레이터의 실행을 시작하거나 재개한다.
+
+제네레이터 내에서 yield 키워드 다음에 값 x를 반환하는 것은 반복자에서 `{ done: false, value: x }` 를 반환하는 것과 같고,  
+제네에이터가 종료되며 x를 반환하는 것은 반복자에서 `{ done: true, value: x }` 를 반환하는 것과 같다.
+
+### 간단한 제네레이터 함수
+
+아래는 위에서 설명한 내용을 보여주기 위한 제네레이터 소스이다.
+
+```tsx
+//fruitGenerator.js
+function* fruitGenerator() {
+  yield 'peach';
+  yield 'watermelon';
+  return 'summer';
+}
+
+const fruitGeneratorObj = fruitGenerator();
+console.log(fruitGeneratorObj);
+console.log(fruitGeneratorObj.next()); // 1
+console.log(fruitGeneratorObj.next()); // 2
+console.log(fruitGeneratorObj.next()); // 3
+/**
+Object [Generator] {}
+{ value: 'peach', done: false }
+{ value: 'watermelon', done: false }
+{ value: 'summer', done: true }
+ */
+```
+
+1. fruitGeneratorObj.next()가 처음 호출되었을 때 제네레이터는 첫 번째 yield 명령에 도달할 때까지 실행을 계속하여 제네레이터를 일시 중지하고 호출자에게 ‘peach’ 값을 반환한다.
+2. fruitGeneratorObj.next()의 두 번째 호출에서 제네레이트는 두 번째 yield 명령에서 다시 일시 정지하고 호출자에게 ‘watermelon’ 값을 반환한다.
+3. fruitGeneratorObj.next()의 마지막 호출로 인해 제네레이터의 실행은 마지막 명령인 return 문에서 재개된다.
+   이는 제네레이터를 종료하고 ‘summer’ 값과 함께 done 속성이 true로 설정된 객체를 반환한다.  
+
+
+제네레이터도 반복 가능하므로 for…of 루프에서 사용할 수 있다.
+
+```tsx
+for (const fruit of fruitGenerator()) {
+  console.log(fruit);
+}
+/**
+peach
+watermelon
+
+summer는 제네레이터에 의해 생성되는 값이 아니라 반복이 종료되어 반환하는(요소가 아닌) 값이기 때문에 출력하지 않음
+ */
+```
