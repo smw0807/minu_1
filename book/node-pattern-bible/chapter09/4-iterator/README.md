@@ -380,3 +380,66 @@ Using return():
 twoWayException은 첫 번째 yield 명령어가 반환되는 즉시 예외가 발생한다.  
 이것은 제네레이터 내부에 예외가 발생하는 것과 똑같이 동작하며 이것은 try/catch 블록을 사용하여 다른 예외처럼 포착하고 처리할 수 있음을 의미한다.  
 대신 return() 함수는 제네레이터의 실행을 중지하고 주어진 값이 제네레이터에 의해 반환값으로 제공되도록 한다.
+
+### 반복자 대신 제네레이터를 사용하는 방법
+
+제네레이터 객체도 반복자이다.  
+제네레이터 함수를 사용하여 반복가능자 객체의 @@iterator 함수를 구현할 수 있다.  
+아래는 반복가능자에서 만들었던 matric.js 파일을 제네레이터로 변환한 코드이다.
+
+```tsx
+export class Matrix {
+  constructor(inMatrix) {
+    this.data = inMatrix;
+  }
+
+  get(row, column) {
+    if (row >= this.data.length || column >= this.data[row].length) {
+      throw new RangeError('Out of bounds');
+    }
+    return this.data[row][column];
+  }
+
+  set(row, column, value) {
+    if (row >= this.data.length || column >= this.data[row].length) {
+      throw new RangeError('Out of bounds');
+    }
+    this.data[row][column] = value;
+  }
+
+  //1
+  *[Symbol.iterator]() {
+    //2
+    let nextRow = 0;
+    let nextCol = 0;
+    //3
+    while (nextRow !== this.data.length) {
+      yield this.data[nextRow][nextCol];
+
+      if (nextCol == this.data[nextRow].length - 1) {
+        nextRow++;
+        nextCol = 0;
+      } else {
+        nextCol++;
+      }
+    }
+  }
+}
+```
+
+1. @@iterator 함수가 이제 제네레이터로 됐다.
+2. 반복의 상태를 유지하기 위해 사용하는 변수가 이제 제너레이터의 로컬 변수일 뿐인데,  
+   이전 버전의 Matrix 클래스에서는 이 두 변수가 클로저의 일부였다.  
+   이는 제너레이터가 호출될 때 재 진입 사이에 로컬의 상태가 유지되기 때문에 가능하다.
+3. 매트릭스의 요소를 반복하기 위해 표준 루프를 사용하고 있다.  
+   이것은 반복자의 next() 함수를 호출하는 루프보다 확실히 더 직관적이다.
+
+제너레이터는 처음부터 반복자를 작성하는 것보다 훌륭한 대안이다.  
+반복 루틴의 가독성을 향상시키고 동일한 수준의 (또는 더 나은) 기능을 제공하고 있다.
+
+<aside>
+💡 **제너레이터**   
+위임 지시자 yield * iterable은 iterable을 인수로 받아들이는 자바스크립트 내장 구문의 또 다른 예이다.   
+명령어는 iterable의 요소를 반복하고 각 요소를 하나씩 생성한다.
+
+</aside>
