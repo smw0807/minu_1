@@ -290,8 +290,7 @@ Object [Generator] {}
 1. fruitGeneratorObj.next()가 처음 호출되었을 때 제네레이터는 첫 번째 yield 명령에 도달할 때까지 실행을 계속하여 제네레이터를 일시 중지하고 호출자에게 ‘peach’ 값을 반환한다.
 2. fruitGeneratorObj.next()의 두 번째 호출에서 제네레이트는 두 번째 yield 명령에서 다시 일시 정지하고 호출자에게 ‘watermelon’ 값을 반환한다.
 3. fruitGeneratorObj.next()의 마지막 호출로 인해 제네레이터의 실행은 마지막 명령인 return 문에서 재개된다.
-   이는 제네레이터를 종료하고 ‘summer’ 값과 함께 done 속성이 true로 설정된 객체를 반환한다.  
-
+   이는 제네레이터를 종료하고 ‘summer’ 값과 함께 done 속성이 true로 설정된 객체를 반환한다.
 
 제네레이터도 반복 가능하므로 for…of 루프에서 사용할 수 있다.
 
@@ -306,3 +305,78 @@ watermelon
 summer는 제네레이터에 의해 생성되는 값이 아니라 반복이 종료되어 반환하는(요소가 아닌) 값이기 때문에 출력하지 않음
  */
 ```
+
+### 제네레이터 반복 제어
+
+제네레이터 객체는 일반 반복자보다 유용하다.  
+실제 next() 함수는 선택적으로 인자를 허용한다.(반복자 프로토콜에 지정된 대로 반드시 한 개의 인자를 받을 필요는 없다.)  
+이러한 인수는 yield 명령어의 반환값으로 전달된다.  
+아래는 이를 보여주는 제네레이터이다.
+
+```tsx
+//twoWayGenerator.js
+function* twoWayGenerator() {
+  const what = yield null;
+  yield 'Hello ' + what;
+}
+
+const twoWay = twoWayGenerator();
+console.log(twoWay.next()); //{ value: null, done: false
+console.log(twoWay.next('world')); //{ value: 'Hello world', done: false }
+```
+
+위 코드는 다음과 같이 작동한다.
+
+1. next() 함수가 처음 호출되면 제네레이터는 첫 번째 yield 문에 도달한 다음 일시 중단된다.
+2. next(’world’)가 호출되면 제네레이터는 yield 명령에 있는 일시 중지된 시점에서 다시 시작되만 이번에는 제네레이터로 전달되는 값이 존재한다.  
+   이 값은 what 변수에 설정된다.  
+   그런 다음 제네레이터는 문자열 Hello에 what 변수를 더하여 결과를 출력한다.
+
+제네레이터 객체에서 제공하는 다른 두 가지 추가적인 함수는 throw() 및 return() 함수이다.  
+첫 번째는 next() 함수처럼 동작하지만 제네레이터 내에 마지막 yield 지점에 throw된 것처럼 예외를 발생시키고 done 및 value 속성이 있는 표준 반복자 결과 객체를 반환한다.  
+두 번째인 return() 함수는 제네레이터를 강제로 종료하고 다음과 같은 객체를 반환한다.  
+`{ done: true, value: returnArgument }` 여기서 returnArgument는 return() 함수에 전달된 인자인다.  
+아래는 이 두 가지 함수의 데모를 보여준다.
+
+```tsx
+//twoWayGenerator2.js
+function* twoWayGenerator() {
+  try {
+    const what = yield null;
+    yield 'Hello ' + what;
+  } catch (err) {
+    yield 'Hello error: ' + err.message;
+  }
+}
+console.log('Using throw(): ');
+const twoWayException = twoWayGenerator();
+// console.log(twoWayException.next());
+console.log(twoWayException.throw(new Error('Boom!!!')));
+/*
+Using throw(): 
+// { value: null, done: false }
+// { value: 'Hello error: Boom!!!', done: false }
+Error: Boom!!!
+    at Object.<anonymous> (.../twoWayGenerator2.js:12:35)
+    at Module._compile (node:internal/modules/cjs/loader:1105:14)
+    at Object.Module._extensions..js (node:internal/modules/cjs/loader:1159:10)
+    at Module.load (node:internal/modules/cjs/loader:981:32)
+    at Function.Module._load (node:internal/modules/cjs/loader:822:12)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:77:12)
+    at node:internal/main/run_main_module:17:47
+*/
+
+console.log('Using return():');
+const twoWayReturn = twoWayGenerator();
+console.log(twoWayReturn.next());
+console.log(twoWayReturn.return('returnValue!'));
+/*
+Using return():
+{ value: null, done: false }
+{ value: 'returnValue!', done: true }
+*/
+```
+
+twoWayException은 첫 번째 yield 명령어가 반환되는 즉시 예외가 발생한다.  
+이것은 제네레이터 내부에 예외가 발생하는 것과 똑같이 동작하며 이것은 try/catch 블록을 사용하여 다른 예외처럼 포착하고 처리할 수 있음을 의미한다.  
+대신 return() 함수는 제네레이터의 실행을 중지하고 주어진 값이 제네레이터에 의해 반환값으로 제공되도록 한다.
