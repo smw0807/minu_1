@@ -443,3 +443,108 @@ export class Matrix {
 명령어는 iterable의 요소를 반복하고 각 요소를 하나씩 생성한다.
 
 </aside>
+
+## 9-4-5 비동기 반복자
+
+지금까지 본 반복은 next() 함수에서 동기적으로 값을 반환했다.  
+그러나 자바스크립트, 특히 노드에서는 비동기 연산이 필요한 항목에 대해 반복작업을 하는 것이 매우 일반적이다.
+
+예를 들어, HTTP 서버에서 요청한 SQL 쿼리의 결과 또는 REST API 요소에 대한 반복 작업을 한다고 생각해보자.  
+이러한 모든 상황에서 next() 함수는 Promise를 반환하는 것이 편리하거나, async/await 구문을 사용해 동기화하는 것이 좋다.
+
+이것을 **비동기 반복자** 라고 한다.  
+비동기 반복자는 Promise를 반환한다.  
+비동기 함수를 사용하여 반복자의 next() 함수를 정의한다.  
+**비동기 반복가능자(async iterable)**는 @@asyncIterator 함수, 즉 Symboilc.asyncIterator 키를 통해 접근할 수 있는 함수를 구현한 객체로 비동기 반복자를 반환(동기적으로)한다.
+
+비동기 반복가능자는 for await…of 구문을 사용하여 반복할 수 있으며, 비동기 함수에만 사용할 수 있다.  
+이 구문을 사용하면 본질적으로 반복자 패턴 위에 순차적인 비동기 실행을 구현한다.
+
+for await…of 구문은 Promise 들의 배열과 같이 간단한 반복가능자를 반복하는데 사용할 수 있다.  
+이것은 반복자의 모든 요소가 Promise가 아니더라도 동작한다.
+
+아래는 이를 설명하기 위해 URL 목록을 입력으로 받아 사용가능한 상태(up/down)를 반복하여 체크할 수 있는 클래스이다.
+
+```tsx
+import superagent from 'superagent';
+
+export class CheckUrls {
+  //1
+  constructor(urls) {
+    this.urls = urls;
+  }
+
+  [Symbol.asyncIterator]() {
+    const urlsIterator = this.urls[Symbol.iterator](); //2
+
+    return {
+      //3
+      async next() {
+        const iteratorResult = urlsIterator.next(); //4
+        if (iteratorResult.done) {
+          return { done: true };
+        }
+
+        const url = iteratorResult.value;
+        try {
+          const checkResult = (await superagent.head(url)).redirect(2); //5
+          return {
+            done: false,
+            value: `${url} is up, status: ${checkResult.status}`,
+          };
+        } catch (err) {
+          return {
+            done: false,
+            value: `${url} is down, error: ${err.message}`,
+          };
+        }
+      },
+    };
+  }
+}
+```
+
+1. CheckUrls 클래스 생성자는 URL 목록을 인자로 받는다.  
+   반복자와 반복가능자를 사용하는 방법을 알고 있으므로, URL 목록은 어떤 반복가능자라고 할 수 있을 것이다.
+2. @@asyncIterator 함수에서 this.urls 객체로부터 반복자를 얻는다.  
+   방금 언급했듯이 이것은 반복가능자이어야 한다.  
+   이를 위해 @@iterable 함수를 호출하기만 하면 된다.
+3. 여기서 next() 함수가 async 함수인 것에 유의할 필요가 있다.  
+   즉, 비동기 반복가능자 프로토콜에서 요청된 대로 함상 프라미스를 반환한다.
+4. next() 함수에서 urlsIterator를 사용하여 목록의 다음 URL을 가져온다.  
+   더 이상 존재하지 않을 경우 `{ done: true }` 를 반환한다.
+5. await 명령어를 사용하여 비동기적으로 현재 URL로 전송된 HEAD 요청과 결과를 가져오는 과정을 유의해서 살펴볼것…
+
+아래는 위 CheckUrls 클래스를 for await…of 구문을 사용한 코드
+
+```tsx
+import { CheckUrls } from './checkUrls.js';
+
+async function main() {
+  const checkUrls = new CheckUrls([
+    'https://www.naver.com',
+    'https://nodejsdesignpatterns.com',
+    'https://example.com',
+    'https://mustbedownforsurehopefully.com',
+  ]);
+
+  for await (const status of checkUrls) {
+    console.log(status);
+  }
+}
+main();
+/*
+https://www.naver.com is down, error: (intermediate value).redirect is not a function
+https://nodejsdesignpatterns.com is down, error: Moved Permanently
+https://example.com is down, error: (intermediate value).redirect is not a function
+https://mustbedownforsurehopefully.com is down, error: getaddrinfo ENOTFOUND mustbedownforsurehopefully.com
+*/
+```
+
+for await…of 구문은 비동기 반복가능자를 반복할 수 있는 매우 직관적인 문법을 제공한다.
+
+<aside>
+💡 for await…of 루프(및 동기 버전)는 break, return 또는 exception으로 인해 조기에 중단되는 경우 선택적으로 반복자의 return() 메서드를 호출한다.
+일반적으로 이것은 반복이 완료될 때 수행되는 정리 작업을 즉각적으로 실행하는 데 사용할 수 있다.
+
+</aside>
