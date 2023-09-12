@@ -548,3 +548,43 @@ for await…of 구문은 비동기 반복가능자를 반복할 수 있는 매�
 일반적으로 이것은 반복이 완료될 때 수행되는 정리 작업을 즉각적으로 실행하는 데 사용할 수 있다.
 
 </aside>
+
+## 9-4-6 비동기 제너레이터
+
+제너레이터 또한 **비동기 제너레이터**를 사용할 수 있다.  
+**비동기 제너레이터 함수**를 정의하려면 함수 정의 앞에 async 키워드를 추가하면 된다.
+
+```tsx
+async function* generatorFunction() {
+	...
+}
+```
+
+비동기 제너레이터는 본문 내에서 await 명령을 사용할 수 있으며 next() 함수의 반환값은 규약에 정의된 done 및 value 속성을 가진 객체를 이행값으로 반환하는 프라미스이다.  
+**비동기 제너레이터**는 유효한 비동기 반복자이기도 해서 for await…of 루프로 사용할 수 있다.
+
+아래는 제너레이터가 어떻게 비동기 반복자의 구현을 단순화하는지 보여주기 위해 비동기 반복자에서 작성한 CheckUrls 클래스를 비동기 제너레이터로 변환한 코드이다.
+
+```tsx
+//checkUrls.js
+import superagent from 'superagent';
+
+export class CheckUrls {
+  constructor(urls) {
+    this.urls = urls;
+  }
+
+  async *[Symbol.asyncIterator]() {
+    for (const url of this.url) {
+      try {
+        const checkResult = (await superagent.head(url)).redirect(2);
+        yield `${url} is up, status: ${checkResult.status}`;
+      } catch (err) {
+        yield `${url} is down, error: ${err.message}`;
+      }
+    }
+  }
+}
+```
+
+흥미로운 점은….순수 비동기 반복자 대신 비동기 제너레이터를 사용하면 코드가 단순해지고 가독성이 높아지며 명확해진다.
