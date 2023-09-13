@@ -628,3 +628,19 @@ main();
 
 또한, EventEmitter도 반복할 수 있다.  
 events.on(emitter, eventName) 유틸리티 함수를 사용하면 eventName으로 지정된 이름과 일치하는 모든 이벤트를 반환하는 반복자를 얻을 수 있는 반복가능자를 획득할 수 있다.
+
+## 9-4-2 실전에서
+
+반복자, 특히 비동기 반복자는 Node.js 생태계에서 빠르게 인기를 얻고 있다.  
+실제로 많은 상황에서 스트림 대신 선호되는 대안이 되고 있으며, 사용자 정의로 만들어진 메커니즘을 대체하고 있다.
+
+예를들어, @databases/pg, @databases/mysql, @databases/sqlite 패키지는 각각 Postgres, MySQ, SQLite 데이터베이스와 연결하는 유명한 라이브러리들이다.  
+이들은 모두 쿼리 결과를 쉽게 반복하는데 사용할 수 있는 비동기 반복가능자를 반환하는 queryStream()이라는 함수를 제공한다.
+
+```tsx
+for await (const record of db.queryStream(sql`SELECT * FROM my_table`)) {
+  //record를 가지고 필요한 작업을 수행
+}
+```
+
+내부적으로는 반복자 쿼리 결과에 대한 커서를 자동으로 처리하므로 for await…of 구문을 사용하여 간단한 루프를 수행하면 된다.
