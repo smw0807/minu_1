@@ -56,3 +56,150 @@ const 바인드 = run.bind(null, 'minwoo', '32');
 
 이 기술을 사용하면 별도의 컴포넌트를 통해 작업 실행을 제어하고 예약할 수 있다.  
 이는 본질적으로 명령 패턴의 호출자(Invoker)와 동일하다.
+
+## 9-6-2 좀더 복잡한 명령
+
+실행 취소 및 직렬화를 지원하려고 한다.  
+트위터와 유사한 서비스에 상태 업데이트를 전송하는 작은 객체인 명령의 ‘대상(target)’ 객체부터 만들어볼 것이다.  
+단순화를 위해 연동이 필요한 서비스는 목업(mockup)을 사용
+
+```tsx
+//statusUpdateService.js
+const statusUpdates = new Map();
+
+// 대상(target)
+export const statusUpdateService = {
+  postUpdate(status) {
+    const id = Math.floor(Math.random() * 1000000);
+    statusUpdates.set(id, status);
+    console.log(`Status posted: ${status} and id : ${id}`);
+    return id;
+  },
+
+  destroyUpldate(id) {
+    statusUpdates.delete(id);
+    console.log(`Status removed: ${id}`);
+  },
+};
+```
+
+이 코드는 명령 패턴의 ‘대상(target)’을 나타낸다.  
+아래는 새로운 상태로 업데이트하여 게시하도록 하는 명령의 생성하기 위한 팩토리 함수를 구현한 것이다.
+
+```tsx
+//createPostStatusCmd.js
+export function createPostStatusCmd(service, status) {
+  let postId = null;
+
+  // 명령(command)
+  return {
+    run() {
+      postId = serivce.postUpdate(status);
+    },
+    undo() {
+      if (postId) {
+        service.destroyUpdate(postId);
+        postId = null;
+      }
+    },
+    serialize() {
+      return {
+        type: 'status',
+        action: 'post',
+        status: status,
+      };
+    },
+  };
+}
+```
+
+이 함수는 POST로 최신의 상태를 전달한다는 의도를 모델링한 명령(Command)을 생성하는 팩토리 이다.  
+각 명령은 다음 세 가지 기능을 구현한다.
+
+- 호출 시 작업을 시작시키는 run() 함수.  
+  9-6-1에서 만들었던 작업(Task) 패턴을 구현한다.  
+  명령이 실행되면 대상 서비스의 함수를 사용하여 새로운 상태로 상태를 갱신한다.
+- 실행 후 작업을 취소하는 undo() 함수.  
+  이 경우 단순히 대상 서비스에서 destroyUpdate() 함수를 호출한다.
+- 동일한 명령 객체를 다시 만드는데 필요한 모든 정보를 담고 있는 JSON 객체를 만들기 위한 serialize() 함수
+
+아래는 호출자를 만든 코드이다.  
+생성자와 run() 함수(invoker.js)를 구현한다.
+
+```tsx
+//invoker.js
+// 호출자(invoker)
+export class Invoker {
+  constructor() {
+    this.history = [];
+  }
+
+  run(cmd) {
+    this.history.push(cmd);
+    cmd.run();
+    console.log('Command executed', cmd.serialize());
+  }
+}
+```
+
+run() 함수는 호출자의 기본 기능이다.  
+명령을 history 인스턴스 변수에 저장한 다음 명령 자체를 실행시키는 역할을 한다.
+
+```tsx
+delay(cmd, delay) {
+  setTimeout(() => {
+    console.log(`Executing delayed command`, cmd.serialize());
+    this.run(cmd);
+  }, delay)
+}
+```
+
+명령 실행을 지연시키는 함수
+
+```tsx
+undo() {
+  const cmd = this.history.pop();
+  cmd.undo();
+  console.log('Command undone', cmd.serialize());
+}
+```
+
+명령을 되돌리는 undo() 함수
+
+마지막으로 웹 서비스를 사용하여 직렬화한 다음 네트워크를 통해 전송하여 원격 서버에서 명령을 실행하도록 할 수도 있다.
+
+```tsx
+async runRemotely(cmd) {
+  await superagent.post('http://localhost:3000/cmd').send({ json: cmd.serialize() });
+  console.log('Command executed remotely', cmd.serialize());
+}
+```
+
+아래는 클라이언트 코드이다. 필요한 모든 종속성을 가져오고 호출자를 인스턴스화하여 시작한다.
+
+```tsx
+// client.js
+import { createPostStatusCmd } from './createPostStatusCmd.js';
+import { statusUpdateService } from './statusUpdateService.js';
+import { Invoker } from './invoker.js';
+
+const invoker = new Invoker();
+// 상태 메세지 게시를 나타내는 명령 만들기
+const command = createPostStatusCmd(statusUpdateService, 'HI!');
+// 명령 실행
+invoker.run(command);
+// 명령 취소 및 이전 상태로 되돌림
+invoker.undo();
+// 3초 후 메세지를 보내도록 예약
+invoker.delay(command, 1000 * 3);
+// 작업을 다른 컴퓨터로 마이그레이션하여 애플리케이션의 부하를 분산
+invoker.runRemotely(command);
+```
+
+여기까지가 명령으로 작업을 감싸는 것으로 어떤 작업이 가능한지 보여준다.
+
+반드시 필요한 경우에만 완벽한 명령 패턴을 사용해야 한다는 점에 주의해야 한다.  
+위 코드를 보면 statusUpdateService의 함수를 호출하기 위해 많은 코드가 작성되었다.  
+필요한 것이 단지 호출뿐이라면 복잡한 명령은 불필요한 노력을 동반하게 될 것이다.  
+그러나 작업 실행을 예약해야 하거나, 비동기 작업을 실행해야 하는 경우 간단한 작업(Task) 패턴이 최상의 절충안을 제공한다.  
+대신 실행 취소, 변환, 충돌 해결 또는 앞서 설명한 다른 사용 사례 중 하나와 같은 고급 기능이 필요한 경우라면, 좀더 복잡한 명령 패턴을 사용하는 것이 필요하다.
