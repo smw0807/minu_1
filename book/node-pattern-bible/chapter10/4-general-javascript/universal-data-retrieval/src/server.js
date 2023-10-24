@@ -5,7 +5,8 @@ import reactServer from 'react-dom/server.js';
 import htm from 'htm';
 import fastify from 'fastify';
 import fastifyStatic from 'fastify-static';
-import { StaticRouter } from 'react-router-dom';
+import { StaticRouter, matchPath } from 'react-router-dom';
+import { routes } from './frontend/router.js';
 import { App } from './frontend/App.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -15,8 +16,10 @@ const html = htm.bind(react.createElement);
  * 1
  * 웹팩 개발 서버를 사용하지 않을 것이므로 서버에서 페이지의 전체 HTML 코드를 반환해야 한다.
  * 서버에서 렌더링한 리액트 애플리케이션의 결과 content를 이 템플릿에 전달하여 최종 HTML을 클라이언트로 반환한다.
+ *
+ * serverData 인자값을 window.__STATIC_CONTEXT__ 라는 전역변수에 삽입하는 스크립트 태그를 렌더링한다.
  */
-const template = ({ content }) => `<!DOCTYPE html>
+const template = ({ content, serverData }) => `<!DOCTYPE html>
 <html>
   <head>
     <meta charset="UTF-8">
@@ -24,6 +27,13 @@ const template = ({ content }) => `<!DOCTYPE html>
   </head>
   <body>
     <div id="root">${content}</div>
+    ${
+      serverData
+        ? `<script type="text/javascript"> window.__STATIC_CONTEXT__=${JSON.stringify(
+            serverData
+          )}</script>`
+        : ''
+    }
     <script type="text/javascript" src="/public/main.js"></script>
   </body>
 </html>`;
