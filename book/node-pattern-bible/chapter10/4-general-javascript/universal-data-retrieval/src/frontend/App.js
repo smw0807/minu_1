@@ -1,5 +1,6 @@
 import react from 'react';
 import htm from 'htm';
+import { Switch, Route } from 'react-router-dom';
 import { routes } from './router';
 
 const html = htm.bind(react.createElement);

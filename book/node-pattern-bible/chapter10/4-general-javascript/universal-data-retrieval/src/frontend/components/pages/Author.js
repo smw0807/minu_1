@@ -1,12 +1,19 @@
 import react from 'react';
 import htm from 'htm';
+import superagent from 'superagent';
+import { AsyncPage } from './AsyncPage.js';
 import { FourOhFour } from './FourOhFour.js';
 import { Header } from '../Header.js';
-import { authors } from '../../../data/authors.js';
 
 const html = htm.bind(react.createElement);
 
-export class Author extends react.Component {
+export class Author extends AsyncPage {
+  static async preloadAsyncData(props) {
+    const { body } = await superagent.get(
+      `http://localhost:3001/api/author/${props.match.params.authorId}`
+    );
+    return { author: body };
+  }
   render() {
     const author = authors.find(author => author.id === this.props.match.params.authorId);
 

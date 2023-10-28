@@ -61,7 +61,35 @@ server.register(fastifyStatic, {
  */
 server.get('*', async (req, reply) => {
   const location = req.raw.originalUrl;
-  const staticContext = {};
+  console.log('location : ', location);
+  let component;
+  let match;
+  for (const route of routes) {
+    component = route.component;
+    match = matchPath(location, route);
+    if (match) {
+      break;
+    }
+  }
+  let staticData;
+  let staticError;
+  let hasStaticContext = false;
+  if (typeof component.preloadAsyncData === 'function') {
+    hasStaticContext = true;
+    try {
+      const data = await component.preloadAsyncData({ match });
+      staticData = data;
+    } catch (err) {
+      staticError = err;
+    }
+  }
+
+  const staticContext = {
+    [location]: {
+      data: staticData,
+      err: staticError,
+    },
+  };
   /**
    * 5
    * 서버 측에서 react-router-dom의 StaticRouter 인스턴스를 사용하여 애플리케이션 컴포넌트를 감싸야한다.
@@ -81,14 +109,10 @@ server.get('*', async (req, reply) => {
    * template() 함수를 사용하여 페이지 템플릿으로 생성된 HTML 코드인 content를 감싸고 그 결과를 클라이언트에 전송한다.
    */
   const content = reactServer.renderToString(serverApp);
-  const responseHtml = template({ content });
+  const serverData = hasStaticContext ? staticContext : null;
+  const responseHtml = template({ content, serverData });
 
-  let code = 200;
-  if (staticContext.statusCode) {
-    code = staticContext.statusCode;
-  }
-  console.log('CODE : ', code);
-
+  let code = staticContext.statusCode ? staticContext.statusCode : 200;
   reply.code(code).type('text/html').send(responseHtml);
 });
 
