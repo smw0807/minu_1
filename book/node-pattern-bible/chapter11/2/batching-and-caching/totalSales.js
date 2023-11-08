@@ -3,7 +3,7 @@ import level from 'level';
 import sublevel from 'subleveldown';
 
 const db = level('example-db');
-const salesDb = sublevel(db, 'sale', { valueEncoding: 'json' });
+const salesDb = sublevel(db, 'sales', { valueEncoding: 'json' });
 
 export async function totalSales(product) {
   console.group('totalSales');
