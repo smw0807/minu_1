@@ -43,3 +43,43 @@
 
 고려해야할 중요한 세부 사항은 Zalgo 안티패턴이다.  
 비동기 API를 다루기 때문에 캐시에 액세스하는 동안 동기 작업만이 존재한다 해도 항상 캐시된 값을 일관성 있게 비동기적으로 반환해야 한다.
+
+## 11-2-3 캐싱 혹은 일괄 처리가 없는 API 서버
+
+작은 데모 서버 구현을 통해 알아보자.
+
+- 판매를 관리하는 API 서버
+- 특정 유형의 상품에 대한 모든 거래의 합계를 서버에 질의
+- level npm 패키지 사용
+- 데이터 모델은 판매(sales) sublevel에 저장되어 있는 간단한 거래 목록이며 형식은 다음과 같다  
+  transactionId { amount, product }
+- 키는 transactionId, 값은 판매량(amount), 제품유형(product)의 JSON 객체
+
+```jsx
+//totalSales.js
+import level from 'level';
+import sublevel from 'subleveldown';
+
+const db = level('example-db');
+const salesDb = sublevel(db, 'sale', { valueEncoding: 'json' });
+
+export async function totalSales(product) {
+  console.group('totalSales');
+  console.log('product : ', product);
+  const now = Date.now();
+  let sum = 0;
+  for await (const transaction of salesDb.createValueStream()) {
+    console.log('transaction : ', transaction);
+    if (!product || transaction.product == product) {
+      sum += transaction.amount;
+    }
+  }
+  console.log(`totalSales() took: ${Date.now() - now}ms`);
+  console.groupEnd();
+  return sum;
+}
+```
+
+salses sublevel의 모든 transaction들을 반복하면서 특정 product의 판매량을 합산한다.  
+알고리즘은 나중에 일괄 처리 및 캐싱의 효과를 강조하기 위해 의도적으로 느리게 하였다.  
+실제 애플리케이션에서는 인덱스를 사용하여 제품별로 트랜잭션을 질의하거나 map, reduce 알고리즘을 사용하여 모든 제품의 합계를 지속적으로 계산할 수 있다.
