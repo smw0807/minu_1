@@ -11,7 +11,7 @@ export async function totalSales(product) {
   const now = Date.now();
   let sum = 0;
   for await (const transaction of salesDb.createValueStream()) {
-    console.log('transaction : ', transaction);
+    // console.log('transaction : ', transaction);
     if (!product || transaction.product == product) {
       sum += transaction.amount;
     }

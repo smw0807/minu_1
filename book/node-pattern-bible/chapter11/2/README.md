@@ -83,3 +83,63 @@ export async function totalSales(product) {
 salses sublevel의 모든 transaction들을 반복하면서 특정 product의 판매량을 합산한다.  
 알고리즘은 나중에 일괄 처리 및 캐싱의 효과를 강조하기 위해 의도적으로 느리게 하였다.  
 실제 애플리케이션에서는 인덱스를 사용하여 제품별로 트랜잭션을 질의하거나 map, reduce 알고리즘을 사용하여 모든 제품의 합계를 지속적으로 계산할 수 있다.
+아래는 위 API를 HTTP 서버로 노출시킨 코드이다.
+
+```jsx
+//server.js
+import { createServer } from 'http';
+import { totalSales } from './totalSales.js';
+
+createServer(async (req, res) => {
+  console.group('Server');
+  const url = new URL(req.url, 'http://localhost');
+  console.log('url : ', url);
+  const product = url.searchParams.get('product');
+  console.log('product : ', product);
+  console.log(`Processing query: ${url.search}`);
+
+  const sum = await totalSales(product);
+  res.setHeader('Content-Type', 'application/json');
+  res.writeHead(200);
+  res.end(
+    JSON.stringify({
+      product,
+      sum,
+    })
+  );
+  console.groupEnd();
+}).listen(8000, () => console.log('Server started'));
+```
+
+그리고 성능 테스트를 위해 200ms 간격으로 20개의 요청을 보내는 스크립트 파일을 실행한다.
+
+```jsx
+//loadTest.js
+import superagent from 'superagent';
+
+const start = Date.now();
+let count = 20;
+let pending = count;
+const interval = 200;
+const query = process.argv[2] ? process.argv[2] : 'product=book';
+
+function sendRequest() {
+  superagent.get(`http://localhost:8000?${query}`).then(result => {
+    console.log(result.status, result.body);
+    if (!--pending) {
+      console.log(`All completed in: ${Date.now() - start}ms`);
+    }
+  });
+
+  if (--count) {
+    setTimeout(sendRequest, interval);
+  }
+}
+
+sendRequest();
+```
+
+완료까지 대략 3878ms가 걸린다.  
+다음 섹션에서 이제 최적화를 적용한 후 얼마나 많은 시간을 절약할 수 있는지 측정해본다.
+
+## 11-2-4 Promise를 사용한 일괄 처리 및 캐싱
