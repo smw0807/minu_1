@@ -225,3 +225,5 @@ export function totalSales(product) {
   return resultPromise;
 }
 ```
+
+요청이 완료된 후 특정 시간(CACHE_TTL)이 지나거나 요청이 실패한 경우, 즉시 캐시에서 프라미스를 제거하기만 하면 된다.
