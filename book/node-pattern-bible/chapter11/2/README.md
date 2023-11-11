@@ -189,3 +189,39 @@ export function totalSales(product) {
    여기서 이미 실행중인 요청에 편승한다.
 2. 주어진 제웊멩 대해 실행 중인 요청이 없으면 원래 totalSales() 함수를 실행하고 결과 프라미스를 runningRequests 맵에 저장한다.  
    다음으로 요청이 완료되는 즉시 runningRequests 맵에서 동일한 프라미스를 제거해야 한다.
+
+### 총 판매 웹 서버에서의 요청 캐싱
+
+프라미스를 사용하므로 일괄 처리 API에 캐싱 레이어를 추가하는 것은 간단하다.  
+해야 할 일은 요청이 완료된 후에도 요청 맵에 프라미스를 남겨두는 것이다.
+
+```jsx
+//totalSalesCache.js
+import { totalSales as totalSalesRaw } from './totalSales.js';
+
+const CACHE_TTL = 30 * 1000; // 30 secondes TTS
+const cache = new Map();
+
+export function totalSales(product) {
+  if (cache.has(product)) {
+    console.log('Cache hit');
+    return cache.get(product);
+  }
+
+  const resultPromise = totalSalesRaw(product);
+  cache.set(product, resultPromise);
+  resultPromise.then(
+    () => {
+      setTimeout(() => {
+        cache.delete(product);
+      }, CACHE_TTL);
+    },
+    err => {
+      cache.delete(product);
+      throw err;
+    }
+  );
+
+  return resultPromise;
+}
+```
