@@ -143,3 +143,49 @@ sendRequest();
 다음 섹션에서 이제 최적화를 적용한 후 얼마나 많은 시간을 절약할 수 있는지 측정해본다.
 
 ## 11-2-4 Promise를 사용한 일괄 처리 및 캐싱
+
+프라미스는 비동기 일괄 처리 및 요청 캐싱을 구현하기 위한 훌륭한 도구이다.  
+아래와 같은 이유로 프라미스를 사용하면 일괄 처리 및 캐싱이 매우 간단하고 간결해진다.
+
+- 여러 then() 리스너를 동일한 프라미스에 연결할 수 있다.  
+  이는 요청을 일괄 처리하는데 정확히 필요하다.
+- then() 리스너느 호출이 보장되며(한 번만) 프라미스가 이미 해결된 후에 연결되어도 동작한다.  
+  또한 then()은 항상 비동기적으로 호출된다.
+  이는 프라미스가 미해결된 값을 반환하는 자연스러운 메커니즘을 제공함을 의미한다.
+
+### 총 판매 웹 서버의 일괄 처리
+
+API가 호출될 때 다른 동일한 요청이 보류 중인 경우 새 요청을 시작하는 대신 해당 요청이 완료될 때까지 기다린다.  
+이는 프라미스로 쉽게 구현할 수 있다.
+
+```jsx
+//totalSalesBatch.js
+import { totalSales as totalSalesRaw } from './totalSales.js';
+
+const runningRequests = new Map();
+
+export function totalSales(product) {
+  // 1
+  if (runningRequests.has(product)) {
+    console.log('Batching');
+    return runningRequests.get(product);
+  }
+
+  //2
+  const resultPromise = totalSalesRaw(product);
+  runningRequests.set(product, resultPromise);
+  resultPromise.finally(() => {
+    runningRequests.delete(product);
+  });
+
+  console.log('resultPromise : ', resultPromise);
+  return resultPromise;
+}
+```
+
+이 파일에서의 totalSales() 함수는 는 totalSales.js의 totalSales() API에 대한 프록시이다.
+
+1. 주어진 product에 대한 프라미스가 이미 존재할 경우, 해당 프라미스를 되돌려 준다.  
+   여기서 이미 실행중인 요청에 편승한다.
+2. 주어진 제웊멩 대해 실행 중인 요청이 없으면 원래 totalSales() 함수를 실행하고 결과 프라미스를 runningRequests 맵에 저장한다.  
+   다음으로 요청이 완료되는 즉시 runningRequests 맵에서 동일한 프라미스를 제거해야 한다.
