@@ -45,3 +45,70 @@ setTimeout(() => {
 
 cancelable() 함수는 cancelRequested라는 하나의 속성을 가진 객체를 입력으로 받는다.  
 함수에서 모든 비동기 호출 후 cancelRequested 속성을 확인하고 이것이 참이면, 전용 CancelError 예외를 발생시켜서 함수를 실행을 중단한다.
+
+## 11-3-2 비동기 호출 래핑
+
+기초적인 취소 가능한 비동기 함수를 만들고 사용하는 것은 매우 간단하지만, 많은 코드가 추가된다.  
+실제로 추가 코드가 너무 많아서 함수의 실제 비즈니스 논리를 식별하기 어렵다.  
+비동기 루틴을 호출하는데 사용할 수 있는 래핑 함수 안에 취소 로직을 포함시켜 추가되는 코드를 줄일 수 있다.
+
+```jsx
+import { CancelError } from './cancelError.mjs';
+
+export function createCacncelWrapper() {
+  let cancelRequested = false;
+
+  function cancel() {
+    cancelRequested = true;
+  }
+
+  function cancelWrapper(func, ...args) {
+    if (cancelRequested) {
+      return Promise.reject(new CancelError());
+    }
+    return func(...args);
+  }
+
+  return { cancelWrapper, cancel };
+}
+```
+
+래퍼는 팩토리 함수를 통해 생성했다.  
+팩토리는 비동기 실행 함수를 감싸는 래패 함수(cancelWrapper)와 비동기 작업 취소(cancel)를 트리거하는 함수, 이렇게 두 가지 함수를 반환한다.  
+이를 통해 여러 비동기 호출을 감싸는 래퍼 함수를 만든 다음 cancel() 함수 하나를 사용하여 모두 취소할 수 있다.
+
+cancelWrapper 함수는 호출할 함수(func)와 함수에 전달할 일련의 매개 변수들(args)을 입력으로 받는다.  
+래퍼는 단순히 취소가 요청되었는지 확인하고, 취소할 수 있는 경우 거부 사유료 CancelError 객체를 사용한 프라미스를 반환한다.  
+그렇지 않으면 func를 호출한다.
+
+```jsx
+import { asyncRoutine } from './asyncRountine.mjs';
+import { createCacncelWrapper } from './cancelWrapper.mjs';
+import { CancelError } from './cancelError.mjs';
+
+async function cancelable(cancelWrapper) {
+  const resA = await cancelWrapper(asyncRoutine, 'A');
+  console.log(resA);
+  const resB = await cancelWrapper(asyncRoutine, 'B');
+  console.log(resB);
+  const resC = await cancelWrapper(asyncRoutine, 'C');
+  console.log(resC);
+}
+
+const { cancel, cancelWrapper } = createCacncelWrapper();
+
+cancelable(cancelWrapper).catch(err => {
+  if (err instanceof CancelError) {
+    console.log('Function canceled');
+  } else {
+    console.log(err);
+  }
+});
+
+setTimeout(() => {
+  cancel();
+}, 100);
+```
+
+위 코드를 실행하면 A 실행 중 cancel 함수가 실행되면서 B부터는 실행이 취소됨  
+setTimeout의 값을 늘릴 수록 뒤에 함수에서 취소되는걸 확인할 수 있다.
