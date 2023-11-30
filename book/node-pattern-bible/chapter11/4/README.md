@@ -162,3 +162,190 @@ export class SubsetSum extends EventEmitter {
 이 경우 실제로 이벤트 루프는 응답성을 잃고 전체 애플리케이션이 지역되기 시작하므로 실제 환경에서는 바람직하지 않다.
 
 이 기술은 동기 작업이 산발적으로 실행되고, 실행하는데 너무 오래 걸리지 않는 특정 상황에서 사용하여 실행을 인터리브하는 것이 이벤트 루프를 차단하지 않는 가장 간단하고 효과적인 방법이다.
+
+## 11-4-3 외부 프로세스 사용
+
+이벤트 루프가 차단되는 것을 방지하는 또 다른 패턴으로 `**자식 프로세스**`를 사용하는 방법이 있다.  
+Node.js가 웹 서버와 같은 I/O 집약적인 애플리케이션을 실행할 때 비동기 아키텍처 덕분에 리소스 활용도를 최적화할 수 있어 최상의 성능을 제공한다.  
+따라서 응용 프로그램의 응답성을 유지하는 가장 좋은 방법은 기본 애플리케이션의 컨텍스트에서 값 비싼 CPU 바인딩 작업을 실행하지 않고, 별도의 프로세스를 사용하는 것이다.  
+이것이 주는 세 가지 주요 장점은 다음과 같다.
+
+- 동기 작업은 실행 단계를 인터리브할 필요 없이 최고 속도로 실행할 수 있다.
+- Node.js에서 프로세스로 작업하는 것은 간단한데, 메인 애플리케이션 자체를 확장할 필요 없이 여러 프로세서를 쉽게 사용할 수 있다.
+- 실제로 최대 성능이 필요한 경우 외부 프로세스는 고성능의 오래된 C 또는 Go 혹은 Rust와 같은 최신 컴파일 언어와 같은 하위 수준 언어로 만들어질 수 있다.  
+  (항상 작업에 가장 적합한 도구를 사용하자.)
+
+Node.js에는 외부 프로세스와 상호작용하기 위한 충분한 API의 도구들이 있다.  
+child_process 모듈에서 필요한 모든 것을 찾을 수 있다.
+
+child_process.fork() 함수는 새로운 자식 Node.js 프로세스를 생성하고 자동으로 통신 채널을 생성하여 EventEmitter와 매우 유사한 인터페이스를 사용하여 정보를 교환할 수 있다.
+
+### 부분집합 합계 작업을 외부 프로세스에 위임하기
+
+이전에 작업했던 SubsetSum 작업을 동기 처리를 담당하는 별도의 자식 프로세스를 만들어 주 서버의 이벤트 루프가 네트워크에서 들어오는 요청을 처리할 수 있도록 할 것이다.
+
+1. 실행 중인 프로세스 풀을 만들 수 있는 processPool.js라는 새 모듈을 만든다.  
+   새 프로세스를 시작하는 데는 비용이 많이 들고 시간이 필요하므로 지속적으로 실행하고 요청을 처리할 수 있도록 하면서 시간과 CPU 주기를 절약할 수 있다.  
+   풀은 동시에 실행되는 프로세스 수를 제한하여 애플리케이션이 서비스 거부(DoS) 공격에 노출되는 것을 방지하는데 도움이 된다.
+2. 하위 프로세스에서 실행되는 SumFork.js라는 모듈을 만든다.  
+   자식 프로세스와 통신하고 현재 애플리케이션에서 가져온 것처럼 전달한다.
+3. 부분집합 합계 알고리즘을 실행하고 그 결과를 상위 프로세스로 전달하는 목표를 가진 Worker가 필요하다.
+
+```jsx
+import { fork } from 'child_process';
+
+export class ProcessPool {
+  constructor(file, poolMax) {
+    this.file = file;
+    this.poolMax = poolMax;
+    this.pool = [];
+    this.active = [];
+    this.waiting = [];
+  }
+
+  acquire() {
+    return new Promise((resolve, reject) => {
+      let worker;
+      if (this.pool.length > 0) {
+        // 1
+        worker = this.pool.pop();
+        this.active.push(worker);
+        return resolve(worker);
+      }
+
+      if (this.active.length >= this.poolMax) {
+        // 2
+        return this.waiting.push({ resolve, reject });
+      }
+
+      worker = fork(this.file); // 3
+      worker.once('message', message => {
+        if (message === 'ready') {
+          this.active.push(worker);
+          return resolve(worker);
+        }
+        worker.kill();
+        reject(new Error('Improper process start'));
+      });
+      worker.once('exit', code => {
+        console.log(`Worker exited with code ${code}`);
+        this.active = this.active.filter(w => worker !== w);
+        this.pool = this.pool.filter(w => worker !== w);
+      });
+    });
+  }
+
+  release(worker) {
+    if (this.waiting.length > 0) {
+      // 4
+      const { resolve } = this.waiting.shift();
+      return resolve(worker);
+    }
+    this.active = this.active.filter(w => worekr !== w); // 5
+    this.pool.push(worekr);
+  }
+}
+```
+
+child_process 모듈에서 fork() 함수를 임포트하여 새 프로세스를 만드는데 사용한다.  
+실행할 Node.js 프로그램 파일 매개 변수와 풀에서 실행할 수 있는 최대 인스턴스 수(poolMax)를 ProcessPool 생성자에 전달한다.
+
+- this.pool : 사용할 준비가 된 실행 중인 프로세스 집합
+- this.active : 현재 사용중인 프로세스 목록
+- this.waiting : 사용 가능한 프로세스가 없어서, 처리할 수 없는 모든 요청들을 콜백 대기열에 넣는다.
+
+1. pool에 사용할 준비가 된 프로세스가 있으면 이것을 active 목록에 넣은 후 resolve() 함수에 전달하여 외부 Promise를 이행하는데 사용한다.
+2. pool에 사용가능한 프로세스가 없고 이미 실행중인 프로세스가 최대 프로세스 수에 도달할 경우 나중에 사용하기 위해 외부 Promise의 resolve() 및 reject() 콜백을 대기열에 추가하여 이를 수행한다.
+3. 아직 최대 실행 중인 프로세스 수에 도달하지 않을 경우 child_process.fork()를 사용하여 새 프로세스를 만든다.  
+   그리고 새로 시작된 프로세스로부터 ready 메세지를 기다린다.  
+   이는 프로세스가 작업을 시작할 준비가 되었음을 의미한다.  
+   이 메세지 기반 채널은 child_process.fork()로 시작된 모든 프로세스와 함께 자동으로 제공된다.
+
+release() 함수는 프로세스가 완료되면 pool에 다시 넣는다.
+
+1. 대기목록에 요청이 있는 경우, 대기열의 맨 앞에 있는 resolve() 콜백에 전달하여 release 중인 작업자를 재할당 한다.
+2. release 중인 작업자를 active 목록에서 제거하고 pool에 다시 넣는다.
+
+이제 이 프로그램은 프로세스는 중지되지 않고 재할당되므로 각 요청에서 프로세스 생성부터 다시 시작하지 않아 시간을 절약할 수 있다.  
+(그러나 이게 최선의 선택은 아님. 응용 프로그램의 요구 사항에 따라 크게 달라진다는 점에 유의하자)
+
+### 하위 프로세스와 통신
+
+worker와 통신하고 생성된 결과를 전달하는 역할을 하는 SubsetSumFork 클래스를 구현.
+
+```jsx
+import { EventEmitter } from 'events';
+import { dirname, join } from 'path';
+import { fileURLToPath } from 'url';
+import { ProcessPool } from './processPool.js';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const workerFile = join(__dirname, 'workers', 'subsetSumProcessWorker.js');
+const workers = new ProcessPool(workerFile, 2);
+
+export class SubsetSum extends EventEmitter {
+  constructor(sum, set) {
+    super();
+    this.sum = sum;
+    this.set = set;
+  }
+
+  async start() {
+    const worekr = await workers.acquire(); // 1
+    worker.send({ sum: this.sum, set: this.set });
+
+    const onMessage = msg => {
+      if (msg.event === 'end') {
+        // 3
+        worekr.removeListener('message', onMessage);
+        workers.release(worekr);
+      }
+
+      this.emit(msg.event, msg.data); // 4
+    };
+
+    worekr.on('message', onMessage); // 2
+  }
+}
+```
+
+subsetSumProcessWorker.js 파일을 자식 작업자로 사용하여 새 ProcessPool 객체를 생성한다는 것을 주목해야한다.
+
+1. 풀에서 새로운 자식 프로세스를 획득한다.  
+   작업이 완료되면 즉시 작업자 핸들을 사용하여 실행할 작업 데이터와 함께 메시지를 자식 프로세스에 보낸다.  
+   send() API는 Node.js가 child_process.fork()로 시작된 모든 프로세스에 자동으로 제공된다.
+2. 새로운 리스너를 연결하기 위해 on() 함수를 사용해서 작업 프로세스로부터 전달되는 메시지를 수신한다.
+3. onMessage 리스너에서 먼저 end 이벤트를 수신했는지 확인한다.(작업이 완료 되었음을 의미)  
+   수신되었을 경우 onMessage 리스너를 제거하고 worker를 해제하여 풀에 다시 담는다.
+4. 작업자 프로세스는 { event, data } 형식의 메시지를 생성하여 자식 프로세스에서 생성된 모든 이벤트를 원활하게 전달(재발송)할 수 있다.
+
+### 작업자 구현
+
+```jsx
+import { SubsetSum } from '../subsetSum.js';
+
+process.on('message', msg => {
+  // 1
+  const subsetSum = new SubsetSum(msg.sum, msg.set);
+
+  subsetSum.on('match', data => {
+    // 2
+    process.send({ event: 'match', data: data });
+  });
+  subsetSum.on('end', data => {
+    process.send({ event: 'end', data: data });
+  });
+  subsetSum.start();
+});
+process.send('ready');
+```
+
+동기식으로 처리되던 SubsetSum을 이제 별도의 프로세스에서 처리하기 때문에 더 이상 이벤트 루프를 차단하는 것에 대해 걱정할 필요가 없다.  
+모든 HTTP 요청은 중단 없이 메인 애플리케이션의 이벤트 루프에서 계속 처리된다.  
+작업자가 자식 프로세스로 시작되면 다음과 같은 일이 발생한다.
+
+1. 부모 프로세스에서 오는 메시지 수신을 즉시 시작한다.  
+   메시지가 수신되는 즉시 SubsetSum 클래스의 새로운 인스턴스를 만들고 match 및 end 이벤트에 대한 리스너를 등록한다.  
+   끝으로 subSetSum.start()로 계산을 시작한다.
+2. 실행중인 알고리즘에서 이벤트가 수신될 때마다 { event, data } 형식의 객체로 감싸서 상위 프로세르로 전달한다.  
+   이 메시지는 subsetSumFork.js 모듈에서 처리된다.
