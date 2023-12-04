@@ -370,3 +370,134 @@ Node 10.5.0에 추가된 작업자 스레드는 메인 이벤트 루프 외부�
 
 작업자 스레드를 기본 스레드에서 격리하면 언어의 무결성이 유지된다.  
 동시에 기본 통신 방식과 데이터 공유 기능은 99%의 사용사례에서 충분한 방법이다.
+
+### 작업자 스레드에서 부분집합 합계 작업 실행
+
+```jsx
+//ThreadPool.js
+import { Worker } from 'worker_threads';
+
+/**
+ *
+ * @param {*} file 실행할 파일
+ * @param {*} poolMax 풀에서 실행할 수 있는 최대 인스턴스 수
+ */
+export class ThreadPool {
+  constructor(file, poolMax) {
+    this.file = file;
+    this.poolMax = poolMax;
+    this.pool = [];
+    this.active = [];
+    this.waiting = [];
+  }
+
+  acquire() {
+    return new Promise((resolve, reject) => {
+      let worker;
+      if (this.pool.length > 0) {
+        worker = this.pool.pop();
+        this.active.push(worker);
+        return resolve(worker);
+      }
+
+      if (this.active.length >= this.poolMax) {
+        return this.waiting.push({ resolve, reject });
+      }
+
+      worker = new Worker(this.file);
+      worker.once('online', () => {
+        this.active.push(worker);
+        resolve(worker);
+      });
+      worker.once('exit', code => {
+        console.log(`Worker exited with code ${code}`);
+        this.active = this.active.filter(w => worker !== w);
+        this.pool = this.pool.filter(w => worker !== w);
+      });
+    });
+  }
+
+  release(worker) {
+    if (this.waiting.length > 0) {
+      const { resolve } = this.waiting.shift();
+      return resolve(worker);
+    }
+    this.active = this.active.filter(w => worker !== w);
+    this.pool.push(worker);
+  }
+}
+```
+
+```jsx
+//subsetSumThreadWorker.js
+import { parentPort } from 'worker_threads';
+import { SubsetSum } from '../subsetSum.js';
+
+parentPort.on('message', msg => {
+  const subsetSum = new SubsetSum(msg.sum, msg.set);
+
+  subsetSum.on('match', data => {
+    parentPort.postMessage({ event: 'match', data: data });
+  });
+
+  subsetSum.on('end', data => {
+    parentPort.postMessage({ event: 'end', data: data });
+  });
+
+  subsetSum.start();
+});
+```
+
+자식 프로세스 때와의 주요 차이점은 process.send() 및 process.on()을 사용하는 대신  
+parentPort.postMessage() 및 parentPort.on()을 사용해야한다는 것이다.
+
+```jsx
+//subsetSumThreads.js
+import { EventEmitter } from 'events';
+import { dirname, join } from 'path';
+import { fileURLToPath } from 'url';
+import { ThreadPool } from './ThreadPool';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const workerFile = join(__dirname, 'workers', 'subsetSumThreadWorker.js');
+const workers = new ThreadPool(workerFile, 2);
+
+export class SubsetSum extends EventEmitter {
+  constructor(sum, set) {
+    super();
+    this.sum = sum;
+    this.set = set;
+  }
+
+  async start() {
+    const worker = await workers.acquire();
+    worker.postMessage({ sum: this.sum, set: this.set });
+
+    const onMessage = msg => {
+      if (msg.event === 'end') {
+        worker.removeListener('message', onMessage);
+        workers.release(worker);
+      }
+
+      this.emit(msg.event, msg.data);
+    };
+
+    worker.on('message', onMessage);
+  }
+}
+```
+
+fork된 프로세스 대신 작업자 스레드를 사용하도록 기존 애플리케이션을 변경하는 일은 간단하다.  
+이는 두 컴포넌트(child_process, worker_threads)의 API가 매우 유사하지만 작업자 스레드가 완전한 Node.js 프로세스와 많은 공통점을 가지고 있기 때문이다.
+
+실행 시 메인 애플리케이션의 이벤트 루프는 별도의 스레드에서 실행되므로 부분 집합 알고리즘으로 인해 차단되지 않는다.
+
+## 11-4-5 운영에서 CPU 바인딩된 태스크의 실행
+
+지금까지 작성한 소스코드들은 시간 초과, 오류 및 기타 유형의 실패를 처리 등의 구현은 생략되어 있다.  
+실제 운영 용도로 구현을 해야한다면 많은 테스트를 거친 라이브러리를 사용하는 것이 좋다.
+
+[workerpool](https://github.com/josdejong/workerpool/tree/master)과 [piscina](https://github.com/piscinajs/piscina) 이 두가지는 이 섹션에서 살펴본 동일한 개념을 기반으로 하고 있다.  
+이를 통해 외부 프로세스 또는 작업자 스레드를 사용하여 CPU 집약적인 작업의 실행을 제어할 수 있다.
+
+마지막으로, 실행할 수 있는 알고리즘이 특히 복잡하거나 CPU 바인딩 작업 수가 단일 노드의 용량을 초과하는 경우 여러 노드에 걸쳐 계산을 확장하는 것을 고려해야 한다.
