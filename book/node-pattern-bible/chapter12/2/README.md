@@ -67,3 +67,35 @@ cluster.schedulingPolicy 변수와 상수 cluster.SCHED_RR(라운드로빈) 혹�
   그러나 클러스터에서 각 작업자는 server.listen(0)을 호출할 때마다 동일한 무작위 포트를 받는다.  
   즉, 포트는 처음에만 무작위가 되고, 두 번째 호출부터 같은 포트를 받게 된다.  
   모든 작업자가 다른 임의의 포트에서 수신하도록 하려면 포트 번호를 직접 생성해야 한다.
+
+### 간단한 HTTP 서버 만들기
+
+```jsx
+//app.js
+import { createServer } from 'http';
+
+const { pid } = process;
+
+const server = createServer((req, res) => {
+  //CPU 집약적인 작업
+  let i = 1e7;
+  while (1 > 0) {
+    i--;
+  }
+
+  console.log(`Handling request from ${pid}`);
+  res.end(`Hello from ${pid}\n`);
+});
+
+server.listen(8080, () => console.log(`Started at ${pid}`));
+```
+
+위에 작성한 HTTP 서버는 **프로세스 식별자(PID)**가 포함된 메세지를 다시 보내 모든 요청에 응답한다.  
+이것은 요청을 처리하는 애플리케이션의 인스턴스를 식별하는데 유용하다.  
+위 코드를 실행 시 빈 루프를 1000만 번 실행하기 때문에 curl로 요청을 보내도 응답이 오질 않는다.
+
+![Untitled](https://prod-files-secure.s3.us-west-2.amazonaws.com/bc261f43-de91-483d-8946-ac5a65106576/f4a83974-fd31-44cb-9c5e-a0689d64559d/Untitled.png)
+
+autocannon과 같은 네트워크 벤치 마킹 도구를 사용하면 서버가 한 프로세스에서 처리할 수 있는 초당 요청을 측정할 수도 있다.
+
+`npx autocannon -c 200 -d 10 url` 은 10초 동안 200개의 동시 연결로 서버에 부하를 준다.
