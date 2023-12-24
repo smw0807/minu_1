@@ -99,3 +99,71 @@ server.listen(8080, () => console.log(`Started at ${pid}`));
 autocannon과 같은 네트워크 벤치 마킹 도구를 사용하면 서버가 한 프로세스에서 처리할 수 있는 초당 요청을 측정할 수도 있다.
 
 `npx autocannon -c 200 -d 10 url` 은 10초 동안 200개의 동시 연결로 서버에 부하를 준다.
+
+### 클러스터 모듈을 통한 확장
+
+```jsx
+//app.js
+import { createServer } from 'http';
+import { cpus } from 'os';
+import cluster from 'cluster';
+
+// 1
+if (cluster.isMaster) {
+  const availableCpus = cpus();
+  console.log(`Clustering to ${availableCpus.length} processes`);
+  availableCpus.forEach(() => cluster.fork());
+}
+// 2
+else {
+  const { pid } = process;
+  const server = createServer((req, res) => {
+    let i = 1e7;
+    while (i > 0) {
+      i--;
+    }
+    console.log(`Hedling request from ${pid}`);
+    res.end(`Hellow from ${pid}\n`);
+  });
+  server.listen(8080, () => console.log(`Started at ${pid}`));
+}
+```
+
+클러스터 모듈을 사용하는 데는 많은 노력이 필요하지 않다.
+
+1. app.js를 실행하면 마스터 프로세스가 실행된다.  
+   cluster.isMaster 변수는 true로 설정되고 우리가 해야 할 유일한 작업은 cluster.fork()를 사용하여 현재 프로세스를 포크하는 것이다.  
+   위 코드는 사용 가능한 모든 처리 능력을 활용하기 위해 시스템의 논리적인 CPU 코어 수 많큼 작업자를 시작시킨다.
+2. master 프로세스에서 cluster.fork()를 실행하면 현재 모듈(app.js)이 다시 실행되지만 이번에는 작업자 모드(cluster.isWorker가 true로 설정되고 cluster.isMaster가 false로 설정됨)에서 실행된다.  
+   애플리케이션이 작업자로 실행되면 실제 작업을 처리할 수 있다.  
+   이 경우 작업자는 새로운 HTTP 서버를 시작시킨다.
+
+<aside>
+💡 각 워커는 자체 이벤트 루프, 메모리 공간 및 로드 된 모듈이 있는 다른 Node.js 프로세스라는 점을 기억해야한다.
+
+</aside>
+
+클러스터 모듈의 사용은 반복 패턴을 기반으로 하므로 애플리케이션의 여러 인스턴스를 매우 쉽게 실행할 수 있따.
+
+```jsx
+if (cluster.isMaster) {
+  // fork()
+} else {
+  // do work
+}
+```
+
+내부적으로 cluster.fork() 함수는 child_process.fork() API를 사용하므로 master와 worker 간에 사용 가능한 통신 채널도 존재하게 도니다.  
+worker 프로세스는 cluster.workers 변수에서 액세스 할 수 있으므로, 모든 프로세스에 메시지를 브로드캐스팅 하는 것은 다음 코드라인과 같이 간단하다.
+
+```jsx
+Object.values(cluster.workers).forEach(worker => worker.send('Hello from the master'));
+```
+
+![실행 시 cpu 의 개수만큼 프로세스가 실행된 모습](https://prod-files-secure.s3.us-west-2.amazonaws.com/bc261f43-de91-483d-8946-ac5a65106576/f3a911d5-b132-49ab-90d4-24ecf2eb6817/Untitled.png)
+
+실행 시 cpu 의 개수만큼 프로세스가 실행된 모습
+
+![부하 테스트 결과](https://prod-files-secure.s3.us-west-2.amazonaws.com/bc261f43-de91-483d-8946-ac5a65106576/eea2ed2d-e960-4e66-ae57-00acb960c388/Untitled.png)
+
+부하 테스트 결과
