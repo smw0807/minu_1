@@ -230,3 +230,43 @@ exit 이벤트를 활용하여 오류 코드로 종료되는 것을 감지하는
 ![9천건의 요청 중 724 실패](https://prod-files-secure.s3.us-west-2.amazonaws.com/bc261f43-de91-483d-8946-ac5a65106576/de6ab6e5-fdd1-4188-99a4-14fcaf96f786/Untitled.png)
 
 9천건의 요청 중 724 실패
+
+### 제로 다운타임 재시작
+
+```jsx
+// 1
+process.on('SIGUSR2', async () => {
+  const workers = Object.values(cluster.workers);
+  // 2
+  for (const worker of workers) {
+    console.log(`Stopping worker: ${worker.process.pid}`);
+    worker.disconnect(); //3
+    await once(worker, 'exit');
+    if (!worker.exitedAfterDisconnect) continue;
+    const newWorker = cluster.fork(); //4
+    await once(newWorker, 'listening'); //5
+  }
+});
+```
+
+위 코드 블록이 작동하는 방식은 다음과 같다.
+
+1. 작업자의 재시작은 SIGUSR2 신호를 수신할 때 트리거된다.  
+   여기서 비동기 작업을 수행해야 하므로 이벤트 핸들러를 구현하기 위해 비동기 함수를 사용하고 있음을 주의해야한다.
+2. SIGUSR2 신호가 수신되면 cluster.workers 객체의 모든 값을 반복한다.  
+   cluster.workers 내의 모든 요소는 작업자 풀에서 현재 활성화된 작업들의 객체이다.]
+3. 각각의 작업자에 대해 가장 먼저 하는 일은 worker.disconnect()를 호출하여 작업자를 정상적으로 중지시키는 것이다.  
+   작업자가 현재 요청을 처리하고 있을 경우 작업이 완료된 후 중단된다.
+4. 종료한 프로세스가 종료되면 새로운 작업자를 생성할 수 있다.
+5. 다음 작업자를 다시 시작하기 전에 새 작업자가 준비되고 새로운 연결을 수신할 때까지 대기한다.
+
+![실행중인 프로세스 하나를 kill 하면 다시 실행된 모습](https://prod-files-secure.s3.us-west-2.amazonaws.com/bc261f43-de91-483d-8946-ac5a65106576/10c376e1-5c1a-4661-b470-b207d35ba334/Untitled.png)
+
+실행중인 프로세스 하나를 kill 하면 다시 실행된 모습
+
+`kill -SIGUSR92 <PID>`
+
+<aside>
+💡 pm2는 클러스터 기반의 작은 유틸리티로 로드 밸런싱, 프로세스 모니터링, 제로 다운타입 재시작 및 기타 기능을 제공한다.
+
+</aside>
