@@ -143,7 +143,7 @@ else {
 
 </aside>
 
-클러스터 모듈의 사용은 반복 패턴을 기반으로 하므로 애플리케이션의 여러 인스턴스를 매우 쉽게 실행할 수 있따.
+클러스터 모듈의 사용은 반복 패턴을 기반으로 하므로 애플리케이션의 여러 인스턴스를 매우 쉽게 실행할 수 있다.
 
 ```jsx
 if (cluster.isMaster) {
@@ -167,3 +167,66 @@ Object.values(cluster.workers).forEach(worker => worker.send('Hello from the mas
 ![부하 테스트 결과](https://prod-files-secure.s3.us-west-2.amazonaws.com/bc261f43-de91-483d-8946-ac5a65106576/eea2ed2d-e960-4e66-ae57-00acb960c388/Untitled.png)
 
 부하 테스트 결과
+
+### 클러스터 모듈의 탄력성 및 가용성
+
+작업자는 모두 별도의 프로세스이므로 다른 작업자에게 영향을 주지 않고 프로그램의 필요에 따라 없애거나 다시 생성할 수 있다.  
+일부 작업자가 아직 살아있는 한 서버는 계속 연결을 수락할 것이다.  
+살아있는 작업자가 없으면 기존 연결이 끊어지고 새 연결이 거부된다.  
+Node.js는 작업자 수를 자동으로 관리하지 않는다.  
+또한 자체 요구사항에 따라 작업자 풀을 관리하는 것은 애플리케이션의 책임이다.
+
+애플리케이션이 확장하면 특히 오작동이나 충돌이 발생하더라도 특정 수준의 서비스를 유지할 수 있는 다른 장점이 있다.  
+이 속성은 **복원력**이라고도 하며, 시스템 가용성에 기여한다.
+
+동일한 애플리케이션의 여러 인스턴스를 시작함으로써 중복된 시스템을 생성한다.  
+이것은 어떤 이유로든 한 인스턴스가 다운되더라도 다른 인스턴스가 요청을 처리할 준비가 되어 있음을 의미한다.
+
+```jsx
+import { createServer } from 'http';
+import { cpus } from 'os';
+import cluster from 'cluster';
+
+// 1
+if (cluster.isMaster) {
+  const availableCpus = cpus();
+  console.log(`Clustering to ${availableCpus.length} processes`);
+  availableCpus.forEach(() => cluster.fork());
+  cluster.on('exit', (worker, code) => {
+    if (code !== 0 && !worker.exitedAfterDisconnect) {
+      console.log(`Worker ${worker.process.pid} crashed. Starting a new worker`);
+      cluster.fork();
+    }
+  });
+}
+// 2
+else {
+  setTimeout(() => {
+    throw new Error('Ooops');
+  }, Math.ceil(Math.random() * 3) * 1000);
+  const { pid } = process;
+  const server = createServer((req, res) => {
+    let i = 1e7;
+    while (i > 0) {
+      i--;
+    }
+    console.log(`Hedling request from ${pid}`);
+    res.end(`Hellow from ${pid}\n`);
+  });
+  server.listen(8080, () => console.log(`Started at ${pid}`));
+}
+```
+
+1~3초 사이의 임의의 시간 후에 오류와 함께 프로세스가 종료된다.  
+인스턴스가 하나만 있는 경우 애플리케이션 시작 시간으로 인해 다시 시작되는 사이에 무시할 수 없는 지연이 발생할 수 있다.  
+이는 다시 시작하는 동안에는 애플리케이션을 사용할 수 없음을 의미한다.  
+대신 여러 인스턴스가 존재하면 작업자 중 하나가 실패하더라도 수신 요청을 처리할 수 있는 백업프로세스가 항상 존재하게 된다.  
+exit 이벤트를 활용하여 오류 코드로 종료되는 것을 감지하는 즉시 새로운 작업자를 생성할 수 있다.  
+위 코드에서 마스터 부분을 보면 exit 이벤트를 수신하자마자 프로세스가 의도적으로 종료되었는지 또는 오류로 인해 종료되었는지 확인한다.  
+상태 코드와 작업자가 마스터에 의해 명시적으로 종료되었는지 여부를 나타내는 worker.exitedAfterDisconnect 플래그를 확인하여 수행한다.  
+오류로 인해 프로세스가 종료되었음을 확인하면 새로운 작업자를 시작한다.  
+충돌된 작업자가 교체되는 동안 다른 작업자는 여전히 요청을 처리할 수 있으므로 애플리케이션의 가용성에 영향을 주지 않는다.
+
+![9천건의 요청 중 724 실패](https://prod-files-secure.s3.us-west-2.amazonaws.com/bc261f43-de91-483d-8946-ac5a65106576/de6ab6e5-fdd1-4188-99a4-14fcaf96f786/Untitled.png)
+
+9천건의 요청 중 724 실패
