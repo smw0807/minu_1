@@ -367,3 +367,136 @@ Node.js 애플리케이션의 경우 클러스터 모듈 대신 이 접근 방�
 - **HAProxy**: TCP/HTTP 트래픽을 위한 빠른 로드 밸런서이다.
 - **Node.js 기반 프록시** : Node.js에서 직접 역방향 프록세와 로드 밸런서를 구현하기 위한 많은 솔루션이 존재한다. 하지만 장점과 단점이 존재한다.
 - **클라우드 기반 프록시:** 클라우딩 컴퓨팅 시대에 로드 밸런서를 서비스로 활용하는 것은 드문 일이 아니다. 이는 최소한의 유지 관리가 필요하고 일반적으로 확장성이 높으면 떄로는 주문형 확장성을 위해 동적 구성을 지원하기 때문에 편리할 수 있다.
+
+### Nginx를 사용한 로드 밸런싱
+
+https://www.notion.so/smw0807/940b30667f7c4ecb879d16fe917642bc?pvs=4#fe31ac6973ba495b9d19710dc16d4f19
+
+nginx설치 맥기준 `brew install nginx` https://nginx.org/en/docs/install.html
+
+![2023-12-26 기준 최신 버전](https://prod-files-secure.s3.us-west-2.amazonaws.com/bc261f43-de91-483d-8946-ac5a65106576/971c4cdc-5dcf-4aab-b22b-072ce56aada5/Untitled.png)
+
+2023-12-26 기준 최신 버전
+
+```jsx
+//app.js
+import { createServer } from 'http';
+
+const { pid } = process;
+const server = createServer((req, res) => {
+  let i = 1e7;
+  while (i > 0) {
+    i--;
+  }
+  console.log(`Handling request from ${pid}`);
+  res.end(`Hello from ${pid}`);
+});
+
+const port = Number.parseInt(process.env.PORT || process.argv[2]) || 8080;
+server.listen(port, () => console.log(`Started at ${pid}`));
+```
+
+서버의 여러 인스턴스를 시작하고 서로 다른 포트에서 수신할 수 있기 하기 위해 커맨드라인 인자(command-line argument)를 사용하여 수신 포트를 지정할 수 있도록 코드를 작성했다.
+
+또한 클러스터 없이 충돌 시 재시작이 가능하게 해야하는데 이는 전담 관리자, 즉 애플리케이션을 모니터링하고 필요한 경우 다시 시작하는 외부 프로세스를 사용할 수 있다.  
+이를 위해 다음 중 선택할 수 있다.
+
+- forever([nodejsdp.link/forever](http://nodejsdp.link/forever)) 또는 pm2([nodejsdp.link/pm2](http://nodejsdp.link/pm2))와 같은 Node.js 기반의 관리자
+- systemd([nodejsdp.link/systemd](http://nodejsdp.link/systemd)) 또는 runit([nodejsdp.link/runit](http://nodejsdp.link/runit))과 같은 OS 기반 모니터
+- monit([nodejsdp.link/monit](http://nodejsdp.link/monit)) 또는 supervisord([nodejsdp.link/supervisord](http://nodejsdp.link/supervisord))와 같은 고급 모니터링 솔루션
+- kubernetes([nodejsdp.link/kubernetes](http://nodejsdp.link/kubernetes)), Nomad([nodejsdp.link/nomad](http://nodejsdp.link/nomad)) 또는 Docker Swarm([nodejsdp.link/swarm](http://nodejsdp.link/swarm))과 같은 컨테이너 기반 런타임
+
+여기서는 forever를 사용할 것이다.  
+사용하기에 가장 간단하고 직접적인 도구이다. `npm i -g forever`
+
+이제 서로 다른 포트에서 forever에 의해 관리될 네 개의 애플리케이션 인스턴스를 시작한다.
+
+```jsx
+forever start app.js 8081
+forever start app.js 8082
+forever start app.js 8083
+forever start app.js 8084
+```
+
+![forever를 이용해 4개의 프로세스가 실행중인 모습](https://prod-files-secure.s3.us-west-2.amazonaws.com/bc261f43-de91-483d-8946-ac5a65106576/9dfe28e1-9bfb-4015-9d41-7afb03de4513/Untitled.png)
+
+forever를 이용해 4개의 프로세스가 실행중인 모습
+
+![forever list를 통해 프로세스 목록을 확인할 수 있다.](https://prod-files-secure.s3.us-west-2.amazonaws.com/bc261f43-de91-483d-8946-ac5a65106576/dc530a48-9095-4293-bf45-2d7290644f98/Untitled.png)
+
+forever list를 통해 프로세스 목록을 확인할 수 있다.
+
+<aside>
+💡 forever stopall을 사용하여 forever start로 실행된 Node.js 프로세스를 중지시킬 수 있다.   
+또는 forever stop <id>를 사용하여 forever 목록에 표시된 프로세스에서 특정 프로세스를 중지할 수 있다.
+
+</aside>
+
+이제 Nginx 서버로 로드 밸런서를 구성할 차례이다.
+
+<aside>
+💡 nginx를 사용하면 동일한 서버 인스턴스 후방에서 여러 애플리케이션을 실행할 수 있으므로 일반적으로 Unix 시스템에서 /usr/local/nginx/confg, /etc/nginx 또는 /usr/local/etc/nginx 아래에 있는 글로벌 설정 파일을 사용하는 것이 더 일반적이다.   
+여기서는 작업 폴터에 설정 파일을 저장함으로써 보다 간단한 접근 방식을 취한다.   
+실제 운영환경에서는 권장되는 모범사례를 따르는 것이 좋다.
+
+</aside>
+
+nginx.conf 파일을 만들고, Node.js 프로세스에 대해 작동하는 로드 밸런서를 위해 필요한 최소한의 구성을 적용한다.
+
+```bash
+daemon off; ## 1
+error_log /dev/stderr info; ## 2
+
+events {
+  worker_connections 2048; ## 3
+}
+
+http { ## 4
+  access_log /dev/stdout;
+
+  upstream my-load-balanced-app {
+    server 127.0.0.1:8081;
+    server 127.0.0.1:8082;
+    server 127.0.0.1:8083;
+    server 127.0.0.1:8084;
+  }
+
+  server {
+    listen 8000; ## max에 nginx설치하니 8080을 사용해서 8000으로 수정
+
+    location / {
+      proxy_pass http://my-load-balanced-app;
+    }
+  }
+}
+```
+
+1. deamon off 설정을 사용하면 현재 권한이 없는 사용자를 사용하여 Nginx를 독립 실행형 프로세스로 실행할 수 있으며 현재 터미널의 포그라운드(foreground)에서 프로세스를 계속 실행할 수 있다.(ctrl+c로 종료가능)
+2. error_log(및 나중에 http 블록에서 access_log)를 사용하여 오류를 스트리밍하고 로그를 표준 출력과 표준 오류로 각각 전송하므로 터미널에서 바로 실시간으로 로그를 읽을 수 있다.
+3. events 블록을 통해 Nginx에서 네트워크 연결을 관리하는 방법을 설정할 수 있다.  
+   여기서는 Nginx 작업자 프로세스에서 열 수 있는 최대 동시 연결 수를 2,048개로 설정했다.
+4. http 블록을 사용하면 주어진 애플리케이션에 대한 구성을 정의할 수 있다.  
+   upstream 섹션에서는 네트워크 요청을 처리하는데 사용되는 백엔드 서버 목록을 정의한다.  
+   server 섹션에서는 listen 8000을 사용하여 서버가 포트 8000에서 수신하도록 지시하고 마지막으로 proxy_pass를 설정한다.  
+   이 지시문은 Nginx가 이전에 정의한 서버 그룹(my-load-balanced-app)에 요청을 전달하도록 한다.
+
+`nginx -c ${PWD}/nginx.conf` 명령어를 입력해 Nginx를 시작한다.
+
+![실행 시 출력되는 로그](https://prod-files-secure.s3.us-west-2.amazonaws.com/bc261f43-de91-483d-8946-ac5a65106576/21b7a43b-3098-4eed-99d2-3c3f05ec6750/Untitled.png)
+
+실행 시 출력되는 로그
+
+여러 애플리케이션을 배포하기 위해서는 기본적으로 다음 레시피를 따라야 한다.
+
+1. Node.js 애플리케이션을 실행하는 n개의 백엔드 서버를 프로비저닝한다(forever와 같은 서비스 모니터로 여러 인스턴스를 실행하거나 클러스터 모듈을 사용해서 실행)
+2. Nginx가 설치된 로드 밸런서 시스템과 트래픽을 n개의 백엔드 서버로 라우팅 하는데 필요한 모든 설정을 프로비저닝 한다.  
+   (소프트웨어를 시스템에 설치 배포하고, 필요한 구성 셋팅 작업을 해서 실행 가능하도록 준비하는 걸 프로비저닝이라고함)  
+   모든 서버의 모든 프로세스는 네트워크에 있는 다양한 머신의 해당 주소를 사용하여 Nginx 설정 파일의 upstream 블록에 나열되어야 한다.
+3. 공개 IP와 공개 도메인 이름을 사용하여 인터넷에서 로드 밸런서를 공개적으로 사용할 수 있도록 한다.
+4. 브라우저 또는 autocannon과 같은 벤치마킹 도구를 사용하여 로드 밸런서의 공개 주소로 트래픽을 보낸다.
+
+<aside>
+💡 위 절차들을 간단히 하기 위해 클라우드 제공 업체 관리 인터페이스를 통해 서버를 부팅하고 SSH를 사용하여 로그인해서 이러한 모든 단계를 수동으로 수행할 수 있다.   
+또는 Terraform, Ansible, Packer와 같은 코드로 인프라를 작성하여 이러한 작업을 자동화할 수 있는 도구를 사용할 수도 있따.
+
+</aside>
