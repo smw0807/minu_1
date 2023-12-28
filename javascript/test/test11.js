@@ -13,3 +13,4 @@ const test = arr.map(v => ({
 }));
 
 console.log(test);
+console.log(test);
