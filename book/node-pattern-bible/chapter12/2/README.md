@@ -541,3 +541,163 @@ example.com에 대한 요청이 수신되면 로드 밸런서는 요청 경로�
 
 이 패턴은 트래픽 부하를 분산하는 데 유용하고 실행중인 서버에서 서비스 인스턴스를 분리할 수 있다는 추가적인 장점이 있다.  
 그리고 네트워크 서비스에 적용된 서비스 로케이터 디자인 패턴의 구현으로 볼 수 있다.
+
+### http-proxy와 consul을 사용한 동적 로드 밸런서 구현
+
+동적 네트워크 인프라를 지원하기 위해서는 Nginx 또는 HAProxy와 같은 역방향 프록시를 사용할 수 있다.  
+자동화된 서비스로 자신들의 설정 정보를 갱신한 후에, 로드 밸런서가 변경된 정보를 가져가도록 수정해야 한다.  
+Nginx의 경우 `nginx -s reload` 명령어로 이를 수행할 수 있다.
+
+consul(https://www.npmjs.com/package/consul)을 서비스 레지스트리로 사용하여 위 그림의 멀티 서비스 아키텍처를 구체화해볼 수 있다.  
+이를 위해 3개의 npm 패키지를 사용한다.
+
+- http-proxy: Node.js에서 역방향 프록시/로드 밸런서 생성을 단순화한다.
+- portfinder: 시스템에서 사용 가능한 포트를 찾는다
+- consul: Consul과 상호작용한다.
+
+아래 작성한 코드는 각 서버가 시작되는 순간 서비스 레지스트리에 자신의 정보를 등록한다.
+
+```tsx
+import { createServer } from 'http';
+import consul from 'consul';
+import portfinder from 'portfinder';
+import { nanoid } from 'nanoid';
+
+const serviceType = process.argv[2];
+const { pid } = process;
+
+async function main() {
+  const consulClient = consul();
+
+  const port = await portfinder.getPortPromise(); // 1
+  const address = process.env.ADDRESS || 'localhost';
+  const serviceId = nanoid();
+
+  // 2
+  function registerService() {
+    consulClient.agent.service.register(
+      {
+        id: serviceId,
+        name: serviceType,
+        address,
+        port,
+        tags: [serviceType],
+      },
+      () => {
+        console.log(`${serviceType} [${serviceId}]  registered successfully.`);
+      }
+    );
+  }
+
+  // 3
+  function unregisterService(err) {
+    err && console.error(err);
+    console.log(`deregistering ${serviceType} [${serviceId}]`);
+    consulClient.agent.service.deregister(serviceId, () => {
+      process.exit(err ? 1 : 0);
+    });
+  }
+
+  process.on('exit', unregisterService); // 4
+  process.on('uncaughtException', unregisterService);
+  process.on('SIGINT', unregisterService);
+
+  // 5
+  const server = createServer((req, res) => {
+    let i = 1e7;
+    while (i > 0) {
+      i--;
+    }
+    console.log(`Handling request from ${pid}`);
+    res.end(`${serviceType} [${serviceId}] response from ${pid}\n`);
+  });
+
+  server.listen(port, address, () => {
+    registerService();
+    console.log(`Started ${serviceType} [${serviceId}] at ${pid} on port ${port}`);
+  });
+}
+
+main().catch(err => {
+  console.error(err);
+  process.exit(1);
+});
+```
+
+1. 시스템에서 사용 가능한 포트를 찾는다.(기본적으로 포트 8000에서 검색을 시작한다.)  
+   또한 사용자가 환경 변수 ADDRESS를 사용하여 주소를 설정할 수도 있다.  
+   끝으로 nanoid를 사용하여 이 서비스를 식별하기 위해 임의의 ID를 생성한다.
+2. 레지스트리에 새 서비스를 등록하기 위해 consul 라이브러리를 사용하는 함수를 선언한다.  
+   서비스 정의에는 id(서비스에 대한 고유 식별자), name(서비스를 식별하는 일반 이름), address, port(서비스에 액세스하는 방법을 식별하기 위함), tag(선택 사항인 태그들의 배열)라는 여러 가지 속성들이 필요하다.
+3. Consul에 등록학 서비스를 제거할 수 있는 함수
+4. unregisterService()를 정리 함수로 사용하여 (의도적 또는 실수로) 프로그램이 종료되었을 때 서비스가 Consul에서 등록 해제된다.
+5. portfinder에서 발견한 포드와 현재 서비스에 대해 설정된 주소에서 서비스용 HTTP 서버를 시작한다.  
+   서버가 시작되면 registerService() 함수를 호출하여 서비스 검색을 위해 등록한다.
+
+이 스크림트를 사용하여 다양한 유형의 애플리케이션을 시작하고 등록할 수 있다.
+
+```tsx
+//loadBalancer.js
+import { createServer } from 'http';
+import httpProxy from 'http-proxy';
+import consul from 'consul';
+
+// 1
+const routing = [
+  {
+    path: '/api',
+    service: 'api-service',
+    index: 0,
+  },
+  {
+    path: '/',
+    service: 'webapp-service',
+    index: 0,
+  },
+];
+
+const consulClient = consul(); // 2
+const proxy = httpProxy.createProxyServer();
+
+const server = createServer((req, res) => {
+  // 3
+  const route = routing.find(route => req.url.startWith(route.path));
+
+  // 4
+  consulClient.agent.service.list((err, services) => {
+    const servers =
+      !err && Object.values(services).filter(service => service.Tags.includes(route.service));
+
+    if (err || !servers.length) {
+      res.writeHead(502);
+      return res.end('Bad Gateway');
+    }
+
+    route.index = (route.index + 1) % servers.length; // 5
+    const server = servers[route.index];
+    const target = `http://${server.Address}:${server.port}`;
+    proxy.web(req, res, { target });
+  });
+});
+
+server.listen(8080, () => {
+  console.log('Load balancer started on port 8080');
+});
+```
+
+1. 로드 밸런서 경로를 정의한다.  
+   라우팅 배열의 각 항목에는 맵핑된 경로에 도착하는 요청을 처리하는 데 사용되는 서비스가 포함되어 있다.  
+   index 속성은 주어진 서비스의 요청을 **[라운드로빈](https://www.notion.so/940b30667f7c4ecb879d16fe917642bc?pvs=21)**하는데 사용된다.
+2. 레지스트리에 액세스할 수 있도록 consul 클라이언트를 인스턴스화 해야 한다.  
+   그리고 http-proxy 서버를 인스턴스화 한다.
+3. 서버의 요청 핸들러에서 가장 먼저 하는 일은 라우팅 테이블에서 URL을 찾는 것이다.  
+   결과는 서비스 이름이 포함된 설명자(descriptor) 이다.
+4. consul로부터 요청을 처리하는데 필요한 서비스를 구현한 서버의 목록을 받는다.  
+   이 목록이 비어있거나 검색의 오류가 있는 경우 클라이언트에 오류를 반환한다.  
+   Tags 속성을 사용하여 사용 가능한 모든 서비스를 필터링하고 현재 서비스 유형을 구현하고 있는 서버의 주소를 찾는다.
+5. 요청 대상으로 라우팅 할 수 있다.  
+   라운드로빈 방식에 따라 목록에서 다음 서버를 가리키도록 route.index를 갱신한다.  
+   그런 다음 인덱스를 사용하여 목록에서 서버를 선택하고 요청(req) 및 응답(res) 객체와 함께 proxy.web()으로 전달한다.
+
+이 패턴의 장점은 직접적이라는 것이다.  
+인프라를 수요에 따라 또는 일정에 따라 동적으로 확장할 수 있으면, 로드 밸런서는 추가적인 노력 없이 새로운 설정으로 자동 조정된다.

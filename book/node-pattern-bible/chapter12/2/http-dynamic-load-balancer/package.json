@@ -1,0 +1,23 @@
+{
+  "name": "http-dynamic-load-balancer",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "consul": "^1.2.0",
+    "forever": "^4.0.3",
+    "http-proxy": "^1.18.1",
+    "nanoid": "^5.0.4",
+    "portfinder": "^1.0.32"
+  },
+  "devDependencies": {
+    "autocannon": "^7.14.0"
+  }
+}
