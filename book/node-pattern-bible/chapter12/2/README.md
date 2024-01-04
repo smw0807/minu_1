@@ -789,3 +789,79 @@ app.js에 작성된 서버 인스턴스를 8081, 8082로 실행 시키고 client
 ![Untitled](https://prod-files-secure.s3.us-west-2.amazonaws.com/bc261f43-de91-483d-8946-ac5a65106576/ad76fb76-d984-4ba5-a3cb-5f53f54d47bc/Untitled.png)
 
 각 요청이 다른 서버로 전송이되어 로드 밸런서 없이도 분산이 가능함을 확인할 수 있게 해준다.
+
+## 12-2-6 컨테이너를 사용한 애플리케이션 확장
+
+쿠버네티스(kubernetes)와 같은 컨테이너 및 컨테이너 오케스트레이션 플랫폼을 사용하는 것이 로드 밸런싱, 탄력적인 확장, 고가용성 등과 같은 확장 문제의 대부분을 기본 컨터에니 플랫폼에 위임하여 간단하게 애플리케이션을 만들 수 있다.
+
+### 컨테이너란?
+
+**OCI(Open Container Initiative)**에 의해 표준화된 **컨테이너**, 특히 **Linux 컨테이너**는 “코드와 모든 종속성을 패키지화하여 애플리케이션이 하나의 컴퓨팅 환경이 아닌 다른 컴퓨팅 환경에서도 빠르고 안정적으로 실행되도록 하는 소프트웨어의 표준 단위”로 정의 된다.
+
+즉, 컨테이너를 사용하면 책상의 로컬 개발 랩톱에서 클라우드의 프로덕션 서버에 이르기까지 다양한 컴퓨터에서 애플리케이션을 원활하게 패키징하고 실행할 수 있다.
+
+이식성이 매우 뛰어난 것 외에 컨테이너로 실행되는 애플리케이션은 실행 시 오버헤드가 매우 적다는 장점이 있다.  
+실제로 컨테이너는 운영체제에서 직접 네이티브 애플리케이션을 실행하는 것만큼 빠르게 실행된다.
+
+간단히 말해서 컨테이너는 Linux 운영체제에서 직접 격리된 프로세스를 정의하고 실행할 수 있는 표준 소프트웨어 단위로 볼 수 있다.
+
+이식성과 성능 측면에서 컨테이너는 **가상 머신**과 비교할 때 큰 발전으로 간주되는데, 응요 프로그램에 대한 OCI 호환 컨테이너를 만들고 실행하는데 여러 가지 방법과 도구가 있고, 가장 인기있는 것은 Docker이다.
+
+### Docker로 컨테이너 생성 및 실행
+
+```tsx
+//app.js
+import { createServer } from 'http';
+import { hostname } from 'os';
+
+const version = 1;
+const server = createServer((req, res) => {
+  let i = 1e7;
+  while (i > 0) {
+    i--;
+  }
+  res.end(`Hello from ${hostname()} (v${version})`);
+});
+server.listen(8080);
+```
+
+![Untitled](https://prod-files-secure.s3.us-west-2.amazonaws.com/bc261f43-de91-483d-8946-ac5a65106576/d3087362-403f-49f9-9e7d-c71794ad187c/Untitled.png)
+
+애플리케이션을 도커에 담으려면 두 단계의 프로세스를 따라야 한다.
+
+- 컨테이너 이미지 빌드
+- 이미지에서 컨테이너 인스턴스 실행
+
+애플리케이션의 **컨테이너 이미지**를 생성하려면 Dockerfile을 정의해야 한다.  
+컨테이너 이미지(또는 Docker 이미지)는 실제 패키지이면 OCI 표준을 따른다.  
+여기에는 모든 소스 코드와 필요한 종속성이 포함되어 있으며 애플리케이션을 실행하는 방법을 설명하여 정의해야 한다.  
+그래서 package.json이 정의되어 있어야함
+
+Dockerfile은 애플리케이션의 컨테이너 이미지를 만드는데 사용되는 빌드 스크립트르 정의하는 파일(실제로 Dockerfile이라고 함)입니다.
+
+```docker
+#Dockerfile
+FROM node:14-alpine
+EXPOSE 8081
+COPY app.js package.json /app/
+WORKDIR /app
+CMD [ "npm", "start" ]
+```
+
+- FROM node:14-alpine  
+  사용할 기본 이미지를 나타낸다.  
+  기본 이미지를 사용하면 기존 이미지의 “위에” 빌드할 수 있다.
+- EXPOSE 8081  
+  애플리케이션이 포트 8081에서 TCP 연결을 수신할 것임을 Docker에 알린다.
+- COPY app.js package.json /app/  
+  app.js와 package.json 파일을 컨테이너 파일시스템의 /app 디렉터리에 복사한다.  
+  컨테이너는 격리되어 있으므로 기본적으로 호스트 운영체제와 파일을 공유할 수 없다.  
+  따라서 프로젝트 파일에 액세스하고 실행할 수 있도록 컨테이너에 프로젝트 파일을 복사해야 한다.
+- WORKDIR /app  
+  컨테이너의 작업 디렉터리를 app으로 설정한다.
+- CMD [ "npm", "start" ]  
+  이미지에서 컨테이너를 실행할 때 애플리케이션을 시작하기 위해 실행할 명령을 지정한다.
+
+Dockerfile이 위치한 곳에서 `docker build .` 명령어를 입력하면 Dockerfile을 사용하여 컨테이너 이미지를 만들 수 있다.
+
+![Untitled](https://prod-files-secure.s3.us-west-2.amazonaws.com/bc261f43-de91-483d-8946-ac5a65106576/458d647e-cb44-4aa7-abe5-71569511fefc/Untitled.png)
