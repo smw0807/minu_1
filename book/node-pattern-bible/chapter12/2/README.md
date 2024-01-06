@@ -900,3 +900,23 @@ Dockerfile이 위치한 곳에서 `docker build .` 명령어를 입력하면 Doc
 
 개발, 테스트 및 프로덕션 목적으로 쿠버네티스 클러스터를 만드는 방법에는 여러 가지가 있다.  
 쿠버네티스 시험을 시작하는 가장 쉬운 방법은 [minikube](https://kubernetes.io/docs/tasks/tools/)라는 도구로 쉽게 만들 수 있는 로컬 단일 노드 클러스터를 사용하는 것이다.
+
+### kubernetes에서 애플리케이션 배포 및 확장
+
+<aside>
+💡 macOS 및 Linux 환경에서는 minikube start 및 eval $(minikube docker-env)를 실행하여 작업 환경을 초기화해야 한다.
+두 번째 명령은 현재 터미널에서 docker 및 kubectl을 사용할 때 로컬 Minikube 클러스터와 상호작용 하는지 확인한다.
+여러 터미널을 여는 경우 모든 터미털에서 eval $(minikube docker-env)를 실행해야 한다.   
+또한 minikube 대시보드를 실행하여 클러스터의 모든 객체를 시각화하고 상호작용할 수 있는 편리한 웹 대시보드를 실행할 수 있다.
+
+</aside>
+
+먼저 Docker 이미지를 빌드하고 의미있는 이름을 지정한다.
+
+`docker build -t hello-web:v1 .`  
+환경을 올바르게 설정한 경우 hello-web 이미지를 로컬 쿠버네티스 클러스터에서 사용할 수 있다.
+
+<aside>
+💡 로컬 개발에는 로컬 이미지를 사용하는 것으로 충분하다. 프로덕션 환경으로 이동할 준비가 되었다면 Docker Hub, Docker registry, Google Cloud Container Registry, Amazon Elastic Container Registry와 같은 도커 컨테이너 레지스트리에 이미지를 게시하는 것이 가장 좋다. 이미지를 컨테이터 레지스트리에 게시한 후에는 매번 해당 이미지를 다시 빌드할 필요 없이 애플리케이션을 다른 호스트에 쉽게 배포할 수 있다.
+
+</aside>
