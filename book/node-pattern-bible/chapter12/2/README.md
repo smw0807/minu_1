@@ -920,3 +920,71 @@ Dockerfile이 위치한 곳에서 `docker build .` 명령어를 입력하면 Doc
 💡 로컬 개발에는 로컬 이미지를 사용하는 것으로 충분하다. 프로덕션 환경으로 이동할 준비가 되었다면 Docker Hub, Docker registry, Google Cloud Container Registry, Amazon Elastic Container Registry와 같은 도커 컨테이너 레지스트리에 이미지를 게시하는 것이 가장 좋다. 이미지를 컨테이터 레지스트리에 게시한 후에는 매번 해당 이미지를 다시 빌드할 필요 없이 애플리케이션을 다른 호스트에 쉽게 배포할 수 있다.
 
 </aside>
+
+### kubernetes 배포 만들기
+
+https://www.notion.so/smw0807/940b30667f7c4ecb879d16fe917642bc?pvs=4#c99f2aeb84764c7fafb3071dc257f8ff
+
+minikube 클러스터에서 이 컨테이너의 인스턴스를 실행하려면 다음 명령을 사용하여 배포 본(kubernetes 객체)을 만들어야 한다.
+`kubectl create deployment hello-web --image=hello-web:v1`
+
+![위 명령어가 성공적으로 입력되면 출력되는 로그](https://prod-files-secure.s3.us-west-2.amazonaws.com/bc261f43-de91-483d-8946-ac5a65106576/27e573cd-19ba-4f8a-aec6-42af69dbbab4/Untitled.png)
+
+위 명령어가 성공적으로 입력되면 출력되는 로그
+
+위 명령은 기본적으로 쿠버네티스에 hello-web:v1 컨테이너의 인스턴스를 hello-web이라는 애플리케이션으로 실행하도록 지시한다.  
+그리고 `kubectl get deployments` 명령을 사용하여 배포가 실행 중인지 확인할 수 있다.
+
+![Untitled](https://prod-files-secure.s3.us-west-2.amazonaws.com/bc261f43-de91-483d-8946-ac5a65106576/302d9446-34f7-4db6-9b47-67bcdbabbb21/Untitled.png)
+
+이 테이블은 hello-web 배포가 활성화되어 있고 할당된 하나의 pod가 있음을 나타낸다.  
+**pod(이하 파드)**는 동일한 쿠버네티스의 기본 단위이며, 동일한 쿠버네티스 노드에서 함께 실행해야 하는 컨테이너 집합을 나타낸다.  
+동일한 파드의 컨테이너에는 스토리지 및 네트워크와 같은 공유 리소스가 있다.  
+일반적으로 파드에는 컨테이너가 하나만 포함되어 있지만, 이러한 컨테이너가 긴밀하게 결합된 애플리케이션을 실행하는 경우 파드에 둘 이상의 컨테이너가 표시되는 것은 드문 일이 아니다.
+
+`kubectl get pod` 명령으로 클로스터에서 실행중인 모든 파드를 나열할 수 있다.
+
+![Untitled](https://prod-files-secure.s3.us-west-2.amazonaws.com/bc261f43-de91-483d-8946-ac5a65106576/bfc3b771-1503-4b5a-84ec-b7e09dd9bd6a/Untitled.png)
+
+이제 로컬 머신에서 웹 서비스에 접근할 수 있게 하려면 배포를 expose 해야 한다.
+
+`kubectl expose deployment hello-web --type=LoadBalancer --port=8080`
+쿠버네티스에 모든 컨테이너의 포트 8081에 연결하여 hello-web
+
+`minikube service hello-web`
+로컬 주소를 가져와 로드 밸런서에 접근할 수 있도록 하는 minikube의 도우미 명령이다.  
+이 명령은 브라우저 창을 열 것이므로 이제 브라우저에서 컨테이너의 응답을 볼 수 있다.
+
+### kubernetes 배포 확장
+
+`kubectl scale —replicas=5 deployment hello-web`
+하나가 아닌 5개의 인스턴스를 실행하여 애플리케이션을 확장할 수 있다.
+`kubectl get deployments`를 입력해서 확인할 수 있다.
+
+### kubernetes 롤 아웃
+
+새로운 버전의 앱을 출시한다고 가정할 때 app.js에서 const version=2를 설정하고 새 이미지를 만들 수 있다.
+`docker build -t hello-web:v2 .`
+
+이 시점에서 실행 중인 모든 pod를 이 새로운 버전으로 업그레이드 하려면 다음 명령어를 실행해야 한다.
+
+`kubectl set image deployment/hello-web hello-web=hello-web:v2 --record`
+
+- **`deployment/hello-web`**: **`hello-web`**이라는 이름의 배포를 지정합니다.
+- **`hello-web=hello-web:v2`**: **`hello-web`** 컨테이너의 이미지를 **`hello-web:v2`**로 업데이트합니다.
+- **`-record`**: 이 변경 사항을 배포의 리비전 히스토리에 기록합니다.
+
+![정상적으로 버전 업그레이드 되었을 경우](https://prod-files-secure.s3.us-west-2.amazonaws.com/bc261f43-de91-483d-8946-ac5a65106576/16a34d49-c762-4c79-954a-304fff6c2fc5/Untitled.png)
+
+정상적으로 버전 업그레이드 되었을 경우
+
+쿠버네티스가 컨터에너를 하나씩 교체하여 새 버전을 출시하기 시작했다는 것이다.  
+컨테이너가 교체되면 실행 중인 인스턴스가 정상적으로 중지된다.  
+이렇게 하면 컨테이너가 종료되기 전에 현재 진행중인 요청을 완료할 수 있다.
+
+쿠버네티스와 같은 컨테이너 오케스트레이터 플랫폼을 사용할 경우, 여러 인스턴스로 확장하거나 소프트 롤아웃 및 애플리케이션의 재시작을 처리하는 것과 같은 문제를 애플리케이션이 신경쓸 필요가 없기 때문에 코드를 매우 간단하게 유지할 수 있다.
+
+쿠버네티스에서 컨테이너를 실행할 때 컨테이너가 “일회용”으로 간주되는 경우가 많다.  
+이는 기본적으로 언제든지 종료하고 다시 시작할 수 있음을 의미한다.  
+이것은 관련 없는 세부적인 사항처럼 보일 수 있지만, 실제로 이 동작을 고려하고 애플리케이션을 가능한 상태 비저장을 유지해야 한다.  
+실제로 컨테이너는 기본적으로 로컬 파일 시스템의 변경 사항을 유지하지 않으므로 일부 영구적인 정보를 저장해야 할 때마다 데이터베이스나 영구 볼륨 같은 외부 저장소 메커니즘에 의존해야 한다.
