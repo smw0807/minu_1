@@ -5,7 +5,7 @@ import { WebSocketServer } from 'ws';
 //정적인 파일들을 서비스 한다
 //1
 const server = createServer((req, res) => {
-  return staticHandler(req, res, { public: 'wwww' });
+  return staticHandler(req, res, { public: 'www' });
 });
 
 const wss = new WebSocketServer({ server }); //2
