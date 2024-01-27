@@ -219,3 +219,82 @@ ZeroMQ PUB/SUB 소켓을 사용하는 채팅 서버 메시징 아키텍처
 위 그림은 채팅 애플리케이션의 두 인스턴스가 있을 때 정보의 흐름을 보여주지만, 동일한 개념의 N개의 인스턴스에 적용할 수 있다.  
 이 아키텍처에서 필요한 모든 연결을 설정할 수 있으려면, 각 노드가 시스템의 다른 노드를 알고있어야 한다.  
 또한 구독이 SUB 소켓에서 PUB 소켓으로 이동하는 동안 메시지가 반대 방향으로 이동하는 방식을 보여준다.
+
+### ZeroMQ PUB/SUB 소켓 사용
+
+```jsx
+import { createServer } from 'http';
+import staticHandler from 'serve-handler';
+import ws from 'ws';
+import yargs from 'yargs'; // 1
+import zmq from 'zeromq';
+
+const server = createServer((req, res) => {
+  return staticHandler(req, res, { public: 'www' });
+});
+
+let pubSocket;
+async function initializeSockets() {
+  pubSocket = new zmq.Publisher(); // 2
+  await pubSocket.bind(`tcp://127.0.0.1:${yargs.argv.pub}`);
+
+  const subSocket = new zmq.Subscriber(); //3
+  const subPorts = [].concat(yargs.argv.sub);
+  for (const port of subPorts) {
+    console.log(`Subscribing to ${port}`);
+    subSocket.connect(`tcp://127.0.0.1:${port}`);
+  }
+  subSocket.subscribe('chat');
+
+  //4
+  for await (const [msg] of subSocket) {
+    console.log(`Message from another server: ${msg}`);
+    boardcast(msg.toString().split(' ')[1]);
+  }
+}
+
+initializeSockets();
+
+const wss = new ws.Server({ server });
+wss.on('connection', client => {
+  console.log('Client connected');
+  client.on('message', msg => {
+    console.log(`Message: ${msg}`);
+    broadcast(msg);
+    pubSocket.send(`chat ${msg}`); //5
+  });
+});
+
+function broadcast(msg) {
+  for (const client of wss.clients) {
+    if (client.readyState === ws.OPEN) {
+      client.send(msg);
+    }
+  }
+}
+
+server.listen(yargs.argv.http || 8080);
+```
+
+1. yargs는 커맨드라인 인자를 파싱하는 패키지이다.  
+   명명된 인자를 쉽게 받아들이기 위해 사용한다.  
+    zeromq는 ZeroMQ용 node.js 클라이언트인 패키지이다.
+2. initializeSockets() 함수에서 즉시 게시자 소켓을 만들고 커맨드라인 인자인 —pub에 지정된 포트에 바인딩 한다.
+3. 구독자(Subscriber) 소켓을 만들고 이를 애플리케이션의 다른 인스턴스의 게시자(Publisher) 소켓에 연결한다.  
+   대상 게시자 소켓의 포트는 커맨드라인의 인자인 —sub로 지정한다.(둘 이상일 수 있음)  
+   그런 다음 채팅을 필터로 제공하여 실제 구독을 생성한다.  
+   즉, chat을 필터로 제공하여 실제 구독을 생성한다.  
+   다시 말해, chat으로 시작하는 메시지만 수신한다.
+4. subSocket은 비동기 반복가능자이므로 for await..of 루프를 사용하여 구독자 소켓에 도착하는 메시지를 수신하기 시작한다.  
+   우리가 수신하는 모든 메시지에서 접두사 chat을 제거한 다음 실제 페이로드를 현재 WebSocket 서버에 연결된 모든 클라이언트에 broadcast() 한다.
+5. 현재 인스턴스의 WebSocket 서버에서 새로운 메시지를 받으면 연결된 모든 클라이언트로 브로드캐스트하지만 게시자 소켓을 통해 게시하기도 한다.  
+   chat을 접두사로 사용하고 그 뒤에 공백을 두어 chat을 필터로 사용하는 모든 구독에 메시지가 게시되도록 한다.
+
+이렇게 P2P Pub/Sub 패턴을 사용하여 통합된 간단한 분산 시스템을 만들 수 있다.
+
+실행해보면, 구독자 소켓이 게시자 소켓에 대한 연결이 설정되지 않아도 ZeroMQ는 문제가 없다는 걸 알 수 있다.  
+(5001, 5002에 대한 수신 대기 중인 게시자 소켓이 없어도 ZeroMQ는 오류를 발생시키지 않는다.)  
+그 이유는 ZeroMQ가 장애에 대한 복원력이 뛰어나도록 만들어졌으며, 기본적인 연결 재시도 메커니즘을 구현하고 있기 때문이다.  
+또한 이 기능은 노드가 중단되거나 재시작될 경우 특히 유용하다.  
+게시자 소켓에도 이러한 로직이 적용된다.  
+구독이 없는 경우 모든 메시지를 삭제하지만 계속 작동한다.
