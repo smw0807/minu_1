@@ -395,3 +395,53 @@ AMQP 및 히스토리 서비스를 사용하는 채팅 애플리케이션의 아
 이것은 채팅 서버가 영우 가입자가 아니며, 연결이 종료되는 즉시 큐가 제거된다는 것을 의미한다.  
 대신 히스토리 서비스는 메시지를 잃어버리지 않는다.  
 따라서 히스토리 서비스를 위해 만들려는 큐는 내구성이 있어야 하므로 서비스가 연결 해제된 동안 게시된 모든 메시지가 큐에 유지되고 다시 온라인 상태가 되면 전달해야 한다.
+
+### AMQP를 사용하여 히스토리 서비스 구현
+
+```jsx
+//historySvc.js
+import { createServer } from 'http';
+import level from 'level';
+import timestamp from 'monotonic-timestamp';
+import JSONSteam from 'JSONStream';
+import amqp from 'amqplib';
+
+async function main() {
+  const db = level('./msgHistory');
+
+  const connection = await amqp.connect('amqp://localhost'); //1
+  const channel = await connection.createChannel();
+  await channel.assertExchange('chat', 'fanout'); //2
+  const { queue } = channel.assertQueue('chat_history'); //3
+  await channel.bindQueue(queue, 'chat'); //4
+
+  // 5
+  channel.consume(queue, async msg => {
+    const content = msg.content.toString();
+    console.log(`Saving message: ${content}`);
+    await db.put(timestamp(), content);
+    channel.ack(msg);
+  });
+
+  createServer((req, res) => {
+    res.writeHead(200);
+    db.createValueStream().pipe(JSONSteam.stringify()).pipe(res);
+  }).listen(8090);
+}
+
+main().catch(err => console.error(err));
+```
+
+1. 먼저 AMQP 브로커(여기서는 RabbitMQ)와 연결을 설정한다.  
+   그런 다음 통신 상태를 유지하는 세션과 유사한 채널을 만든다.
+2. chat이라는 익스체인지를 설정한다.  
+   assertExchange() 명령은 익스체인지 브로커에 존재하는지 확인한다.  
+   그렇지 않으면 익스체인지가 생성된다.
+3. chat_history라는 큐를 만든다.  
+   기본적으로 큐는 영구성이 있으므로(durable) 영구 구독자를 지원하기 위해 추가적인 옵션을 전달할 필요가 없다.
+4. 큐를 이전에 만든 익스체인지에 바인딩한다.  
+   여기서는 익스체인지가 팬아웃 유형이므로 다른 특정 옵션(예: 라우팅 키 또는 패턴)이 필요하지 않기 때문에 필터링을 수행하지 않는다.
+5. 큐에서 들어오는 메시지를 수신할 수 있다.  
+   타임스탬프를 키로 사용하여 수신한 모든 메시지를 LevelDB 데이터베이스에 저장하여 메시지를 날짜별로 정리한다.  
+   메시지가 데이터베이스에 성공적으로 저장된 후에만 channel.ack(msg)를 사용하여 모든 메시지를 확인응답한다.  
+   브로커가 ACK(확인응답)를 받지 못하면 메시지는 다시 처리될 수 있도록 대기열에 보관된다.
