@@ -445,3 +445,78 @@ main().catch(err => console.error(err));
    타임스탬프를 키로 사용하여 수신한 모든 메시지를 LevelDB 데이터베이스에 저장하여 메시지를 날짜별로 정리한다.  
    메시지가 데이터베이스에 성공적으로 저장된 후에만 channel.ack(msg)를 사용하여 모든 메시지를 확인응답한다.  
    브로커가 ACK(확인응답)를 받지 못하면 메시지는 다시 처리될 수 있도록 대기열에 보관된다.
+
+### 채팅 애플리케이션을 AMQP와 통합하기
+
+```jsx
+//index.js
+import { createServer } from 'http';
+import staticHandler from 'serve-handler';
+import ws from 'ws';
+import amqp from 'amqplib';
+import JSONStream from 'JSONStream';
+import superagent from 'superagent';
+
+const httpPort = process.argv[2] || 8080;
+
+async function main() {
+  const connection = await amqp.connect('amqp://localhost');
+  const channel = await connection.createChannel();
+  await channel.assertExchange('chat', 'fanout');
+  //1
+  const { queue } = await channel.assertQueue(`chat_srv_${httpPort}`, { exclusive: true });
+  await channel.bindQueue(queue, 'chat');
+
+  //2
+  channel.consume(
+    queue,
+    msg => {
+      msg = msg.content.toString();
+      console.log(`From queue: ${msg}`);
+      broadcast(msg);
+    },
+    { noAck: true }
+  );
+
+  const server = createServer((req, res) => {
+    return staticHandler(req, res, { public: 'www' });
+  });
+
+  const wss = new ws.Server({ server });
+  wss.on('connection', client => {
+    console.log('Client connected');
+
+    client.on('message', msg => {
+      console.log('Message: ${msg}');
+      channel.publish('chat', '', Buffer.from(msg)); //3
+    });
+
+    // 이력 조회 서비스
+    superagent //4
+      .get('http://localhost:8090')
+      .on('error', err => console.error(err))
+      .pipe(JSONStream.parse('*'))
+      .on('data', msg => client.send(msg));
+  });
+
+  function broadcast(msg) {
+    for (const client of wss.clients) {
+      if (client.readyState === ws.OPEN) {
+        client.send(msg);
+      }
+    }
+  }
+
+  server.listen(httpPort);
+}
+
+main().catch(err => console.error(err));
+```
+
+1. 채팅서버는 지속적인 구독자일 필요가 없기 때문에 발사 후 망각(fire-and-forget) 패러다임이면 충분하다.  
+   따라서 대기열을 만들 때 {exclusive: true} 옵션을 전달하여 대기열이 현재 연결에 독점되므로 채팅 서버가 종료되는 즉시 삭제된다.
+2. 큐에서 메시지를 읽을 때 확인응답을 다시 보낼 필요가 없다.  
+   따라서 작업을 더 용이하게 하기 위해 큐에서 메시지를 소비하기 시작할 때 { noAck: true } 옵션을 전달한다.
+3. 팬아웃 익스체인지를 사용하고 있으므로 수행할 라우팅이 없기 때문에 대상 익스체인지(chat)와 라우팅 키를 지정하기만 하면 된다.  
+   이 경우에는 비어있다. (’’)
+4. 히스토리 마이크로서비스를 질의를 하고 새로운 연결이 설정되면 바로 모든 과거의 메시지를 클라이언트에 전송하여 이를 수행한다.
