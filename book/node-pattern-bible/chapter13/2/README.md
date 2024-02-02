@@ -553,3 +553,92 @@ main().catch(err => console.error(err));
 메시지 대기열과 스트림은 데이터 전달의 신뢰성이 보장되어야 하는 경우라 하더라도 pub/sub 패턴을 구현하는데 사용할 수 있다.  
 그러나 메시지 대기열은 고급 메시지 라우팅을 제공하고 서로 다른 메시지에 대해 서로 다른 우선순위를 가지게 할 수 있기 때문에 복잡한 시스템의 작업을 통합하는데 더 적합하다.(스트림에서 레코드의 순서는 항상 유지됨)  
 표준 아키텍처에서는 메시지의 우선 순위와 고급 라우팅 메커니즘 덕분에 메시지 큐가 더 적합할 수 있지만, 둘 다 작업 배포 패턴을 구현하는데 사용할 수도 있다.
+
+### Redis Streams를 사용하여 채팅 애플리케이션 구현
+
+[Apache Kafka](https://kafka.apache.org/)와 [Amazon Kiensis](https://aws.amazon.com/ko/kinesis/)는 가장 인기있는 스트리밍 플랫폼이다.  
+그러나 더 간단한 작업의 경우 Redis Streams라는 log 데이터 구조를 구현한 Redis를 사용할 수 있다.
+
+아래의 코드는 Redis Streams가 작동하는 모습인데  
+메시지 대기열을 통해 스트림을 사용하는 즉각적인 이점은 채텅 방에서 교환된 메시지의 기록을 저장하고 검색하기 위해 전용 컴포넌트에 의존할 필요없이 필요할 때마다 스트림에 질의를 할 수 있다.  
+이는 애플리케이션의 아키텍처를 많이 단순화하기 때문에, 최소한 매우 간단한 사용 사례에서는 스트림이 메시지 큐보다 더 좋은 선택이다.
+
+```jsx
+import { createServer } from 'http';
+import staticHandler from 'serve-handler';
+import ws from 'ws';
+import Redis from 'ioredis';
+
+const redisClient = new Redis();
+const redisClientXRead = new Redis();
+
+const server = createServer((req, res) => {
+  return staticHandler(req, res, { public: 'www' });
+});
+
+const wss = new ws.Server({ server });
+wss.on('connection', async client => {
+  console.log('Client connected');
+
+  client.on('message', msg => {
+    console.log(`Message: ${msg}`);
+    redisClient.xadd('chat_stream', '*', 'message', msg); //1
+  });
+
+  // 2
+  // Load message history
+  const logs = await redisClient.xrange('chat_stream', '-', '+');
+  for (const [, [, message]] of logs) {
+    client.send(message);
+  }
+});
+
+function broadcast(msg) {
+  for (const client of wss.clients) {
+    if (client.readyState === ws.OPEN) {
+      client.send(msg);
+    }
+  }
+}
+
+let lastRecordId = '$';
+
+//3
+async function processStreamMessage() {
+  while (true) {
+    const [[, records]] = await redisClientXRead.xread(
+      'BLOCK',
+      '0',
+      'STREAMS',
+      'chat_stream',
+      lastRecordId
+    );
+    for (const [recordId, [, message]] of records) {
+      console.log(`Message from stream: ${message}`);
+      broadcast(message);
+      lastRecordId = recordId;
+    }
+  }
+}
+
+processStreamMessage().catch(err => console.error(err));
+
+server.listen(process.argv[2] || 8080);
+```
+
+1. xadd 명령은 스트림에 새 레코드를 추가하며, 연결된 클라이언트에서 새 채팅 메시지가 도착할 때 이 레코드를 사용하여 새 채팅 메시지를 추가한다.  
+   인자의 구성은 다음과 같다. 1. 스트림의 명칭 (chat_stream) 2. 레코드의 ID  
+    \* 은 Redis가 ID를 생성하도록 요청한다.  
+    이는 ID가 레코드의 사전적인 순서를 보존하기 위해 단순하게 하기 위함이다. 3. 키-값 쌍의 목록이다.  
+    위 코드의 경우 msg(클라이언트로부터 받은 메시지) 값의 message 라는 키만 지정한다.
+2. 채팅 내역을 검색하기 위해 스트림의 과거 레코드를 질의한다.  
+   지정된 두 ID 내에서 스트림의 모든 레코드를 검색할 수 있도록 xrange 명령을 사용한다.  
+   위 코드에선 가능한 낮은 ID와 가능한 높은 ID를 나타내는 특수 ID ‘-’(빼기)와 ‘+’(더하기)를 사용한다.  
+   이것은 본질적으로 현재 스트림에 있는 모든 레코드를 검색한다는 것을 의미한다.
+3. 새 레코드가 스트림에 추가되기를 기다리는 부분이다.  
+   각 애플리케이션 인스턴스는 대기열에 추가되는 새로운 채팅 메시지를 읽을 수 있으며 통합에 필수적인 부분이다.  
+   이 작업을 위해 무한 루프와 xread 명령을 사용하며 다음과 같은 인자를 제공한다. 1. BLOCK은 새로운 메시지가 도착할 때가지 호출을 차단하는 것을 의미한다. 2. 일정 시간이 지나면 null을 반환하도록 타임아웃을 지정한다.  
+    0은 영원히 기다리겠다는 것을 의미한다. 3. STREAMS는 Redis에 읽고자 하는 스트림의 세부 사항을 지정할 것임을 알려주는 키워드이다. 4. 읽고자하는 스트림의 이름이다.(chat_stream) 5. 새로운 메시지 읽기를 시작하려는 레코드 ID(lastRecordId)를 제공한다.  
+    $(달러 기호)로 설정되어 있는 것은, 현재 스트림에서 가장 높은 ID를 나타내는 특수 ID 기호이다.  
+    기본적으로 현재 스트림에 있는 마지막 레코드 이후에 스트림 읽기를 시작해야 한다.  
+    첫 번째 레코드를 읽은 후 마지막으로 읽은 레코드 ID로 lastRecordId 변수를 업데이트 한다.

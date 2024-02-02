@@ -47,7 +47,7 @@ async function processStreamMessage() {
       'chat_stream',
       lastRecordId
     );
-    for (cosnt[(recordId, [, message])] of records) {
+    for (const [recordId, [, message]] of records) {
       console.log(`Message from stream: ${message}`);
       broadcast(message);
       lastRecordId = recordId;
