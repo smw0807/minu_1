@@ -2,7 +2,7 @@ import isv from 'indexed-string-variation';
 import { createHash } from 'crypto';
 
 export function processTask(task) {
-  const variationGen = isv(task.alphabet);
+  const variationGen = isv.generator(task.alphabet);
   console.log(
     'Processing from ' +
       `${variationGen(task.batchStart)} (${task.batchStart}) ` +
