@@ -225,3 +225,26 @@ main().catch(err => console.error(err));
 
 이 외에도 작업자가 수행하는 작업은 매우 간단하다.  
 수신된 모든 작업을 처리하고 일치하는 항목이 발견되면 toSink 소켓을 통해 결과 수집기에 메시지를 보낸다.
+
+### 결과 수집기 구현
+
+결과 수집기(싱크)는 작업자에서 수신한 메시지를 콘솔에 간단히 출력한다.
+
+```jsx
+//collector.js
+import zmq from 'zeromq';
+import { processTask } from './processTask';
+
+async function main() {
+  const sink = new zmq.Pull();
+  await sink.bind('tcp//*5017');
+
+  for await (const rawMessage of sink) {
+    console.log('Message from worker: ', rawMessage.toString());
+  }
+}
+
+main().catch(err => console.log(err));
+```
+
+결과 수집기(생산자)는 영구 노드이므로 작업자의 PUSH 소켓에 명시적으로 바인딩하는 대신 PULL 소켓을 바인딩 한다.
