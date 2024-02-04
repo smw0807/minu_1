@@ -154,3 +154,74 @@ main().catch(err => console.error(err));
    작업자가 이미 실행 중인 동안 생산자가 시작되면 작업자가 타임 기반 재연결 알고리즘으로 인해 잠시 후에 연결할 수 있기 때문인데, 이렇게 되면 첫 번째 연결 작업자가 대부분의 작업을 받아갈 수 있다.
 2. 생성된 각 작업에 대해 문자열을 지정하고 ventilator 소켓의 send() 함수를 사용하여 작업자에게 보낸다.  
    연결된 각 작업자는 라운드로빈 방식으로 다른 작업을 받게 된다.
+
+### 작업자 구현
+
+아래 코드는 작업자의 역할을 하며, 먼저 들어오는 작업을 처리하는 컴포넌트이다.
+
+```jsx
+//processTask.js
+import isv from 'indexed-string-variation';
+import { createHash } from 'crypto';
+
+export function processTask(task) {
+  const variationGen = isv(task.alphabet);
+  console.log(
+    'Processing from ' +
+      `${variationGen(task.batchStart)} (${task.batchStart}) ` +
+      `to ${variationGen(task.batchEnd)} (${task.batchEnd})`
+  );
+
+  for (let idx = task.batchStart; idx <= task.batchEnd; idx++) {
+    const word = variationGen(idx);
+    const shasum = createHash('sha1');
+    shasum.update(word);
+    const digest = shasum.digest('hex');
+
+    if (digest === task.searchHash) {
+      return word;
+    }
+  }
+}
+```
+
+주어진 범위에서 반복한 다음 각 인덱스에 해당하는 변형 문자들(word)를 생성한다.  
+다음으로 word에 대한 SHA1 체크섬을 계산하고 task로 전달된 searchHash와 일치 여부를 검사한다.  
+두 다이제스트가 일치하면 소스 word를 호출자에게 반환한다.
+
+아래는 작업자의 기본 로직을 구현한 소스코드이다.
+
+```jsx
+//worker.js
+import zmq from 'zeromq';
+import { processTask } from './processTask.js';
+
+async function main() {
+  const fromVentilator = new zmq.Pull();
+  const toSink = new zmq.Push();
+
+  //변형 생상자 벤틸레이터 연결
+  fromVentilator.connect('tcp://localhost:5016');
+  //결과 수집자 싱크 연결
+  toSink.connect('tcp://localhost:5017');
+
+  for await (const rawMessage of fromVentilator) {
+    const found = processTask(JSON.parse(rawMessage.toString()));
+    if (found) {
+      console.log(`Found! -> ${found}`);
+      await toSink.send(`Found: ${found}`);
+    }
+  }
+}
+
+main().catch(err => console.error(err));
+```
+
+작업자는 일시적인 노드를 나타내므로 소켓은 들어오는 연결을 수신하는 대신 원격 노드에 연결해야 한다.  
+위 코드에선 두 개의 소켓을 만드는데 이것이 작업자에서 할 일이다.
+
+- 작업을 받기 위해 벤틸레이터에 연결되는 PULL 소켓
+- 결과를 전파하기 위해 싱크에 연결되는 PUSH 소켓
+
+이 외에도 작업자가 수행하는 작업은 매우 간단하다.  
+수신된 모든 작업을 처리하고 일치하는 항목이 발견되면 toSink 소켓을 통해 결과 수집기에 메시지를 보낸다.
