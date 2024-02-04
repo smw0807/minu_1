@@ -85,3 +85,72 @@ ZeroMQ를 사용한 일반적인 파이프라인의 아키텍처
 
 이 아키텍처에서 내구성있는 노드(영구 노드)는 벤틸레이터와 싱크이고 일시적인 노드는 작업자가 된다.  
 각 작업자는 PULL 소켓을 벤틸레이터에 연결하고 PUSH 소켓을 싱크에 연결하면, 벤틸레이터나 싱크에서 매개 변수를 변경하지 않고도 원하는 만큼의 작업자를 시작하고 중지할 수 있다.
+
+### 생산자 구간
+
+변동 구간을 표현하기 위해 색인화된 N-ary(n항) 트리를 사용할 것이다.  
+n-ary 트리의 주어진 색인에 대한 변형을 계산하는 데 도움을 주는 indexed-string-variation 패키지를 활용한다.  
+이 작업은 작업자에서 수행되므로 벤틸레이터에서 해야 할 일은 작업자에게 제공할 인덱스 범위를 생성하는 것이다.  
+그러면 해당 범위로 표시되는 모든 문자들의 변형이 만들어진다.
+
+```jsx
+//generateTask.js
+export function* generateTasks(searchHash, alphabet, maxWordLength, batchSzie) {
+  let nVariations = 0;
+  for (let n = 1; n <= maxWordLength; n++) {
+    nVariations += Math.pow(alphabet.length, n);
+  }
+  console.log(`Finding the hashsum source string over ${nVariations} possible variations`);
+
+  let batchStart = 1;
+  while (batchStart <= nVariations) {
+    const batchEnd = Math.min(batchStart + batchSzie - 1, nVariations);
+    yield {
+      searchHash,
+      alphabet: alphabet,
+      batchStart,
+      batchEnd,
+    };
+
+    batchStart = batchEnd + 1;
+  }
+}
+```
+
+generateTasks()는 1부터 시작하여 batchSzie 크기의 정수 간격을 생성한다.(빈 변형에 해당하는 트리의 루트인 0은 제외)  
+주어진 알파벳과 제공된 최대 단어 길이(maxLength)에 대해 가능한 가장 큰 인덱스(nVariations)에서 끝난다.  
+그런 다음 작업에 대한 모든 데이터를 객체에 담아 호출자에게 전달한다(yield).
+
+아래는 모든 작업자에 작업을 배포하는 생상자의 로직(producer.js)을 구현한 코드이다.
+
+```jsx
+//producer.js
+import zmq from 'zeromq';
+import delay from 'delay';
+import { generateTasks } from './generateTask.js';
+
+const ALPHABET = 'abcdefghijklmnopqrstuvwxyz';
+const BATCH_SIZE = 10000;
+
+const [, , maxLength, searchHash] = process.argv;
+
+async function main() {
+  const ventilator = new zmq.Push(); //1
+  await ventilator.bind('tcp://*:5016');
+  await delay(1000);
+  const generatorObj = generateTasks(searchHash, ALPHABET, maxLength, BATCH_SIZE);
+  for (const task of generatorObj) {
+    await ventilator.send(JSON.stringify(task)); //2
+  }
+}
+
+main().catch(err => console.error(err));
+```
+
+작업자에게 작업을 배포하는 방법
+
+1. PUSH 소켓을 만들고 작업자의 PULL 소켓이 작업을 수신하기 위해 연결되는 로컬 포트 5016에 바인딩 한다.  
+   모든 작업자가 연결될 때까지 1초를 대기한다.  
+   작업자가 이미 실행 중인 동안 생산자가 시작되면 작업자가 타임 기반 재연결 알고리즘으로 인해 잠시 후에 연결할 수 있기 때문인데, 이렇게 되면 첫 번째 연결 작업자가 대부분의 작업을 받아갈 수 있다.
+2. 생성된 각 작업에 대해 문자열을 지정하고 ventilator 소켓의 send() 함수를 사용하여 작업자에게 보낸다.  
+   연결된 각 작업자는 라운드로빈 방식으로 다른 작업을 받게 된다.
