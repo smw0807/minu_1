@@ -287,3 +287,43 @@ AMQP와 같은 시스템을 사용하여 파이프라인 및 작업 분배 패�
 
 작업자가 생성한 결과는 결과 대기열이라고 하는 다른 큐에 게시된 다음, 실제로 싱크와 동일한 결과 수집자에서 사용된다.  
 전체 아키텍처에서 어떤 익스체인지도 사용하지 않고 메시지를 대상 큐로 직접 전송하여 점대점 통신 유형을 구현한다.
+
+### 생상자 구현
+
+```jsx
+//producer.js
+import amqp from 'amqplib';
+import { generateTasks } from './generateTask.js';
+
+const ALPHABET = 'abcdefg';
+const BATCH_SIZE = 10000;
+
+const [, , maxLength, searchHash] = process.argv;
+
+async function main() {
+  const connection = await amqp.connect('amqp://localhost');
+  const channel = await connection.createConfirmChannel(); //1
+  await channel.assertQueue('tasks_queue');
+
+  const generatorObj = generateTasks(searchHash, ALPHABET, maxLength, BATCH_SIZE);
+  for (const task of generatorObj) {
+    channel.sendToQueue('tasks_queue', Buffer.from(JSON.stringify(task))); //2
+  }
+
+  await channel.waitForConfirms();
+  channel.close();
+  connection.close();
+}
+
+main().catch(err => console.error(err));
+```
+
+익스체인지나 바인딩이 없기 때문에 AMQP 기반 애플리케이션 설정이 훨씬 간단해진다.  
+그러나 몇 가지 주의할 사항이 있다.
+
+1. 표준 채널을 만드는 대신 createConfirmChannel을 만든다.  
+   이는 일부 추가 기능이 있는 채널을 생성하기 때문에 필요하다.  
+   특히 나중에 코드에서 브로커가 모든 메시지의 수신을 확인할 때까지 기다리는 waitForConfirm() 함수를 제공한다.  
+   이것은 모든 메시지가 로컬 대기열에서 발송되기 전에 애플리케이션이 브로커에 대해 연결을 너무 빨리 닫는 것을 방지해준다.
+2. 생산자의 핵심은 channel.sendToQueue() API 이다.  
+   익스체인지나 라우팅을 우회하여 메시지를 대기열로 직접 전달한다.(위 코드에선 tasks_queue)
