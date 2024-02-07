@@ -360,3 +360,23 @@ tasks_queue라는 큐에 대한 참조를 얻은 다음 channel.consume()을 사
 메시지가 완전히 처리된 후 channel.ack()를 사용하여 모든 메시지에 응답을 확인한다.
 
 여러 작업자가 시작되면 모두 동일한 대기열에서 수신 대기하므로 메시지가 그들 사이에서 부하의 분산이 시작되게 된다(경쟁 소비자).
+
+### 결과 수집기 구현
+
+여기서 결과 수집기는 콘솔에 수신된 메시지를 간단히 출력하는 모듈이다.
+
+```jsx
+//collector.js
+import amqp from 'amqplib';
+
+async function main() {
+  const connection = await amqp.connect('amqp://localhost');
+  const channel = await connection.createChannel();
+  const { queue } = await channel.assertQueue('result_queue');
+  channel.consume(queue, msg => {
+    console.log(`Message from worker: ${msg.content.toString()}`);
+  });
+}
+
+main().catch(err => console.error(err));
+```
