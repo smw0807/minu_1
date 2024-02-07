@@ -7,7 +7,7 @@ async function main() {
   const { queue } = await channel.assertQueue('tasks_queue');
 
   channel.consume(queue, async rawMessage => {
-    const found = processTask(JSON.parse(rawMessage.content.toString));
+    const found = processTask(JSON.parse(rawMessage.content.toString()));
     if (found) {
       console.log(`Found! => ${found}`);
       channel.sendToQueue('result_queue', Buffer.from(`Found: ${found}`));
