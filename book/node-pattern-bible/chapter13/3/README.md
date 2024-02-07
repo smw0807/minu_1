@@ -327,3 +327,36 @@ main().catch(err => console.error(err));
    이것은 모든 메시지가 로컬 대기열에서 발송되기 전에 애플리케이션이 브로커에 대해 연결을 너무 빨리 닫는 것을 방지해준다.
 2. 생산자의 핵심은 channel.sendToQueue() API 이다.  
    익스체인지나 라우팅을 우회하여 메시지를 대기열로 직접 전달한다.(위 코드에선 tasks_queue)
+
+### 작업자 구현
+
+task_queue의 다른 쪽에는 들어오는 작업을 수신하는 작업자가 존재한다.
+
+```jsx
+//worker.js
+import amqp from 'amqplib';
+import { processTask } from './processTask.js';
+
+async function main() {
+  const connection = await amqp.connect('amqp://localhost');
+  const channel = await connection.createChannel();
+  const { queue } = await channel.assertQueue('tasks_queue');
+
+  channel.consume(queue, async rawMessage => {
+    const found = processTask(JSON.parse(rawMessage.content.toString));
+    if (found) {
+      console.log(`Found! => ${found}`);
+      channel.sendToQueue('result_queue', Buffer.from(`Found: ${found}`));
+    }
+    channel.ack(rawMessage);
+  });
+}
+
+main().catch(err => console.error(err));
+```
+
+tasks_queue라는 큐에 대한 참조를 얻은 다음 channel.consume()을 사용하여 들어오는 작업을 수신한다.  
+일치하는 항목이 발견될 때마다 결과를 result_queue을 통해 수집기에 다시 보내는데, 점대점 통신을 사용한다.  
+메시지가 완전히 처리된 후 channel.ack()를 사용하여 모든 메시지에 응답을 확인한다.
+
+여러 작업자가 시작되면 모두 동일한 대기열에서 수신 대기하므로 메시지가 그들 사이에서 부하의 분산이 시작되게 된다(경쟁 소비자).
