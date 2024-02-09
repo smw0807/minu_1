@@ -422,3 +422,27 @@ Redis Streams를 사용한 해시썸 크래커의 아키텍처는 앞선 AMQP �
 두 개의 다른 스트림(AMQP 예제에서 큐였음)을 가질 것이다.  
 하나는 처리할 작업을 보관하고 다른 스트림(tasks_stream)은 작업자에 의해 소비된 결과를 보관하는 스트림(result_stream)이다.  
 그런 다음 소비자 그룹을 사용하여 tasks_stream의 작업을 애플리케이션의 작업자에게 배포한다.(우리 작업자는 소비자이다.)
+
+### 생산자 구현
+
+```jsx
+//producer.js
+import Redis from 'ioredis';
+import { generateTasks } from './generateTask.js';
+
+const ALPHABET = 'abcdefghijk';
+const BATCH_SIZE = 10000;
+const redisClient = new Redis();
+
+const [, , maxLength, searchHash] = process.argv;
+
+async function main() {
+  const generateObj = generateTasks(searchHash, ALPHABET, maxLength, BATCH_SIZE);
+  for (const task of generateObj) {
+    await redisClient.xadd('tasks_stream', '*', 'task', JSON.stringify(task));
+  }
+  redisClient.disconnect();
+}
+
+main().catch(err => console.error(err));
+```
