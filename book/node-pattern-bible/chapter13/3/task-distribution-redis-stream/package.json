@@ -1,0 +1,21 @@
+{
+  "name": "task-distribution-redis-stream",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "ioredis": "^4.16.3",
+    "indexed-string-variation": "^1.0.3"
+  },
+  "engines": {
+    "node": ">=14"
+  },
+  "engineStrict": true,
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
