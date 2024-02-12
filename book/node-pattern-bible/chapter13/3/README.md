@@ -446,3 +446,87 @@ async function main() {
 
 main().catch(err => console.error(err));
 ```
+
+xaad()를 호출하여 스트림을 사용한 안정적인 메시징 구현?
+
+### 작업자 구현
+
+소비자 그룹을 사용하여 Redis Stream과 상호작용할 수 있도록 작업자를 조정해야 한다.  
+이것이 모든 아키텍처의 핵심이다. 소비자 그룹과 그들의 기능을 활용한다.
+
+```jsx
+import Redis from 'ioredis';
+import { processTask } from './processTask.js';
+
+const redisClient = new Redis();
+const [, , consumerName] = process.argv;
+
+async function main() {
+  // 1
+  await redisClient
+    .xgroup('CREATE', 'tasks_stream', 'workers_group', '$', 'MKSTREAM')
+    .catch(() => console.log('Consummer group already exists'));
+
+  // 2
+  const [[, records]] = await redisClient.xreadgroup(
+    'GROUP',
+    'workers_group',
+    consumerName,
+    'STREAMS',
+    'tasks_stream',
+    '0'
+  );
+  for (const [recordId, [, rawTask]] of records) {
+    await processAndAck(recordId, rawTask);
+  }
+
+  while (true) {
+    // 3
+    const [[, records]] = await redisClient.xreadgroup(
+      'GROUP',
+      'workers_group',
+      consumerName,
+      'BLOCK',
+      '0',
+      'COUNT',
+      '1',
+      'STREAMS',
+      'tasks_stream',
+      '>'
+    );
+    for (const [recordId, [, rawTask]] of records) {
+      await processAndAck(recordId, rawTask);
+    }
+  }
+}
+
+// 4
+async function processAndAck(recordId, rawTask) {
+  const found = processTask(JSON.parse(rawTask));
+  if (found) {
+    console.log(`Found! => ${found}`);
+    await redisClient.xadd('results_stream', '*', 'result', `Found: ${found}`);
+  }
+  await redisClient.xack('tasks_stream', 'workers_group', recordId);
+}
+
+main().catch(err => console.error(err));
+```
+
+1. 소비자 그룹을 사용하기 전에 소비자 그룹이 존재해야 하는데, xgroup 명령을 통해 이를 수행할 수 있다.
+   매개변수의 구조는 아래와 같다.  
+    1. ‘CREATE’는 소비자 그룹을 만들 때 사용하는 키워드이다.  
+    실제로 xgroup 명령을 사용하면 다른 하위 명령을 사용하여 소비자 그룹을 삭제하거나 소비자를 제거하거나, 읽은 레코드의 ID를 업데이트할 수도 있다. 2. ‘tasks_stream’은 읽으려는 스트림의 이름이다. 3. ‘workers_group’은 소비자 그룹의 이름이다. 4. 네 번째 인수는 소비자 그룹이 스트림에서 레코드의 소비(처리)를 시작해야 하는 레코드의 ID를 나타낸다.  
+    $ 사용은 소비자 그룹이 현재 스트림에 있는 마지막 레코드의 ID에서 스트림 읽기를 시작해야 함을 의미한다. 5. ‘MKSTREAM’은 Redis가 스트림이 존재하지 않는 경우 생성하도록 지시하는 추가 매개변수이다.
+2. 현재 소비자가 처리해야 할 모든 보류중인 레코드를 읽는다.  
+   이는 애플리케이션의 갑작스러운 중단(예: 장애)으로 인해 이전 소비자의 실행에서 남은 레코드들이다.  
+   동일한 소비자(동일한 이름)가 마지막 실행 중에 오류 없이 제대로 종료된 경우, 이 목록은 비어있을 가능성이 높다. (각 소비자는 자신의 보류중인 레코드에만 액세스할 수 있다.)  
+   xreadgroup 명령에 다음 인자들을 사용하여 목록을 조회한다. 1. ‘GROUP’, ‘workers_group’, consumerName은 필수 트리오로서, 커맨드라인에서 읽은 소비자그룹 이름(’workers_group’)과 소비자의 이름(consumerName)을 지정한다. 2. ‘STREAM’, ‘tasks_stream’으로 읽고 싶은 스트림을 지정한다. 3. 읽기를 시작해야 하는 ID인 마지막 인자를 ‘0’으로 지정한다.  
+    기본적으로 첫 번째 메시지부터 현재 소비자에게 속한 모든 보류중인 메시지를 읽으려 시도한다.
+3. 이 xreadgroup는 2번과는 완전히 다른 의미를 가진다.  
+   이번의 경우에는 실제로 스트림에서 새로운 레코드에 대한 읽기를 시작한다.(소비자의 히스토리에 액세스하지 않음) 1. ‘GROUP’, ‘workers_group’, consumerName 이 세가지 인자를 사용하여 읽기 작업에 사용할 소비자 그룹을 지정한다. 2. ‘BLOCK’은 빈 목록을 반환하는 대신 현재 사용 가능한 새 레코드가 없으면 호출이 차단되어야 함을 나타낸다.  
+    ’BLOCK’ 다음의 인자는 결과가 없을 경우 함수가 반환되는 타임아웃을 나타내는데, ‘0’은 무기한 대기를 원한다는 것을 의미한다. 3. ‘COUNT’와 ‘1’은 Redis에게 호출당 하나의 레코드를 가져오려 한다는 것을 알린다. 4. ‘STREAMS’, ‘tasks_stream’으로 읽고자 하는 스트림을 지정한다. 5. 특수 ID ‘>’를 사용하여 이 소비자 그룹이 아직 조회하지 않은 레코드들을 가져오려 한다는 것을 알린다.
+
+4. processAndAck() 함수에서 일치하는 항목이 있는지 확인하고 있을 경우,  
+   result_stream에 새 레코드를 추가한다.  
+   마지막으로 xreadgroup()에 의해 반환된 레코드에 대한 모든 처리가 완료되면 Redis xack 명령을 호출하여 레코드가 성공적으로 소비되었음을 확인함으로써, 현재 소비자의 보류 목록에서 레코드를 제거한다.
