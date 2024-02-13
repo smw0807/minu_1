@@ -43,3 +43,64 @@ process.on(’message’, callback)을 사용하여 메시지를 받을 수 있�
 
 이것은 부모 프로세스에서 사용 가능한 인터페이스 채널이 자식에서 사용 가능한 것과 동일하다는 것을 의미한다.  
 이를 통해 채널의 양쪽 끝에서 사용할 수 있는 공통의 추상화를 만들 수 있다.
+
+### 요청(request)의 추상화
+
+새로운 요청을 보내는 부분을 고려하여, 그 추상화를 구현해본다.
+
+```jsx
+//createRequestChannel.js
+import { nanoid } from 'nanoid';
+
+// 1
+export function createRequestChannel(channel) {
+  const correlationMap = new Map();
+
+  // 2
+  function sendRequest(data) {
+    console.log('Sending request', data);
+    return new Promise((resolve, reject) => {
+      const correlationId = nanoid();
+      console.log('correlationId', correlationId);
+
+      const replyTimeout = setTimeout(() => {
+        correlationMap.delete(correlationId);
+        reject(new Error('Request timeout'));
+      }, 10000);
+
+      correlationMap.set(correlationId, replyData => {
+        correlationMap.delete(correlationId);
+        clearTimeout(replyTimeout);
+        resolve(replyData);
+      });
+
+      channel.send({
+        type: 'request',
+        data,
+        id: correlationId,
+      });
+    });
+  }
+
+  // 3
+  channel.on('message', message => {
+    const callback = correlationMap.get(message.inReplyTo);
+    if (callback) {
+      callback(message.data);
+    }
+  });
+
+  return sendRequest;
+}
+```
+
+요청의 추상화가 동작하는 방식은 다음과 같다.
+
+1. createRequestChannel()은 입력 채널을 감싸서 요청을 보내고 응답을 받는데 사용되는 sendRequest() 함수를 반환하는 팩토리이다.  
+   이 패턴의 비밀은 나가는 요청과 응답 핸들러 간의 연관성을 저장하는 correlationMap 변수에 있다.
+2. sendRequest() 함수는 새 요청을 보내는데 사용된다.  
+   nanoid를 사용하여 상관 ID(상관 식별자)를 생성하고 메시지의 유형(type)을 지정할 수 있는 객체로 감싼다.  
+   그런 다음 상관 ID 및 응답 데이터를 호출자에게 리턴하는 핸들러가 correlationMap에 추가되어 나중에 상관 ID로 핸들러를 검색할 수 있게 된다.  
+   또한 매우 간단한 요청 타임아웃을 처리하는 로직이 구현되어 있다.
+3. 팩토리가 호출될 때 수신된 메시지에 대한 리스닝도 시작한다.  
+   상관 ID(inReplyTo 속성에 포함된)가 correlationMap에 포함된 ID와 일치하면 방금 응답받았음을 알 수 있으므로 연결된 응답 핸들러에 대한 참조를 가져와서 메시지에 포함된 데이터로 핸들러를 실행한다.
