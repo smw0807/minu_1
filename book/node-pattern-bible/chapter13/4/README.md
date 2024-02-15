@@ -104,3 +104,38 @@ export function createRequestChannel(channel) {
    또한 매우 간단한 요청 타임아웃을 처리하는 로직이 구현되어 있다.
 3. 팩토리가 호출될 때 수신된 메시지에 대한 리스닝도 시작한다.  
    상관 ID(inReplyTo 속성에 포함된)가 correlationMap에 포함된 ID와 일치하면 방금 응답받았음을 알 수 있으므로 연결된 응답 핸들러에 대한 참조를 가져와서 메시지에 포함된 데이터로 핸들러를 실행한다.
+
+### 응답 추상화
+
+요청 채널(request channel)의 상대편인 응답 채널(reply channel)이 어떻게 작동하는지 살펴보자.  
+응답 핸들러를 감싸기 위한 추상화가 구현될 것이다.
+
+```jsx
+//createReplyChannel.js
+export function createReplyChannel(channel) {
+  return function registerHandler(handler) {
+    channel.on('mmesage', async message => {
+      if (message.type !== 'request') {
+        return;
+      }
+      const replyData = await handler(message.data); // 1
+      // 2
+      channel.send({
+        type: 'response',
+        data: replyData,
+        inReplyTo: message.id,
+      });
+    });
+  };
+}
+```
+
+createReplyChannel() 함수는 새로운 응답 핸들러를 등록하는데 사용되는 또 다른 함수를 반환하는 팩토리이다.  
+새로운 핸들러가 등록되면 다음과 같은 일이 발생한다.
+
+1. 새 요청을 받으면 메시지에 포함된 데이터를 전달하여 즉시 핸들러를 호출한다.
+2. 핸들러가 작업을 완료하고 응답을 반환하면, 응답데이터와 메시지 유형, 상관 ID(inReplyTo 속성)를 객체로 감싼 후 다시 채널에 전달한다.
+
+모든 것이 이미 비동기이기 때문에 Node.js에서는 이 패턴을 매우 쉽게 만들 수 있다.  
+단방향 채널 위에 만들어진 비동기 요청-응답 통신은 다른 비동기 작업과 크게 다르지 않다.  
+특히 구현의 세부사항을 감추는 추상화를 만드는 경우에는 더욱 그렇다.
