@@ -1,6 +1,6 @@
 export function createReplyChannel(channel) {
   return function registerHandler(handler) {
-    channel.on('mmesage', async message => {
+    channel.on('message', async message => {
       if (message.type !== 'request') {
         return;
       }

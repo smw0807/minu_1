@@ -139,3 +139,75 @@ createReplyChannel() 함수는 새로운 응답 핸들러를 등록하는데 사
 모든 것이 이미 비동기이기 때문에 Node.js에서는 이 패턴을 매우 쉽게 만들 수 있다.  
 단방향 채널 위에 만들어진 비동기 요청-응답 통신은 다른 비동기 작업과 크게 다르지 않다.  
 특히 구현의 세부사항을 감추는 추상화를 만드는 경우에는 더욱 그렇다.
+
+### 전체 요청-응답 주기
+
+이제 새로운 비동기 요청-응답 추상화를 사용할 샘플 응답자(replier)를 만든다.
+
+```jsx
+//replier.js
+import { createReplyChannel } from './createReplyChannel.js';
+
+const registerReplyHandler = createReplyChannel(process);
+
+registerReplyHandler(req => {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve({ sum: req.a + req.b });
+    }, req.delay);
+  });
+});
+
+process.send('ready');
+```
+
+요청 이후 일정 시간(요청에 지정되어 있음) 후에 결과를 반환한다.  
+이를 통해 응답 순서가 요청을 보낸 순사와 다를 수 있는지 확인하고, 만들어진 패턴이 동작하는지 확인할 수 있다.  
+모듈의 마지막 줄은 요청을 수락할 준비가 되었음을 나타내는 메시지를 부모 프로세스로 보낸다.
+
+마지막으로 요청자를 만든다.  
+여기서는 child_process.fork()를 사용하여 응답자를 시작시키는 작업도 존재한다.
+
+```jsx
+//requestor.js
+import { fork } from 'child_process';
+import { dirname, join } from 'path';
+import { fileURLToPath } from 'url';
+import { once } from 'events';
+import { createRequestChannel } from './createRequestChannel.js';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
+async function main() {
+  const channel = fork(join(__dirname, 'replier.js')); // 1
+  const request = createRequestChannel(channel);
+
+  try {
+    const [message] = await once(channel, 'message'); // 2
+    console.log(`Child Process initialized: ${message}`);
+    const p1 = request({ a: 1, b: 2, delay: 500 }) // 3
+      .then(res => {
+        console.log(`Reply: 1 + 2 = ${res.sum}`);
+      });
+
+    const p2 = request({ a: 6, b: 1, delay: 100 }) // 4
+      .then(res => {
+        console.log(`Reply: 6 + 1 = ${res.sum}`);
+      });
+
+    await Promise.all([p1, p2]); // 5
+  } finally {
+    channel.disconnect(); // 6
+  }
+}
+
+main().catch(err => console.error(err));
+```
+
+요청자는 응답자(1)를 시작한 다음, 해당 참조를 createRequestChannel()에 전달한다.  
+그런 다음 하위 프로세스가 사용 가능할 때까지(2) 기다렸다가 몇 가지 샘플 요청(3, 4)을 실행한다.  
+마지막으로 두 요청이 완료될 때까지(5) 기다린 다음, 채널 연결을 끊고(6) 하위 프로세스가 정상적으로 종료되도록 한다.
+
+![Untitled](https://prod-files-secure.s3.us-west-2.amazonaws.com/bc261f43-de91-483d-8946-ac5a65106576/4f3ddd28-cf07-4330-82ad-d7b7b5a8ba52/Untitled.png)
+
+응답이 전송 또는 수신 순서와 관계 없이 해당 요청과 올바르게 연결되어 있음을 확인할 수 있다.
