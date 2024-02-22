@@ -233,3 +233,86 @@ AMQP를 사용한 요청-응답 메시징 아키텍처
 모든 요청들은 단일 대기열로 전송된 다음 이를 응답자가 처리한다.  
 응답자는 요청에 지정된 반환 주소를 사용하여 올바른 응답 대기열로 처리 결과를 라우팅 한다.  
 실제로 AMQP 위에 요청-응답 패턴을 만들려면, 응답자가 응답 메시지가 전달되어야 하는 위치를 알 수 있도록 메시지 속성에 응답 대기열의 이름을 지정하기만 하면 된다.
+
+### 요청의 추상화 구현
+
+RabbitMQ를 브로커로 사용하여 AMQP 위에 요청-응답 추상화를 구축한다.
+
+```jsx
+//amqpRequest.js
+import { nanoid } from 'nanoid';
+import amqp from 'amqplib';
+
+export class AMQPRequest {
+  constructor() {
+    this.correlationMap = new Map();
+  }
+
+  async initialize() {
+    this.connection = await amqp.connect('amqp://localhost');
+    this.channel = await this.connection.createChannel();
+    // 1
+    const { queue } = await this.channel.assertQueue('', { exclusive: true });
+    this.replyQueue = queue;
+
+    // 2
+    this.channel.consume(
+      this.replyQueue,
+      msg => {
+        const correlationId = msg.properties.correlationId;
+        const handler = this.correlationMap.get(correlationId);
+        if (handler) {
+          handler(JSON.parse(msg.content.toString()));
+        }
+      },
+      { noAck: true }
+    );
+  }
+
+  send(queue, message) {
+    return new Promise((resolve, reject) => {
+      const id = nanoid(); // 3
+      const replyTimeout = setTimeout(() => {
+        this.correlationMap.delete(id);
+        reject(new Error('Request timeout'));
+      }, 10000);
+
+      // 4
+      this.correlationMap.set(id, replyData => {
+        this.correlationMap.delete(id);
+        clearTimeout(replyTimeout);
+        resolve(replyData);
+      });
+
+      // 5
+      this.channel.sendToQueue(queue, Buffer.from(JSON.stringify(message)), {
+        correlationId: id,
+        replyTo: this.replyQueue,
+      });
+    });
+  }
+
+  destroy() {
+    this.channel.close();
+    this.connection.close();
+  }
+}
+```
+
+여기서 주의해야 할 부분은 응답을 보관하는 대기열을 만드는 방법이다(1).  
+이름을 지정하지 않고, 임의의 이름이 선택된다.  
+그리고 대기열은 배타적이므로 현재 활성 AMQP 연결에 바인딩되어 연결이 닫힐 때 제거된다.  
+여러 대기열에 대한 라우팅 배포가 필요하지 않으므로, 대기열은 익스체인지에 바인딩할 필요가 없다.  
+즉, 메시지가 응답 대기열에 직접 전달되어야 한다.  
+2번 부분에서는 replyQueue 메시지를 소비하기 시작한다.  
+여기서 수신 메시지의 ID를 correlationMap에 있는 ID와 일치시키고 연관된 핸들러를 호출한다.
+
+send() 함수는 요청 대기열의 이름과 보낼 메시지를 입력으로 받는다.  
+상관 ID를 생성하고(3), 이를 처리하여 호출자에게 응답으로 반환하는 핸들러(4)에 연결해야 한다.  
+마지막으로, correlationId 및 replyTo 속성을 메타 데이터로 지정하여 메시지(5)를 보낸다.  
+실제로 AMQP에서는 기본 메시지와 함께 소비자에게 전달할 일련의 속성(또는 메타데이터)들을 지정할 수 있다.  
+메타 데이터 객체는 sendToQueue() 함수의 세 번째 인수로 전달된다.  
+메시지를 보내기 위해 channel.publish() 대신 channel.sendToQueue() API를 사용하고 있다는 점에 유의해야한다.  
+이는 목적지의 대기열로 바로 전달되는 기본적인 점대점(point-to-point) 통신이기 때문이다.
+
+그리고 연결과 채널을 닫는데 사용되는 destroy() 함수를 구현한다.
