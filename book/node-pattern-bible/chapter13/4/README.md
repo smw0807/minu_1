@@ -316,3 +316,44 @@ send() 함수는 요청 대기열의 이름과 보낼 메시지를 입력으로 
 이는 목적지의 대기열로 바로 전달되는 기본적인 점대점(point-to-point) 통신이기 때문이다.
 
 그리고 연결과 채널을 닫는데 사용되는 destroy() 함수를 구현한다.
+
+### 응답 추상화 구현
+
+```jsx
+//amqpReply.js
+import amqp from 'amqplib';
+
+export class AMQPReply {
+  constructor(requestsQueueName) {
+    this.requestsQueueName = requestsQueueName;
+  }
+
+  async initialize() {
+    const connectioon = await amqp.connect('amqp://localhost');
+    this.channel = await connectioon.createChannel();
+    // 1
+    const { queue } = await this.channel.assertQueue(this.requestsQueueName);
+    this.queue = queue;
+  }
+
+  // 2
+  handleRequests(handler) {
+    this.channel.consume(this.queue, async msg => {
+      const content = JSON.parse(msg.content.toString());
+      const replyData = await handler(content);
+      // 3
+      this.channel.sendToQueue(msg.properties.replyTo, Buffer.from(JSON.stringify(replyData)), {
+        correlationId: msg.properties.correlationId,
+      });
+      this.channel.ack(msg);
+    });
+  }
+}
+```
+
+1. 들어오는 요청을 수신할 큐를 만든다.  
+   이 목적을 위해 단순 영구 대기열(durable queue)을 사용할 수 있다.
+2. handleRequest()함수는 새로운 응답을 보내기 위한 요청 핸들러를 등록하는데 사용된다.
+3. channel.sendToRequeue()를 사용하여 응답을 보낸다.  
+   응답을 보낼 때 메시지의 replyTo 속성(반환 주소)에 지정된 큐에 메시지를 직접 게시한다.  
+   또한 응답을 수신한 요청자가 응답 메시지를 해당 요청과 매칭 시킬 수 있도록 응답에 correlationId를 설정했다.
