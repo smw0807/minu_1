@@ -357,3 +357,64 @@ export class AMQPReply {
 3. channel.sendToRequeue()를 사용하여 응답을 보낸다.  
    응답을 보낼 때 메시지의 replyTo 속성(반환 주소)에 지정된 큐에 메시지를 직접 게시한다.  
    또한 응답을 수신한 요청자가 응답 메시지를 해당 요청과 매칭 시킬 수 있도록 응답에 correlationId를 설정했다.
+
+### 요청자와 응답자의 구현
+
+샘플 요청자와 응답자 쌍을 만들어 구현한 추상화 모듈을 사용해본다.
+
+```jsx
+//Replier.js
+import { AMQPReply } from './amqpReply.js';
+
+async function main() {
+  const reply = new AMQPReply('requests_queue');
+  await reply.initialize();
+
+  reply.handleRequests(req => {
+    console.log('Request received', req);
+    return { sum: req.a + req.b };
+  });
+}
+
+main().catch(err => console.error(err));
+```
+
+만든 추상화를 통해 상관ID와 반환 주소를 처리하는 모든 메커니즘을 숨길 수 있다는 것을 확인할 수 있다.  
+해야 할 일은 요청받을 대기열의 이름(’requests_queue’)을 지정하여 새로운 reply 객체를 초기화한다.  
+이 샘플 응답자는 입력으로 받은 두 숫자의 합을 간단히 계산하고 결과를 객체로 반환한다.
+
+아래는 샘플 요청자에 대한 코드이다.
+
+```jsx
+//requestor.js
+import { AMQPRequest } from './amqpRequest.js';
+import delay from 'delay';
+
+async function main() {
+  const request = new AMQPRequest();
+  await request.initialize();
+
+  async function sendRandomRequest() {
+    const a = Math.round(Math.random() * 100);
+    const b = Math.round(Math.random() * 100);
+    const reply = await request.send('requests_queue', { a, b });
+    console.log(`${a} + ${b} = ${reply.sum}`);
+  }
+
+  for (let i = 0; i < 20; i++) {
+    await sendRandomRequest();
+    await delay(1000);
+  }
+
+  request.destroy();
+}
+
+main().catch(err => console.error(err));
+```
+
+샘플 요청자는 1초 간격으로 20개의 임의의 요청을 requests_queue 대기열에 보낸다.  
+이 경우에도 추상화가 완벽하게 작동하여 비동기 요청-응답 패턴의 구현 뒤에 있는 모든 세부 사항을 신경쓸 필요가 없다는 것을 알 수 있다.
+
+AMQP를 사용하면 응답자가 즉시 확장 가능하다는 점이 좋은 기능이기도 하다.  
+두 개 이상의 응답자 인스턴스를 시작하면 요청 간에 부하가 분산되는 것을 볼 수 있다.  
+이는 요청자가 시작할 때마다 동일한 영구 대기열에 자신을 리스너로 추가함으로써 결과적으로 브로커가 큐의 모든 소비자에 걸쳐 메시지를 로드 밸런싱하기 때문에 가능하다.
