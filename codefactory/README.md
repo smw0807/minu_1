@@ -47,3 +47,36 @@ key:value의 쌍으로 이루어져 있다.
 # Hoisting
 
 모든 변수 선언문이 코드의 최상단으로 이동되는 것처럼 느껴지는 현상을 이야기한다.
+
+# 논리 연산자
+
+```js
+// && 조건은 모두 true여야 true를 반환한다.
+console.log(true && true); //true
+console.log(true && false); //false
+
+// || 조건은 하나라도 true면 true를 반환한다.
+console.log(true || false); //true
+console.log(false || false); //false
+
+// ! 조건은 true면 false를 반환하고 false면 true를 반환한다.
+console.log(!true); //false
+console.log(!false); //true
+```
+
+## 단축 평가 (short circuit evaluation)
+
+&&를 사용했을 때 좌측이 true면 우측 값 반환  
+&&를 사용했을 때 좌측이 false면 좌측 값 반환  
+||를 사용했을 때 좌측이 true면 좌측 값 반환
+||를 사용했을 때 좌측이 false면 우측 값 반환
+
+```js
+console.log(true && 'hi'); //hi
+console.log(false && 'hi'); //false
+console.log(true || 'hi'); //true
+console.log(false || 'hi'); //hi
+
+console.log(true && true && 'hi'); //hi
+console.log(true && false && 'hi'); //false
+```
