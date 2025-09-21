@@ -80,3 +80,8 @@ console.log(false || 'hi'); //hi
 console.log(true && true && 'hi'); //hi
 console.log(true && false && 'hi'); //false
 ```
+
+# Class
+
+클래스는 객체지향 프로그래밍에서 특정 객체(인스턴스)를 생성하기 위한 변수와 메소드(함수)를 정의하는 일종의 틀이다.  
+정보를 일반화해서 정리하는 방법!
