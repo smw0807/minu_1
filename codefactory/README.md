@@ -85,3 +85,60 @@ console.log(true && false && 'hi'); //false
 
 클래스는 객체지향 프로그래밍에서 특정 객체(인스턴스)를 생성하기 위한 변수와 메소드(함수)를 정의하는 일종의 틀이다.  
 정보를 일반화해서 정리하는 방법!
+
+## static
+
+클래스 자체에 속하는 값
+
+```js
+class IdolModel {
+  name;
+  year;
+  /**
+   * 1) 클래스 자체에 속하는 값
+   * 2) 인스턴스를 생성하지 않고도 접근할 수 있는 값
+   */
+  static groupName = '아이브';
+  constructor(name, year) {
+    this.name = name;
+    this.year = year;
+  }
+
+  static returnGroupName() {
+    return this.groupName;
+  }
+}
+
+const yuJin = new IdolModel('안유진', 2003);
+console.log(yuJin);
+console.log(IdolModel.groupName);
+console.log(IdolModel.returnGroupName());
+
+console.log('----- IdolModel2 -----');
+/**
+ * Factory constructor
+ */
+class IdolModel2 {
+  name;
+  year;
+
+  constructor(name, year) {
+    this.name = name;
+    this.year = year;
+  }
+
+  static fromObject(object) {
+    return new IdolModel2(object.name, object.year);
+  }
+
+  static fromList(list) {
+    return new IdolModel2(list[0], list[1]);
+  }
+}
+
+const yuJin2 = IdolModel2.fromObject({ name: '안유진', year: 2003 });
+console.log(yuJin2);
+
+const wonYoung = IdolModel2.fromList(['원영', 2004]);
+console.log(wonYoung);
+```
