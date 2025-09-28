@@ -142,3 +142,51 @@ console.log(yuJin2);
 const wonYoung = IdolModel2.fromList(['원영', 2004]);
 console.log(wonYoung);
 ```
+
+## 상속
+
+상속(inheritance)은 객체들 간의 관계를 구축하는 방법이다.  
+슈퍼클래스 또는 부모 클래스 등의 기존의 클래스로부터 속성과 동작을 상속받을 수 있다.
+
+```js
+class IdolModel {
+  name;
+  year;
+
+  constructor(name, year) {
+    this.name = name;
+    this.year = year;
+  }
+}
+
+class FemaleIdolModel extends IdolModel {
+  dance() {
+    return `저는 ${this.name}이고, ${this.year}년생입니다. 전 춤을 추어요`;
+  }
+}
+
+class MaleIdolModel extends IdolModel {
+  sing() {
+    return `저는 ${this.name}이고, ${this.year}년생입니다. 전 노래를 부르어요`;
+  }
+}
+
+const yuJin = new FemaleIdolModel('안유진', 2003);
+console.log(yuJin);
+console.log(yuJin.dance());
+
+const jiMin = new MaleIdolModel('지민', 1995);
+console.log(jiMin);
+console.log(jiMin.sing());
+
+console.log(' ---------------------- ');
+
+console.log(yuJin instanceof IdolModel); //true
+console.log(yuJin instanceof FemaleIdolModel); //true
+console.log(yuJin instanceof MaleIdolModel); //false
+
+console.log(' ---------------------- ');
+console.log(jiMin instanceof IdolModel); //true
+console.log(jiMin instanceof FemaleIdolModel); //false
+console.log(jiMin instanceof MaleIdolModel); //true
+```
